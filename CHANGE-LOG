@@ -1,0 +1,52 @@
+【r121】
+・[readme.html] 使い方を追記
+    UnityでMMDを動かす会 として使い方を用意したほうがよさそうな.
+    SourceForgeのwikiとかバグ管理とか活用したいところ
+・[AvatarSettingScript.cs]Animator.MatchTargetの引数にWeightMaskが必要らしいので追加
+    但し、これで正しいのかわからない。要検証
+・CCDIK周りの整理
+    余計なコメント・ファイルの削除など
+    
+既知の問題
+・Mechanim（Animator?）を使うのに必要なAvatorが生成されないため、Mechanimが使えない
+    -> http://forum.unity3d.com/threads/156951-Create-Mechanim-Avatar-in-editor-script
+        "in 4.0 we can only create Avatars in the ModelImporter" とのこと。
+        ばーじょんあっぷ待ち。
+
+        
+【r120】
+MMDIKBakerのGUI版を追加。
+コンソール+VisualStudio必須だったものをそうでもない具合に。
+
+
+【r119】
+読み込み部分、移動の抽出を変更。ズレがなくなった模様
+
+
+【r117】
+改善したこと
+・IKの実装
+・VMD読み込み時の座標修正
+・Unity側に表示されるWarningの改善
+
+既知のバグ
+・VMD読み込み時にズレがでている（気がする
+・VMDの補間がUnity側に反映されていない
+
+
+【1.1a-r109】
+61回もマイナーバージョンアップしているわけではないので表記を変更
+
+改善したこと
+・トゥーンシェーダーに対応
+・表情を実装
+・剛体にも対応
+・一部、バグっているモデルについても対応
+
+既知のバグ
+・Lat式ミクの読み込みが不完全
+・複数の表情を動かせない
+・同じ複数のモデルを一つのシーンに入れて表情を動かすと全部同じ顔になる
+
+【1.61a】
+ひとまず動いている版
