@@ -20,7 +20,7 @@ public class MaterialMorph : MonoBehaviour
 	/// <summary>
 	/// モーフ処理
 	/// </summary>
-	public void Compute(MaterialMorphParameter[] composite)
+	public void Compute(MaterialMorphParameter[] composite_mul, MaterialMorphParameter[] composite_add)
 	{
 		//キャッシュ設定
 		float weight = transform.localPosition.z;
@@ -50,12 +50,12 @@ public class MaterialMorph : MonoBehaviour
 			switch (operation[i]) {
 			case OperationType.Mul: //乗算
 				{
-					composite[indices[i]] *= values_cache_[i];
+					composite_mul[indices[i]] *= values_cache_[i];
 				}
 				break;
 			case OperationType.Add: //加算
 				{
-					composite[indices[i]] += values_cache_[i];
+					composite_add[indices[i]] += values_cache_[i];
 				}
 				break;
 			default:

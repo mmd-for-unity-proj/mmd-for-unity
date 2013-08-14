@@ -634,19 +634,33 @@ namespace MMD
 																		.Distinct() //重複したインデックスの削除
 																		.ToList(); //ソートに向けて一旦リスト化
 			original_indices.Sort(); //ソート
+			if (uint.MaxValue == original_indices.LastOrDefault()) {
+				//最後が uint.MaxValue(≒-1) なら
+				//全材質対象が存在するので全インデックスを取得
+				original_indices = Enumerable.Range(0, format_.material_list.material.Length + 1).Select(x=>(uint)x).ToList();
+				original_indices[format_.material_list.material.Length] = uint.MaxValue; //uint.MaxValueを忘れない
+			}
 			int[] indices = original_indices.Select(x=>(int)x).ToArray();
-			MaterialMorph.MaterialMorphParameter[] source = indices.Where(x=>x<format_.material_list.material.Length) //-1に全材質対象が有るので、今は除外
+			MaterialMorph.MaterialMorphParameter[] source = indices.Where(x=>x<format_.material_list.material.Length)
 																	.Select(x=>{  //インデックスを用いて、元データをパック
-																			PMXFormat.Material y = format_.material_list.material[x];
 																			MaterialMorph.MaterialMorphParameter result = new MaterialMorph.MaterialMorphParameter();
-																			result.color = y.diffuse_color;
-																			result.specular = new Color(y.specular_color.r, y.specular_color.g, y.specular_color.b, y.specularity);
-																			result.ambient = y.ambient_color;
-																			result.outline_color = y.edge_color;
-																			result.outline_width = y.edge_size;
-																			result.texture_color = Color.white;
-																			result.sphere_color = Color.white;
-																			result.toon_color = Color.white;
+																			if (0 <= x) {
+																				//-1(全材質対象)で無いなら
+																				//元データを取得
+																				PMXFormat.Material y = format_.material_list.material[x];
+																				result.color = y.diffuse_color;
+																				result.specular = new Color(y.specular_color.r, y.specular_color.g, y.specular_color.b, y.specularity);
+																				result.ambient = y.ambient_color;
+																				result.outline_color = y.edge_color;
+																				result.outline_width = y.edge_size;
+																				result.texture_color = Color.white;
+																				result.sphere_color = Color.white;
+																				result.toon_color = Color.white;
+																			} else {
+																				//-1(全材質対象)なら
+																				//適当にでっち上げる
+																				result = MaterialMorph.MaterialMorphParameter.zero;
+																			}
 																			return result;
 																		})
 																	.ToArray();
