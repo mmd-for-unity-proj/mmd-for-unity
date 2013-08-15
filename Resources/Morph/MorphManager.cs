@@ -22,6 +22,20 @@ public class MorphManager : MonoBehaviour
 	public Material[] materials;	// マテリアル
 	private Material[] renderer_shared_materials_;	// レンダー共有マテリアル
 	public Transform[] bones;	// ボーン
+	public MorphBase[] morphs;	// モーフ
+
+	/// <summary>
+	/// グループモーフ
+	/// </summary>
+	[System.Serializable]
+	public class GroupMorphPack {
+		public int[] indices;			// グループインデックス
+		public float[] source;			// グループ元データ
+		public GroupMorph[] script;		// グループモーフのスクリプト配列
+		
+		public GroupMorphPack(int[] i = null, float[] s = null, GroupMorph[] c = null) {indices = i; source = s; script = c;}
+	}
+	public GroupMorphPack group_morph = null;	// グループモーフ
 
 	/// <summary>
 	/// ボーンモーフ
@@ -103,6 +117,9 @@ public class MorphManager : MonoBehaviour
 			return;
 		}
 		
+		//グループモーフ計算
+		ComputeGroupMorph();
+		
 		//ボーンモーフ計算
 		ComputeBoneMorph();
 		
@@ -115,6 +132,30 @@ public class MorphManager : MonoBehaviour
 		//材質モーフ計算
 		ComputeMaterialMorph();
 	}
+
+	/// <summary>
+	/// グループモーフ計算
+	/// </summary>
+	void ComputeGroupMorph()
+	{
+		if (0 < group_morph.indices.Length) {
+			//各表情の合成ベクトルを初期化しておく
+			float[] composite = new float[group_morph.source.Length];
+			System.Array.Copy(group_morph.source, composite, group_morph.source.Length);
+	
+			// 表情ごとに計算する
+			foreach (var morph in group_morph.script) {
+				morph.Compute(composite);
+			}
+	
+			// ここで計算結果を入れていく
+			for (int i = 0, i_max = group_morph.indices.Length; i < i_max; ++i) {
+				MorphBase morph_base = morphs[group_morph.indices[i]];
+				morph_base.group_weight = composite[i];	// ここで反映
+			}
+		}
+	}
+	
 
 	/// <summary>
 	/// ボーンモーフ計算

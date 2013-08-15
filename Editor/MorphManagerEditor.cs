@@ -42,6 +42,9 @@ public sealed class MorphManagerEditor : Editor
 													.Concat(self.bone_morph.script.Where(x=>x.panel == (MorphManager.PanelType)i)
 																						.Select(x=>x.transform)
 															)
+													.Concat(self.group_morph.script.Where(x=>x.panel == (MorphManager.PanelType)i)
+																						.Select(x=>x.transform)
+															)
 													.ToArray();
 		}
 	}

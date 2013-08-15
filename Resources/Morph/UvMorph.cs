@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public class UvMorph : MonoBehaviour
+public class UvMorph : MorphBase
 {
 	public MorphManager.PanelType	panel;
 	public int[]					indices;
@@ -17,9 +17,9 @@ public class UvMorph : MonoBehaviour
 	public void Compute(Vector2[] composite)
 	{
 		//キャッシュ設定
-		float weight = transform.localPosition.z;
+		float weight = base.GetWeight(transform);
 		if ((prev_weight_ != weight) || (null == values_cache_)) {
-			values_cache_ = values.Select(x=>x*weight).ToArray();
+			values_cache_ = values.Select(x=>x * weight).ToArray();
 			prev_weight_ = weight;
 		}
 		

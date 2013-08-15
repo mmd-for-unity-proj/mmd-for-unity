@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MaterialMorph : MonoBehaviour
+public class MaterialMorph : MorphBase
 {
 	public enum OperationType {
 		Mul,
@@ -23,7 +23,7 @@ public class MaterialMorph : MonoBehaviour
 	public void Compute(MaterialMorphParameter[] composite_mul, MaterialMorphParameter[] composite_add)
 	{
 		//キャッシュ設定
-		float weight = transform.localPosition.z;
+		float weight = base.GetWeight(transform);
 		if ((prev_weight_ != weight) || (null == values_cache_)) {
 			values_cache_ = new MaterialMorphParameter[values.Length];
 			for (int i = 0, i_max = values_cache_.Length; i < i_max; ++i) {

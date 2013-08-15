@@ -486,6 +486,8 @@ namespace MMD
 				morphs[i].transform.parent = expression_root_transform;
 			}
 			
+			//グループモーフ作成
+			CreateGroupMorph(morph_manager, morphs);
 			//ボーンモーフ
 			morph_manager.bones = bones.Select(x=>x.transform).ToArray();
 			CreateBoneMorph(morph_manager, morphs);
@@ -495,6 +497,59 @@ namespace MMD
 			CreateUvMorph(morph_manager, morphs);
 			//材質モーフ作成
 			CreateMaterialMorph(morph_manager, morphs);
+			//モーフ一覧設定(モーフコンポーネントの情報を拾う為、最後に設定する)
+			morph_manager.morphs = morphs.Select(x=>x.GetComponent<MorphBase>()).ToArray();
+		}
+
+		/// <summary>
+		/// グループモーフ作成
+		/// </summary>
+		/// <param name='morph_manager'>表情マネージャー</param>
+		/// <param name='morphs'>モーフのゲームオブジェクト</param>
+		void CreateGroupMorph(MorphManager morph_manager, GameObject[] morphs)
+		{
+			//インデックスと元データの作成
+			List<uint> original_indices = format_.morph_list.morph_data.Where(x=>(PMXFormat.MorphData.MorphType.Group == x.morph_type)) //該当モーフに絞る
+																		.SelectMany(x=>x.morph_offset.Select(y=>((PMXFormat.GroupMorphOffset)y).morph_index)) //インデックスの取り出しと連結
+																		.Distinct() //重複したインデックスの削除
+																		.ToList(); //ソートに向けて一旦リスト化
+			original_indices.Sort(); //ソート
+			int[] indices = original_indices.Select(x=>(int)x).ToArray();
+			float[] source = Enumerable.Repeat(0.0f, indices.Length) //インデックスを用いて、元データをパック
+										.ToArray();
+			
+			//インデックス逆引き用辞書の作成
+			Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+			for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
+				index_reverse_dictionary.Add((uint)indices[i], i);
+			}
+
+			//個別モーフスクリプトの作成
+			GroupMorph[] script = Enumerable.Range(0, format_.morph_list.morph_data.Length)
+											.Where(x=>PMXFormat.MorphData.MorphType.Group == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
+											.Select(x=>AssignGroupMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
+											.ToArray();
+
+			//表情マネージャーにインデックス・元データ・スクリプトの設定
+			morph_manager.group_morph = new MorphManager.GroupMorphPack(indices, source, script);
+		}
+
+		/// <summary>
+		/// グループモーフ設定
+		/// </summary>
+		/// <returns>グループモーフスクリプト</returns>
+		/// <param name='morph'>モーフのゲームオブジェクト</param>
+		/// <param name='data'>PMX用モーフデータ</param>
+		/// <param name='index_reverse_dictionary'>インデックス逆引き用辞書</param>
+		GroupMorph AssignGroupMorph(GameObject morph, PMXFormat.MorphData data, Dictionary<uint, uint> index_reverse_dictionary)
+		{
+			GroupMorph result = morph.AddComponent<GroupMorph>();
+			result.panel = (MorphManager.PanelType)data.handle_panel;
+			result.indices = data.morph_offset.Select(x=>((PMXFormat.GroupMorphOffset)x).morph_index) //インデックスを取り出し
+												.Select(x=>(int)index_reverse_dictionary[x]) //逆変換を掛ける
+												.ToArray();
+			result.values = data.morph_offset.Select(x=>((PMXFormat.GroupMorphOffset)x).morph_rate).ToArray();
+			return result;
 		}
 
 		/// <summary>

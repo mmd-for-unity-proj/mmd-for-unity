@@ -2,19 +2,19 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public class VertexMorph : MorphBase
+public class GroupMorph : MorphBase
 {
 	public MorphManager.PanelType	panel;
 	public int[]					indices;
-	public Vector3[]				values;
+	public float[]					values;
 	
 	private float			prev_weight_ = 0.0f;
-	private Vector3[] 		values_cache_ = null;
+	private float[] 		values_cache_ = null;
 	
 	/// <summary>
 	/// モーフ処理
 	/// </summary>
-	public void Compute(Vector3[] composite)
+	public void Compute(float[] composite)
 	{
 		//キャッシュ設定
 		float weight = base.GetWeight(transform);
