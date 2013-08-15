@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace MMD
 			Mesh mesh = CreateMesh();					// メッシュの生成・設定
 			Material[] materials = CreateMaterials();	// マテリアルの生成・設定
 			GameObject[] bones = CreateBones();			// ボーンの生成・設定
-			CreateMorph();								// モーフの生成・設定
+			CreateMorph(bones);							// モーフの生成・設定
 
 	
 			// バインドポーズの作成
@@ -467,7 +467,7 @@ namespace MMD
 		/// <summary>
 		/// モーフ作成
 		/// </summary>
-		void CreateMorph()
+		void CreateMorph(GameObject[] bones)
 		{
 			//表情ルートを生成してルートの子供に付ける
 			GameObject expression_root = new GameObject("Expression");
@@ -486,12 +486,84 @@ namespace MMD
 				morphs[i].transform.parent = expression_root_transform;
 			}
 			
+			//ボーンモーフ
+			morph_manager.bones = bones.Select(x=>x.transform).ToArray();
+			CreateBoneMorph(morph_manager, morphs);
 			//頂点モーフ作成
 			CreateVertexMorph(morph_manager, morphs);
 			//UV・追加UVモーフ作成
 			CreateUvMorph(morph_manager, morphs);
 			//材質モーフ作成
 			CreateMaterialMorph(morph_manager, morphs);
+		}
+
+		/// <summary>
+		/// ボーンモーフ作成
+		/// </summary>
+		/// <param name='morph_manager'>表情マネージャー</param>
+		/// <param name='morphs'>モーフのゲームオブジェクト</param>
+		void CreateBoneMorph(MorphManager morph_manager, GameObject[] morphs)
+		{
+			//インデックスと元データの作成
+			List<uint> original_indices = format_.morph_list.morph_data.Where(x=>(PMXFormat.MorphData.MorphType.Bone == x.morph_type)) //該当モーフに絞る
+																		.SelectMany(x=>x.morph_offset.Select(y=>((PMXFormat.BoneMorphOffset)y).bone_index)) //インデックスの取り出しと連結
+																		.Distinct() //重複したインデックスの削除
+																		.ToList(); //ソートに向けて一旦リスト化
+			original_indices.Sort(); //ソート
+			int[] indices = original_indices.Select(x=>(int)x).ToArray();
+			BoneMorph.BoneMorphParameter[] source = indices.Where(x=>x<format_.bone_list.bone.Length)
+															.Select(x=>{  //インデックスを用いて、元データをパック
+																	PMXFormat.Bone y = format_.bone_list.bone[x];
+																	BoneMorph.BoneMorphParameter result = new BoneMorph.BoneMorphParameter();
+																	result.position = y.bone_position;
+																	if (y.parent_bone_index < (uint)format_.bone_list.bone.Length) {
+																		//親が居たらローカル座標化
+																		result.position -= format_.bone_list.bone[y.parent_bone_index].bone_position;
+																	}
+																	result.rotation = Quaternion.identity;
+																	return result;
+																})
+															.ToArray();
+			
+			//インデックス逆引き用辞書の作成
+			Dictionary<uint, uint> index_reverse_dictionary = new Dictionary<uint, uint>();
+			for (uint i = 0, i_max = (uint)indices.Length; i < i_max; ++i) {
+				index_reverse_dictionary.Add((uint)indices[i], i);
+			}
+
+			//個別モーフスクリプトの作成
+			BoneMorph[] script = Enumerable.Range(0, format_.morph_list.morph_data.Length)
+											.Where(x=>PMXFormat.MorphData.MorphType.Bone == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
+											.Select(x=>AssignBoneMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
+											.ToArray();
+
+			//表情マネージャーにインデックス・元データ・スクリプトの設定
+			morph_manager.bone_morph = new MorphManager.BoneMorphPack(indices, source, script);
+		}
+
+		/// <summary>
+		/// ボーンモーフ設定
+		/// </summary>
+		/// <returns>ボーンモーフスクリプト</returns>
+		/// <param name='morph'>モーフのゲームオブジェクト</param>
+		/// <param name='data'>PMX用モーフデータ</param>
+		/// <param name='index_reverse_dictionary'>インデックス逆引き用辞書</param>
+		BoneMorph AssignBoneMorph(GameObject morph, PMXFormat.MorphData data, Dictionary<uint, uint> index_reverse_dictionary)
+		{
+			BoneMorph result = morph.AddComponent<BoneMorph>();
+			result.panel = (MorphManager.PanelType)data.handle_panel;
+			result.indices = data.morph_offset.Select(x=>((PMXFormat.BoneMorphOffset)x).bone_index) //インデックスを取り出し
+												.Select(x=>(int)index_reverse_dictionary[x]) //逆変換を掛ける
+												.ToArray();
+			result.values = data.morph_offset.Select(x=>{
+														PMXFormat.BoneMorphOffset y = (PMXFormat.BoneMorphOffset)x;
+														BoneMorph.BoneMorphParameter param = new BoneMorph.BoneMorphParameter();
+														param.position = y.move_value;
+														param.rotation = y.rotate_value;
+														return param;
+													})
+											.ToArray();
+			return result;
 		}
 
 		/// <summary>

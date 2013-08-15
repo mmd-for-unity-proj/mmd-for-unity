@@ -21,15 +21,29 @@ public class MorphManager : MonoBehaviour
 	private Mesh renderer_shared_mesh_;	// レンダー共有メッシュ
 	public Material[] materials;	// マテリアル
 	private Material[] renderer_shared_materials_;	// レンダー共有マテリアル
+	public Transform[] bones;	// ボーン
+
+	/// <summary>
+	/// ボーンモーフ
+	/// </summary>
+	[System.Serializable]
+	public class BoneMorphPack {
+		public int[] indices;							// ボーンインデックス
+		public BoneMorph.BoneMorphParameter[] source;	// ボーン元データ
+		public BoneMorph[] script;						// ボーンモーフのスクリプト配列
+		
+		public BoneMorphPack(int[] i = null, BoneMorph.BoneMorphParameter[] s = null, BoneMorph[] c = null) {indices = i; source = s; script = c;}
+	}
+	public BoneMorphPack bone_morph = null;				// ボーンモーフ
 
 	/// <summary>
 	/// 頂点モーフ
 	/// </summary>
 	[System.Serializable]
 	public class VertexMorphPack {
-		public int[] indices;			// 頂点インデックス
-		public Vector3[] source;		// 頂点元座標
-		public VertexMorph[] script;	// 頂点モーフのスクリプト配列
+		public int[] indices;					// 頂点インデックス
+		public Vector3[] source;				// 頂点元データ
+		public VertexMorph[] script;			// 頂点モーフのスクリプト配列
 		
 		public VertexMorphPack(int[] i = null, Vector3[] s = null, VertexMorph[] c = null) {indices = i; source = s; script = c;}
 	}
@@ -41,24 +55,25 @@ public class MorphManager : MonoBehaviour
 	[System.Serializable]
 	public class UvMorphPack {
 		public int[] indices;		// UVインデックス
-		public Vector2[] source;	// UV元座標
+		public Vector2[] source;	// UV元データ
 		public UvMorph[] script;	// UVモーフのスクリプト配列
 		
 		public UvMorphPack(int[] i = null, Vector2[] s = null, UvMorph[] c = null) {indices = i; source = s; script = c;}
 	}
-	public UvMorphPack[] uv_morph;			// UVモーフ
+	public UvMorphPack[] uv_morph;	// UVモーフ
 	
-	///材質モーフ
+	/// <summary>
+	/// 材質モーフ
+	/// </summary>
 	[System.Serializable]
 	public class MaterialMorphPack {
-		public int[] indices;		// 材質インデックス
+		public int[] indices;									// 材質インデックス
 		public MaterialMorph.MaterialMorphParameter[] source;	// 材質元データ
-		public MaterialMorph[] script;	// 材質モーフのスクリプト配列
+		public MaterialMorph[] script;							// 材質モーフのスクリプト配列
 		
 		public MaterialMorphPack(int[] i = null, MaterialMorph.MaterialMorphParameter[] s = null, MaterialMorph[] c = null) {indices = i; source = s; script = c;}
 	}
-	public MaterialMorphPack material_morph;	// 材質モーフ
-
+	public MaterialMorphPack material_morph;					// 材質モーフ
 
 	/// <summary>
 	/// 初回更新前処理
@@ -88,6 +103,9 @@ public class MorphManager : MonoBehaviour
 			return;
 		}
 		
+		//ボーンモーフ計算
+		ComputeBoneMorph();
+		
 		//頂点モーフ計算
 		ComputeVertexMorph();
 		
@@ -98,6 +116,29 @@ public class MorphManager : MonoBehaviour
 		ComputeMaterialMorph();
 	}
 
+	/// <summary>
+	/// ボーンモーフ計算
+	/// </summary>
+	void ComputeBoneMorph()
+	{
+		if (0 < bone_morph.indices.Length) {
+			//各表情の合成ベクトルを初期化しておく
+			BoneMorph.BoneMorphParameter[] composite = new BoneMorph.BoneMorphParameter[bone_morph.source.Length];
+			System.Array.Copy(bone_morph.source, composite, bone_morph.source.Length);
+	
+			// 表情ごとに計算する
+			foreach (var morph in bone_morph.script) {
+				morph.Compute(composite);
+			}
+	
+			// ここで計算結果を入れていく
+			for (int i = 0, i_max = bone_morph.indices.Length; i < i_max; ++i) {
+				bones[bone_morph.indices[i]].localPosition = composite[i].position;
+				bones[bone_morph.indices[i]].localRotation = composite[i].rotation;
+			}
+		}
+	}
+	
 	/// <summary>
 	/// 頂点モーフ計算
 	/// </summary>
