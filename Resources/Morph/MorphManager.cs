@@ -21,15 +21,43 @@ public class MorphManager : MonoBehaviour
 	private Mesh renderer_shared_mesh_;	// レンダー共有メッシュ
 	public Material[] materials;	// マテリアル
 	private Material[] renderer_shared_materials_;	// レンダー共有マテリアル
+	public Transform[] bones;	// ボーン
+	public MorphBase[] morphs;	// モーフ
+
+	/// <summary>
+	/// グループモーフ
+	/// </summary>
+	[System.Serializable]
+	public class GroupMorphPack {
+		public int[] indices;			// グループインデックス
+		public float[] source;			// グループ元データ
+		public GroupMorph[] script;		// グループモーフのスクリプト配列
+		
+		public GroupMorphPack(int[] i = null, float[] s = null, GroupMorph[] c = null) {indices = i; source = s; script = c;}
+	}
+	public GroupMorphPack group_morph = null;	// グループモーフ
+
+	/// <summary>
+	/// ボーンモーフ
+	/// </summary>
+	[System.Serializable]
+	public class BoneMorphPack {
+		public int[] indices;							// ボーンインデックス
+		public BoneMorph.BoneMorphParameter[] source;	// ボーン元データ
+		public BoneMorph[] script;						// ボーンモーフのスクリプト配列
+		
+		public BoneMorphPack(int[] i = null, BoneMorph.BoneMorphParameter[] s = null, BoneMorph[] c = null) {indices = i; source = s; script = c;}
+	}
+	public BoneMorphPack bone_morph = null;				// ボーンモーフ
 
 	/// <summary>
 	/// 頂点モーフ
 	/// </summary>
 	[System.Serializable]
 	public class VertexMorphPack {
-		public int[] indices;			// 頂点インデックス
-		public Vector3[] source;		// 頂点元座標
-		public VertexMorph[] script;	// 頂点モーフのスクリプト配列
+		public int[] indices;					// 頂点インデックス
+		public Vector3[] source;				// 頂点元データ
+		public VertexMorph[] script;			// 頂点モーフのスクリプト配列
 		
 		public VertexMorphPack(int[] i = null, Vector3[] s = null, VertexMorph[] c = null) {indices = i; source = s; script = c;}
 	}
@@ -41,24 +69,25 @@ public class MorphManager : MonoBehaviour
 	[System.Serializable]
 	public class UvMorphPack {
 		public int[] indices;		// UVインデックス
-		public Vector2[] source;	// UV元座標
+		public Vector2[] source;	// UV元データ
 		public UvMorph[] script;	// UVモーフのスクリプト配列
 		
 		public UvMorphPack(int[] i = null, Vector2[] s = null, UvMorph[] c = null) {indices = i; source = s; script = c;}
 	}
-	public UvMorphPack[] uv_morph;			// UVモーフ
+	public UvMorphPack[] uv_morph;	// UVモーフ
 	
-	///材質モーフ
+	/// <summary>
+	/// 材質モーフ
+	/// </summary>
 	[System.Serializable]
 	public class MaterialMorphPack {
-		public int[] indices;		// 材質インデックス
+		public int[] indices;									// 材質インデックス
 		public MaterialMorph.MaterialMorphParameter[] source;	// 材質元データ
-		public MaterialMorph[] script;	// 材質モーフのスクリプト配列
+		public MaterialMorph[] script;							// 材質モーフのスクリプト配列
 		
 		public MaterialMorphPack(int[] i = null, MaterialMorph.MaterialMorphParameter[] s = null, MaterialMorph[] c = null) {indices = i; source = s; script = c;}
 	}
-	public MaterialMorphPack material_morph;	// 材質モーフ
-
+	public MaterialMorphPack material_morph;					// 材質モーフ
 
 	/// <summary>
 	/// 初回更新前処理
@@ -88,6 +117,12 @@ public class MorphManager : MonoBehaviour
 			return;
 		}
 		
+		//グループモーフ計算
+		ComputeGroupMorph();
+		
+		//ボーンモーフ計算
+		ComputeBoneMorph();
+		
 		//頂点モーフ計算
 		ComputeVertexMorph();
 		
@@ -98,6 +133,53 @@ public class MorphManager : MonoBehaviour
 		ComputeMaterialMorph();
 	}
 
+	/// <summary>
+	/// グループモーフ計算
+	/// </summary>
+	void ComputeGroupMorph()
+	{
+		if (0 < group_morph.indices.Length) {
+			//各表情の合成ベクトルを初期化しておく
+			float[] composite = new float[group_morph.source.Length];
+			System.Array.Copy(group_morph.source, composite, group_morph.source.Length);
+	
+			// 表情ごとに計算する
+			foreach (var morph in group_morph.script) {
+				morph.Compute(composite);
+			}
+	
+			// ここで計算結果を入れていく
+			for (int i = 0, i_max = group_morph.indices.Length; i < i_max; ++i) {
+				MorphBase morph_base = morphs[group_morph.indices[i]];
+				morph_base.group_weight = composite[i];	// ここで反映
+			}
+		}
+	}
+	
+
+	/// <summary>
+	/// ボーンモーフ計算
+	/// </summary>
+	void ComputeBoneMorph()
+	{
+		if (0 < bone_morph.indices.Length) {
+			//各表情の合成ベクトルを初期化しておく
+			BoneMorph.BoneMorphParameter[] composite = new BoneMorph.BoneMorphParameter[bone_morph.source.Length];
+			System.Array.Copy(bone_morph.source, composite, bone_morph.source.Length);
+	
+			// 表情ごとに計算する
+			foreach (var morph in bone_morph.script) {
+				morph.Compute(composite);
+			}
+	
+			// ここで計算結果を入れていく
+			for (int i = 0, i_max = bone_morph.indices.Length; i < i_max; ++i) {
+				bones[bone_morph.indices[i]].localPosition = composite[i].position;
+				bones[bone_morph.indices[i]].localRotation = composite[i].rotation;
+			}
+		}
+	}
+	
 	/// <summary>
 	/// 頂点モーフ計算
 	/// </summary>
@@ -156,30 +238,51 @@ public class MorphManager : MonoBehaviour
 	void ComputeMaterialMorph()
 	{
 		//各材質を初期化しておく
-		MaterialMorph.MaterialMorphParameter[] composite = new MaterialMorph.MaterialMorphParameter[material_morph.source.Length];
-		System.Array.Copy(material_morph.source, composite, material_morph.source.Length);
+		MaterialMorph.MaterialMorphParameter[] composite_mul = Enumerable.Repeat(MaterialMorph.MaterialMorphParameter.one, material_morph.source.Length).ToArray();
+		MaterialMorph.MaterialMorphParameter[] composite_add = Enumerable.Repeat(MaterialMorph.MaterialMorphParameter.zero, material_morph.source.Length).ToArray();
 		
 		// 表情ごとに計算する
 		foreach (var morph in material_morph.script) {
-			morph.Compute(composite);
+			morph.Compute(composite_mul, composite_add);
+		}
+		
+		//全材質計算
+		if (-1 == material_morph.indices.LastOrDefault()) {
+			//最後に-1(≒uint.MaxValue)が有れば
+			//全材質に反映
+			MaterialMorph.MaterialMorphParameter composite_mul_all = composite_mul.Last();
+			MaterialMorph.MaterialMorphParameter composite_add_all = composite_add.Last();
+			for (int i = 0, i_max = material_morph.source.Length - 1; i < i_max; ++i) {
+				composite_mul[i] *= composite_mul_all;
+				composite_add[i] += composite_add_all;
+			}
 		}
 		
 		// ここで計算結果を入れていく
-		for (int i = 0, i_max = composite.Length; i < i_max; ++i) {
-			renderer_shared_materials_[material_morph.indices[i]].SetFloat("_Opacity", composite[i].color.a);
-			composite[i].color.a = 1.0f;
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_Color", composite[i].color);
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_AmbColor", composite[i].ambient);
-			renderer_shared_materials_[material_morph.indices[i]].SetFloat("_Shininess", composite[i].ambient.a);
-			composite[i].ambient.a = 1.0f;
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_SpecularColor", composite[i].ambient);
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_OutlineColor", composite[i].outline_color);
-			renderer_shared_materials_[material_morph.indices[i]].SetFloat("_OutlineWidth", composite[i].outline_width);
-#if MFU_CHANGEABLE_TEXTURE_COLOR_SHADER //テクスチャカラーの変更出来るシェーダーが無いので無効化
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_MainTexColor", composite[i].texture_color);
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_SphereTexColor", composite[i].sphere_color);
-			renderer_shared_materials_[material_morph.indices[i]].SetColor("_ToonTexColor", composite[i].toon_color);
-#endif //MFU_CHANGEABLE_TEXTURE_COLOR_SHADER
+		for (int i = 0, i_max = material_morph.source.Length - 1; i < i_max; ++i) {
+			int index = material_morph.indices[i];
+			ApplyMaterialMorph(renderer_shared_materials_[index], material_morph.source[i], composite_mul[i], composite_add[i]);
 		}
+	}
+
+	/// <summary>
+	/// 材質モーフ反映
+	/// </summary>
+	/// <param name='material'>反映先マテリアル</param>
+	/// <param name='composite'>反映するデータ</param>
+	private static void ApplyMaterialMorph(Material material, MaterialMorph.MaterialMorphParameter source, MaterialMorph.MaterialMorphParameter composite_mul, MaterialMorph.MaterialMorphParameter composite_add) {
+		MaterialMorph.MaterialMorphParameter composite = source * composite_mul + composite_add;
+		material.SetColor("_Color", composite.color);
+		material.SetFloat("_Opacity", composite.color.a);
+		material.SetColor("_AmbColor", composite.ambient);
+		material.SetColor("_SpecularColor", composite.specular);
+		material.SetFloat("_Shininess", composite.specular.a);
+		material.SetColor("_OutlineColor", composite.outline_color);
+		material.SetFloat("_OutlineWidth", composite.outline_width);
+#if MFU_CHANGEABLE_TEXTURE_COLOR_SHADER //テクスチャカラーの変更出来るシェーダーが無いので無効化
+		material.SetColor("_MainTexColor", composite.texture_color);
+		material.SetColor("_SphereTexColor", composite.sphere_color);
+		material.SetColor("_ToonTexColor", composite.toon_color);
+#endif //MFU_CHANGEABLE_TEXTURE_COLOR_SHADER
 	}
 }
