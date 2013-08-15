@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DBC5ADDF-731C-4A09-A03D-E94B0524E0C4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MMDIKBakerLibrary</RootNamespace>
+    <AssemblyName>MMDBoneBakerLibrary</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IKBaker.cs" />
+    <Compile Include="Misc\BezireCurve.cs" />
+    <Compile Include="Misc\CCDSolver.cs" />
+    <Compile Include="Misc\DefaultIKLimitter.cs" />
+    <Compile Include="Misc\IIKLimitter.cs" />
+    <Compile Include="Misc\IIKSolver.cs" />
+    <Compile Include="Misc\MathHelper.cs" />
+    <Compile Include="Misc\Matrix.cs" />
+    <Compile Include="Misc\Quaternion.cs" />
+    <Compile Include="Misc\Vector2.cs" />
+    <Compile Include="Misc\Vector3.cs" />
+    <Compile Include="Model\MMDBone.cs" />
+    <Compile Include="Misc\SQTTransform.cs" />
+    <Compile Include="Model\MMDBoneManager.cs" />
+    <Compile Include="Model\MMDIK.cs" />
+    <Compile Include="Model\ModelConverter.cs" />
+    <Compile Include="Motion\AnimationPlayer.cs" />
+    <Compile Include="Motion\MMDBoneKeyFrame.cs" />
+    <Compile Include="Motion\MMDFaceKeyFrame.cs" />
+    <Compile Include="Motion\MMDMotion.cs" />
+    <Compile Include="Motion\MMDMotionTrack.cs" />
+    <Compile Include="Motion\MotionConverter.cs" />
+    <Compile Include="Motion\MotionHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MMDModelLibrary\MMDModelLibrary.csproj">
+      <Project>{FA72506D-CCEC-4391-AA8D-2F6A4FCF9327}</Project>
+      <Name>MMDModelLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MMDMotionLibrary\MMDMotionLibrary.csproj">
+      <Project>{7DF57CE7-A3F1-4269-9D36-4282118E6417}</Project>
+      <Name>MMDMotionLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
