@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: test
 title: Hello, world!
 ---
 
