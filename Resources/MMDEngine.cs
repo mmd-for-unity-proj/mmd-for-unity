@@ -6,11 +6,11 @@ public class MMDEngine : MonoBehaviour {
 
 	public float outline_width = 0.1f;
 	public bool useRigidbody = false;
-	public int[] groupTarget;		// ”ñÕ“Ë„‘ÌƒŠƒXƒg
-	public GameObject[] rigids;		// „‘ÌƒŠƒXƒg
-	public GameObject[] joints;     // ConfigurableJoint‚Ì“ü‚Á‚Ä‚¢‚éƒ{[ƒ“‚ÌƒŠƒXƒg
+	public int[] groupTarget;		// éè¡çªå‰›ä½“ãƒªã‚¹ãƒˆ
+	public GameObject[] rigids;		// å‰›ä½“ãƒªã‚¹ãƒˆ
+	public GameObject[] joints;     // ConfigurableJointã®å…¥ã£ã¦ã„ã‚‹ãƒœãƒ¼ãƒ³ã®ãƒªã‚¹ãƒˆ
 
-	// –ó‚ª‚ ‚Á‚Ä‚±‚¤‚È‚Á‚Ä‚é
+	// è¨³ãŒã‚ã£ã¦ã“ã†ãªã£ã¦ã‚‹
 	public int[] ignore1;
 	public int[] ignore2;
 	public int[] ignore3;
@@ -30,7 +30,7 @@ public class MMDEngine : MonoBehaviour {
 	List<int[]> ignoreList;
 
 
-	// IK‚ÌŒvZ‡
+	// IKã®è¨ˆç®—é †
 	public CCDIKSolver[] ik_list;
 
 	// Use this for initialization
@@ -61,12 +61,12 @@ public class MMDEngine : MonoBehaviour {
 			ignoreList.Add(ignore15);
 			ignoreList.Add(ignore16);
 
-			// ”ñÕ“ËƒOƒ‹[ƒv‚Ìİ’è
+			// éè¡çªã‚°ãƒ«ãƒ¼ãƒ—ã®è¨­å®š
 			for (int i = 0; i < rigids.Length; i++)
 			{
 				for (int shift = 0; shift < 16; shift++)
 				{
-					// ƒtƒ‰ƒOƒ`ƒFƒbƒN
+					// ãƒ•ãƒ©ã‚°ãƒã‚§ãƒƒã‚¯
 					if ((groupTarget[i] & (1 << shift)) == 0)
 					{
 						for (int j = 0; j < ignoreList[shift].Length; j++)
