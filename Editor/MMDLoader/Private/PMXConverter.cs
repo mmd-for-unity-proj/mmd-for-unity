@@ -57,7 +57,10 @@ namespace MMD
 	
 			// IKの登録
 			if (use_ik_) {
-				engine.ik_list = EntryIkSolver(bones);
+				engine.bone_controllers = EntryBoneController(bones);
+				engine.ik_list = engine.bone_controllers.Where(x=>null != x.ik_solver)
+														.Select(x=>x.ik_solver)
+														.ToArray();
 			}
 	
 			// 剛体関連
@@ -866,31 +869,66 @@ namespace MMD
 		/// <summary>
 		/// IK作成
 		/// </summary>
-		/// <returns>IKスクリプト</returns>
+		/// <returns>ボーンコントローラースクリプト</returns>
 		/// <param name='bones'>ボーンのゲームオブジェクト</param>
-		CCDIKSolver[] EntryIkSolver(GameObject[] bones)
+		BoneController[] EntryBoneController(GameObject[] bones)
 		{
-			uint index = 0;
-			return format_.bone_list.bone.Select(x=>new {data=x, index=index++}) //ボーン通しインデックスが要るのでデータと通しインデックスをパック
-								.Where(x=>((0 != ((int)PMXFormat.Bone.Flag.IkFlag & (int)x.data.bone_flag)) && (null != x.data.ik_data))) //IkFlagが有効でik_dataデータを持つもののみに絞る
-								.Select(x=>ConvertIk(x.data.ik_data, x.index, bones)) //ConvertIk()を呼び出す
-								.ToArray();
+			//BoneControllerが他のBoneControllerを参照するので先に全ボーンに付与
+			foreach (var bone in bones) {
+				bone.AddComponent<BoneController>();
+			}
+			BoneController[] result = Enumerable.Range(0, format_.bone_list.bone.Length)
+												.OrderBy(x=>(int)(PMXFormat.Bone.Flag.PhysicsTransform & format_.bone_list.bone[x].bone_flag)) //物理後変形を後方へ
+												.ThenBy(x=>format_.bone_list.bone[x].transform_level) //変形階層で安定ソート
+												.Select(x=>ConvertBoneController(format_.bone_list.bone[x], x, bones)) //ConvertIk()を呼び出す
+												.ToArray();
+			return result;
 		}
 		
 		/// <summary>
-		/// IKをUnity用に変換する
+		/// ボーンをボーンコントローラースクリプトに変換する
 		/// </summary>
-		/// <returns>Unity用IKスクリプト</returns>
-		/// <param name='ik_data'>PMX用IKデータ</param>
+		/// <returns>ボーンコントローラースクリプト</returns>
+		/// <param name='ik_data'>PMX用ボーンデータ</param>
 		/// <param name='bone_index'>該当IKデータのボーン通しインデックス</param>
 		/// <param name='bones'>ボーンのゲームオブジェクト</param>
-		CCDIKSolver ConvertIk(PMXFormat.IK_Data ik_data, uint bone_index, GameObject[] bones)
+		BoneController ConvertBoneController(PMXFormat.Bone bone, int bone_index, GameObject[] bones)
 		{
-			CCDIKSolver result = bones[bone_index].AddComponent<CCDIKSolver>();
-			result.target = bones[ik_data.ik_bone_index].transform;
-			result.controll_weight = ik_data.limit_angle / 4; //HACK: CCDIKSolver側で4倍している様なので此処で逆補正
-			result.iterations = (int)ik_data.iterations;
-			result.chains = ik_data.ik_link.Select(x=>x.target_bone_index).Select(x=>bones[x].transform).ToArray();
+			BoneController result = bones[bone_index].GetComponent<BoneController>();
+			if (0.0f != bone.additional_rate) {
+				//付与親が有るなら
+				result.additive_parent = bones[bone.additional_parent_index].GetComponent<BoneController>();
+				result.additive_rate = bone.additional_rate;
+				result.add_local = (0 != (PMXFormat.Bone.Flag.AddLocal & bone.bone_flag));
+				result.add_move = (0 != (PMXFormat.Bone.Flag.AddMove & bone.bone_flag));
+				result.add_rotate = (0 != (PMXFormat.Bone.Flag.AddRotation & bone.bone_flag));
+			}
+			if (0 != (PMXFormat.Bone.Flag.IkFlag & bone.bone_flag)) {
+				//IKが有るなら
+				result.ik_solver = bones[bone_index].AddComponent<CCDIKSolver>();
+				result.ik_solver.target = bones[bone.ik_data.ik_bone_index].transform;
+				result.ik_solver.controll_weight = bone.ik_data.limit_angle / 4; //HACK: CCDIKSolver側で4倍している様なので此処で逆補正
+				result.ik_solver.iterations = (int)bone.ik_data.iterations;
+				result.ik_solver.chains = bone.ik_data.ik_link.Select(x=>x.target_bone_index).Select(x=>bones[x].transform).ToArray();
+				//IK制御下のBoneController登録
+				result.ik_solver_targets = Enumerable.Repeat(result.ik_solver.target, 1)
+													.Concat(result.ik_solver.chains)
+													.Select(x=>x.GetComponent<BoneController>())
+													.ToArray();
+				
+				//IK制御先のボーンについて、物理演算の挙動を調べる
+				var operation_types = Enumerable.Repeat(bone.ik_data.ik_bone_index, 1) //IK対象先をEnumerable化
+												.Concat(bone.ik_data.ik_link.Select(x=>x.target_bone_index)) //IK制御下を追加
+												.Join(format_.rigidbody_list.rigidbody, x=>x, y=>y.rel_bone_index, (x,y)=>y.operation_type); //剛体リストから関連ボーンにIK対象先・IK制御下と同じボーンを持つ物を列挙し、剛体タイプを返す
+				foreach (var operation_type in operation_types) {
+					if (PMXFormat.Rigidbody.OperationType.Static != operation_type) {
+						//ボーン追従で無い(≒物理演算)なら
+						//IK制御の無効化
+						result.ik_solver.enabled = false;
+						break;
+					}
+				}
+			}
 			return result;
 		}
 		
