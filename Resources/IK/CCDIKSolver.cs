@@ -31,7 +31,7 @@ public class CCDIKSolver : MonoBehaviour
 	public bool drawRay = false;
 
 	// 計算
-	void Solve()
+	public void Solve()
 	{
         // 有効化されてなかった場合は実行しない
         if (!this.enabled) return;

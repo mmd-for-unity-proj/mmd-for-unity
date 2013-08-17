@@ -6,11 +6,11 @@ public class MMDEngine : MonoBehaviour {
 
 	public float outline_width = 0.1f;
 	public bool useRigidbody = false;
-	public int[] groupTarget;		// ��Փˍ��̃��X�g
-	public GameObject[] rigids;		// ���̃��X�g
-	public GameObject[] joints;     // ConfigurableJoint�̓����Ă���{�[���̃��X�g
+	public int[] groupTarget;		// 非衝突剛体リスト
+	public GameObject[] rigids;		// 剛体リスト
+	public GameObject[] joints;     // ConfigurableJointの入っているボーンのリスト
 
-	// �󂪂����Ă����Ȃ��Ă�
+	// 訳があってこうなってる
 	public int[] ignore1;
 	public int[] ignore2;
 	public int[] ignore3;
@@ -29,8 +29,9 @@ public class MMDEngine : MonoBehaviour {
 	public int[] ignore16;
 	List<int[]> ignoreList;
 
-
-	// IK�̌v�Z��
+	// ボーンの計算
+	public BoneController[] bone_controllers;
+	// IKの計算順
 	public CCDIKSolver[] ik_list;
 
 	// Use this for initialization
@@ -61,12 +62,12 @@ public class MMDEngine : MonoBehaviour {
 			ignoreList.Add(ignore15);
 			ignoreList.Add(ignore16);
 
-			// ��Փ˃O���[�v�̐ݒ�
+			// 非衝突グループの設定
 			for (int i = 0; i < rigids.Length; i++)
 			{
 				for (int shift = 0; shift < 16; shift++)
 				{
-					// �t���O�`�F�b�N
+					// フラグチェック
 					if ((groupTarget[i] & (1 << shift)) == 0)
 					{
 						for (int j = 0; j < ignoreList[shift].Length; j++)
@@ -81,11 +82,22 @@ public class MMDEngine : MonoBehaviour {
 		}
 	}
 
-	void LateUpdate () 
+	void LateUpdate() 
 	{
-		foreach (CCDIKSolver ik_script in this.ik_list)
-		{
-			ik_script.SendMessage("Solve");
+		if (0 < bone_controllers.Length) {
+			//ボーンコントローラーが有れば(PMXなら)
+			foreach (BoneController bone_controller in bone_controllers) {
+				bone_controller.Process();
+			}
+			//差分基点座標更新
+			foreach (BoneController bone_controller in bone_controllers) {
+				bone_controller.UpdatePrevTransform();
+			}
+		} else {
+			//ボーンコントローラーが無ければ(PMDなら)
+			foreach (CCDIKSolver ik_script in this.ik_list) {
+				ik_script.Solve();
+			}
 		}
 	}
 
