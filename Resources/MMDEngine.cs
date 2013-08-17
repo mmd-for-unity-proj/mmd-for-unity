@@ -29,7 +29,8 @@ public class MMDEngine : MonoBehaviour {
 	public int[] ignore16;
 	List<int[]> ignoreList;
 
-
+	// ボーンの計算
+	public BoneController[] bone_controllers;
 	// IKの計算順
 	public CCDIKSolver[] ik_list;
 
@@ -81,11 +82,22 @@ public class MMDEngine : MonoBehaviour {
 		}
 	}
 
-	void LateUpdate () 
+	void LateUpdate() 
 	{
-		foreach (CCDIKSolver ik_script in this.ik_list)
-		{
-			ik_script.SendMessage("Solve");
+		if (0 < bone_controllers.Length) {
+			//ボーンコントローラーが有れば(PMXなら)
+			foreach (BoneController bone_controller in bone_controllers) {
+				bone_controller.Process();
+			}
+			//差分基点座標更新
+			foreach (BoneController bone_controller in bone_controllers) {
+				bone_controller.UpdatePrevTransform();
+			}
+		} else {
+			//ボーンコントローラーが無ければ(PMDなら)
+			foreach (CCDIKSolver ik_script in this.ik_list) {
+				ik_script.Solve();
+			}
 		}
 	}
 
