@@ -532,7 +532,8 @@ body {
   padding: 0px 0 20px 0px;
   margin: 0px;
   font: 14px/1.5 "OpenSansRegular", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #f0e7d5;
+  color: #171b1e;
+  /*color: #f0e7d5;*/
   font-weight: normal;
   background: #252525;
   background-attachment: fixed !important;
@@ -541,7 +542,8 @@ body {
   background: -moz-linear-gradient(#2a2a29, #1c1c1c);
   background: -o-linear-gradient(#2a2a29, #1c1c1c);
   background: -ms-linear-gradient(#2a2a29, #1c1c1c);
-  background: linear-gradient(#2a2a29, #1c1c1c);
+  /*background: linear-gradient(#2a2a29, #1c1c1c);*/
+  background: linear-gradient(#65b5b1, #86cecb);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -576,11 +578,13 @@ h3 {
   line-height: 24px;
   font-family: 'OpenSansRegular', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-weight: normal;
-  color: #b6b6b6;
+  /*color: #b6b6b6;*/
+  color: #000;
 }
 
 a {
-  color: #ffcc00;
+  color: #fbf1a4;
+  /*color: #ffcc00;*/
   font-weight: 400;
   text-decoration: none;
 }
@@ -727,13 +731,14 @@ dt {
 }
 #header nav li a {
   color: white;
-  border: 1px solid #5d910b;
+  border: 1px solid #96297b;
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #93bd20), color-stop(100%, #659e10));
   background: -webkit-linear-gradient(#93bd20, #659e10);
   background: -moz-linear-gradient(#93bd20, #659e10);
   background: -o-linear-gradient(#93bd20, #659e10);
   background: -ms-linear-gradient(#93bd20, #659e10);
-  background: linear-gradient(#93bd20, #659e10);
+  /*background: linear-gradient(#93bd20, #659e10);*/
+  background: linear-gradient(#e12885, #96297b);
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   -o-border-radius: 2px;
@@ -810,7 +815,8 @@ section #title .credits {
   font-size: 11px;
   font-family: 'OpenSansRegular', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: normal;
-  color: #696969;
+  /*color: #696969;*/
+  color: #000;
   margin-top: -10px;
 }
 section #title .credits.left {
