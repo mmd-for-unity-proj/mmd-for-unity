@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEditor;
 using System.Collections;
 
 public class LoadedWindow : EditorWindow 
 {
 	/// <summary>
-	/// ƒƒbƒZ[ƒW—pƒeƒLƒXƒg
+	/// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ãƒ†ã‚­ã‚¹ãƒˆ
 	/// </summary>
 	public string Text { get; set; }
 
@@ -14,9 +14,9 @@ public class LoadedWindow : EditorWindow
 	const int height = 300;
 
 	/// <summary>
-	/// ‰Šú‰»
+	/// åˆæœŸåŒ–
 	/// </summary>
-	/// <returns>ƒEƒBƒ“ƒhƒE</returns>
+	/// <returns>ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦</returns>
 	public static LoadedWindow Init()
 	{
 		var window = EditorWindow.GetWindow<LoadedWindow>("PMD file loaded!") as LoadedWindow;

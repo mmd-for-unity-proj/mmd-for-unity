@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 using UnityEditor;
 
@@ -16,7 +16,7 @@ public class VMDLoaderWindow : EditorWindow {
 	
     public VMDLoaderWindow()
     {
-        // ƒfƒtƒHƒ‹ƒgƒRƒ“ƒtƒBƒO
+        // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚³ãƒ³ãƒ•ã‚£ã‚°
         var config = MMD.Config.LoadAndCreate();
         createAnimationFile = config.vmd_config.createAnimationFile;
         interpolationQuality = config.vmd_config.interpolationQuality;

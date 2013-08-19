@@ -1,11 +1,11 @@
-#if (UNITY_4_0 || UNITY_4_1)
+ï»¿#if (UNITY_4_0 || UNITY_4_1)
 
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System;
 
-// ƒAƒoƒ^[‚Ìİ’è‚ğs‚¤ƒXƒNƒŠƒvƒg
+// ã‚¢ãƒã‚¿ãƒ¼ã®è¨­å®šã‚’è¡Œã†ã‚¹ã‚¯ãƒªãƒ—ãƒˆ
 public class AvatarSettingScript 
 {
     GameObject root_object;
@@ -18,7 +18,7 @@ public class AvatarSettingScript
     //Transform avt_right_foot;
     //Transform avt_body;
 
-    // root_object‚ÍMMDEngine‚ª“ü‚Á‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg
+    // root_objectã¯MMDEngineãŒå…¥ã£ã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     public AvatarSettingScript(GameObject root_object)
     {
         this.root_object = root_object;
@@ -27,22 +27,22 @@ public class AvatarSettingScript
     public void SettingAvatar()
     {
         animator = root_object.AddComponent<Animator>();
-        animator.InterruptMatchTarget();	// ‹­§“I‚ÉAvatar‚Ìƒ^[ƒQƒbƒg‚ğİ’è
+        animator.InterruptMatchTarget();	// å¼·åˆ¶çš„ã«Avatarã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è¨­å®š
 
         SetIKs();
 
-        //// Šeå—v•”ˆÊ‚ÌTransform‚ğæ“¾‚µ‚Ä‚­‚é
-        //avt_root = FindChild("ƒZƒ“ƒ^[", root_object.transform);
-        //avt_right_hand = FindChild("‰Eèñ", root_object.transform);
-        //avt_left_hand = FindChild("¶èñ", root_object.transform);
-        //avt_right_foot = FindChild("‰E‘«ñ", root_object.transform);
-        //avt_left_foot = FindChild("¶‘«ñ", root_object.transform);
-        //avt_body = FindChild("ã”¼g", root_object.transform);
+        //// å„ä¸»è¦éƒ¨ä½ã®Transformã‚’å–å¾—ã—ã¦ãã‚‹
+        //avt_root = FindChild("ã‚»ãƒ³ã‚¿ãƒ¼", root_object.transform);
+        //avt_right_hand = FindChild("å³æ‰‹é¦–", root_object.transform);
+        //avt_left_hand = FindChild("å·¦æ‰‹é¦–", root_object.transform);
+        //avt_right_foot = FindChild("å³è¶³é¦–", root_object.transform);
+        //avt_left_foot = FindChild("å·¦è¶³é¦–", root_object.transform);
+        //avt_body = FindChild("ä¸ŠåŠèº«", root_object.transform);
 
         //Debug.Log(animator.IsControlled(avt_root));
         //Debug.Log(avt_right_hand);
 
-        //// Animator‚Éİ’è
+        //// Animatorã«è¨­å®š
         //Match(avt_root,			AvatarTarget.Root);
         //Match(avt_right_hand,	AvatarTarget.RightHand);
         //Match(avt_left_hand,	AvatarTarget.LeftHand);
@@ -53,10 +53,10 @@ public class AvatarSettingScript
 
     void SetIKs()
     {
-        var left_foot_ik = FindChild("¶‘«‚h‚j", root_object.transform);
-        var right_foot_ik = FindChild("‰E‘«‚h‚j", root_object.transform);
-        var left_hand_ik = FindChild("¶è‚h‚j", root_object.transform);
-        var right_hand_ik = FindChild("‰Eè‚h‚j", root_object.transform);
+        var left_foot_ik = FindChild("å·¦è¶³ï¼©ï¼«", root_object.transform);
+        var right_foot_ik = FindChild("å³è¶³ï¼©ï¼«", root_object.transform);
+        var left_hand_ik = FindChild("å·¦æ‰‹ï¼©ï¼«", root_object.transform);
+        var right_hand_ik = FindChild("å³æ‰‹ï¼©ï¼«", root_object.transform);
 
         SetIK(left_foot_ik, AvatarIKGoal.LeftFoot);
         SetIK(right_foot_ik, AvatarIKGoal.RightFoot);
@@ -73,7 +73,7 @@ public class AvatarSettingScript
         }
     }
 
-    // “Á’è‚Ì–¼‘O‚Ìq‹Ÿ‚ğÄ‹A“I‚É’²‚×‚Äæ“¾‚µ‚Ä‚­‚é
+    // ç‰¹å®šã®åå‰ã®å­ä¾›ã‚’å†å¸°çš„ã«èª¿ã¹ã¦å–å¾—ã—ã¦ãã‚‹
     Transform FindChild(string name, Transform target)
     {
         var find_result = target.FindChild(name);
@@ -90,7 +90,7 @@ public class AvatarSettingScript
         return find_result;
     }
 
-    // AvatarTarget‚Éƒ}ƒbƒ`‚µ‚½•”ˆÊ‚Ìİ’è‚ğs‚¤
+    // AvatarTargetã«ãƒãƒƒãƒã—ãŸéƒ¨ä½ã®è¨­å®šã‚’è¡Œã†
     void Match(Transform target, AvatarTarget type)
     {
         animator.MatchTarget(

@@ -189,7 +189,12 @@ namespace MMD
 				bool result = false;
 				result = result || (model_material.alpha < 0.98f); //0.98f以上は不透明と見做す(0.98fに影生成情報を埋め込んでいる為)
 				if (null != texture) {
+#if UNITY_4_2
 					result = result || texture.alphaIsTransparency;
+#else
+					// TODO: 上記
+					// resul = result
+#endif
 				}
 				return result;
 			}
