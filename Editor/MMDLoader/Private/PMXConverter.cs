@@ -327,7 +327,12 @@ namespace MMD
 			bool result = false;
 			result = result || (material.diffuse_color.a < 1.0f);
 			if (null != texture) {
+#if UNITY_4_2
 				result = result || texture.alphaIsTransparency;
+#else
+				// TODO: 上記if内の代替コード必須
+				// result = result;
+#endif
 			}
 			return result;
 		}
