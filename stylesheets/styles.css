@@ -547,7 +547,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #e8e8e8;
+  color: #fffeec;
   margin: 0 0 10px;
   font-family: 'OpenSansRegular', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: normal;
@@ -807,7 +807,7 @@ section #title h1 {
   line-height: 36px;
 }
 section #title p {
-  color: #d7cfbe;
+  color: #efeedc;
   font-family: 'OpenSansLight', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: normal;
   font-size: 18px;
