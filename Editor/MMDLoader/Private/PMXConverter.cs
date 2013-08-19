@@ -330,7 +330,7 @@ namespace MMD
 #if UNITY_4_2
 				result = result || texture.alphaIsTransparency;
 #else
-				// TODO: 上記if内の代替コード必須
+				// TODO: 上記if内の代替コード必須です
 				// result = result;
 #endif
 			}
