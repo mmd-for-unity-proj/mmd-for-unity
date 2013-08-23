@@ -32,7 +32,7 @@ namespace MMD
 					}
 					else if (extension == ".vmd")
 					{
-						SetupScriptableObject<PMDScriptableObject>(path);
+						SetupScriptableObject<VMDScriptableObject>(path);
 					}
 				}
 			};
