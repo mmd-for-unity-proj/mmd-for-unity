@@ -6,6 +6,7 @@ using System.IO;
 
 namespace MMD
 {
+	[CustomEditor(typeof(PMDScriptableObject))]
     public class PMDInspector : Editor
     {
         // PMD Load option
@@ -16,7 +17,6 @@ namespace MMD
         public bool is_pmx_base_import;
 
         // last selected item
-        private static string pmd_path = "";
         private static ModelAgent model_agent;
         private static string message = "";
 
@@ -25,31 +25,24 @@ namespace MMD
         /// </summary>
         private void setup()
         {
-            var t = AssetDatabase.GetAssetPath(Selection.activeObject);
-            if (pmd_path != t)
+            // デフォルトコンフィグ
+			var config = MMD.Config.LoadAndCreate();
+            shader_type = config.pmd_config.shader_type;
+            rigidFlag = config.pmd_config.rigidFlag;
+            use_mecanim = config.pmd_config.use_mecanim;
+            use_ik = config.pmd_config.use_ik;
+            is_pmx_base_import = config.pmd_config.is_pmx_base_import;
+			
+            // モデル情報
+            if (config.inspector_config.use_pmd_preload)
             {
-                if (!File.Exists(t)) return;
-                var config = MMD.Config.LoadAndCreate();
-
-                // デフォルトコンフィグ
-                shader_type = config.pmd_config.shader_type;
-                rigidFlag = config.pmd_config.rigidFlag;
-                use_mecanim = config.pmd_config.use_mecanim;
-                use_ik = config.pmd_config.use_ik;
-                is_pmx_base_import = config.pmd_config.is_pmx_base_import;
-
-                // モデル情報
-                pmd_path = t;
-                if (config.inspector_config.use_pmd_preload)
-                {
-                    model_agent = new ModelAgent(pmd_path);
-                }
-                else
-                {
-                    model_agent = null;
-                }
+				var obj = (PMDScriptableObject)target;
+				model_agent = new ModelAgent(obj.assetPath);
             }
-            if (EditorApplication.isPlaying) pmd_path = "";
+            else
+            {
+                model_agent = null;
+            }
         }
 
         /// <summary>
@@ -88,8 +81,8 @@ namespace MMD
                 if (GUILayout.Button("Convert to Prefab"))
                 {
                     if (null == model_agent) {
-                        var pmd_path = AssetDatabase.GetAssetPath(Selection.activeObject);
-                        model_agent = new ModelAgent(pmd_path);
+						var obj = (PMDScriptableObject)target;
+                        model_agent = new ModelAgent(obj.assetPath);
                     }
                     model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, is_pmx_base_import);
                     message = "Loading done.";

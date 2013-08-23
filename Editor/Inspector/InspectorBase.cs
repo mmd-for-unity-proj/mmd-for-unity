@@ -7,48 +7,46 @@
 
 #if USE_INSPECTOR
 using System.IO;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace MMD
 {
-    [CustomEditor(typeof(Object))]
     public class InspectorBase : Editor
     {
-        static Editor editor;
+		[DidReloadScripts]
+		static void OnDidReloadScripts()
+		{
+			EditorApplication.update += () =>
+			{
+				if (Selection.objects.Length != 0)
+				{
+					string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+					string extension = Path.GetExtension(path).ToLower();
 
-        public InspectorBase()
-        {
-            var ext = Path.GetExtension(AssetDatabase.GetAssetPath(Selection.activeObject));
-            if (ext == ".pmd" || ext == ".pmx")
-            {
-                editor = Editor.CreateEditor(Selection.activeObject, typeof(PMDInspector));
-            }
-            else if (ext == ".vmd")
-            {
-                editor = Editor.CreateEditor(Selection.activeObject, typeof(VMDInspector));
-            }
-            else 
-            {
-                editor = null;
-            }
-        }
+					if (extension == ".pmd" || extension == ".pmx")
+					{
+						SetupScriptableObject<PMDScriptableObject>(path);
+					}
+					else if (extension == ".vmd")
+					{
+						SetupScriptableObject<VMDScriptableObject>(path);
+					}
+				}
+			};
+		}
 
-        // Inspector上のGUI描画処理
-        public override void OnInspectorGUI()
-        {
-            if (editor != null)
-                editor.OnInspectorGUI();
-            else
-                DrawDefaultInspector();
-        }
-
-        // Inspector上のPreviewエリア描画処理
-        public override void OnPreviewGUI(Rect r, GUIStyle background)
-        {
-            if (editor != null)
-                editor.OnPreviewGUI(r, background);
-        }
+		static void SetupScriptableObject<T>(string path) where T : ScriptableObjectBase
+		{
+			int count = Selection.objects.OfType<T>().Count();
+			if (count != 0) return;
+			T scriptableObject = ScriptableObject.CreateInstance<T>();
+			scriptableObject.assetPath = path;
+			Selection.activeObject = scriptableObject;
+			EditorUtility.UnloadUnusedAssets();
+		}
     }
 }
 
