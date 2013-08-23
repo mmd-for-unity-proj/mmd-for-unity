@@ -6,6 +6,7 @@ using System.IO;
 
 namespace MMD
 {
+	[CustomEditor(typeof(VMDScriptableObject))]
     public class VMDInspector : Editor
     {
         // VMD Load option
@@ -14,7 +15,7 @@ namespace MMD
         public GameObject pmdPrefab;
 
         // last selected item
-        private static string vmd_path = "";
+        public static string vmd_path = "";
         private static MotionAgent motion_agent;
         private static string message = "";
 
@@ -24,26 +25,19 @@ namespace MMD
         /// <returns>VMDファイルであればそのパスを、異なればnullを返します。</returns>
         void setup()
         {
-            var t = AssetDatabase.GetAssetPath(Selection.activeObject);
-            if (vmd_path != t)
+            // デフォルトコンフィグ
+            var config = MMD.Config.LoadAndCreate();
+            createAnimationFile = config.vmd_config.createAnimationFile;
+            interpolationQuality = config.vmd_config.interpolationQuality;
+
+            // モデル情報
+            if (config.inspector_config.use_vmd_preload)
             {
-                if (!File.Exists(t)) return;
-
-                // デフォルトコンフィグ
-                var config = MMD.Config.LoadAndCreate();
-                createAnimationFile = config.vmd_config.createAnimationFile;
-                interpolationQuality = config.vmd_config.interpolationQuality;
-
-                // モデル情報
-                vmd_path = t;
-                if (config.inspector_config.use_vmd_preload)
-                {
-                    motion_agent = new MotionAgent(vmd_path);
-                }
-                else
-                {
-                    motion_agent = null;
-                }
+                motion_agent = new MotionAgent(vmd_path);
+            }
+            else
+            {
+                motion_agent = null;
             }
         }
 
