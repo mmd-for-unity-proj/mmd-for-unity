@@ -15,7 +15,6 @@ namespace MMD
         public GameObject pmdPrefab;
 
         // last selected item
-        public static string vmd_path = "";
         private static MotionAgent motion_agent;
         private static string message = "";
 

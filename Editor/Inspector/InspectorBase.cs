@@ -28,12 +28,10 @@ namespace MMD
 
 					if (extension == ".pmd" || extension == ".pmx")
 					{
-						PMDInspector.pmd_path = path;
 						SetupScriptableObject<PMDScriptableObject>(path);
 					}
 					else if (extension == ".vmd")
 					{
-						VMDInspector.vmd_path = path;
 						SetupScriptableObject<PMDScriptableObject>(path);
 					}
 				}

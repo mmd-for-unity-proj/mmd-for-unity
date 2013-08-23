@@ -17,7 +17,6 @@ namespace MMD
         public bool is_pmx_base_import;
 
         // last selected item
-        public static string pmd_path = "";
         private static ModelAgent model_agent;
         private static string message = "";
 
