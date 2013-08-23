@@ -23,29 +23,29 @@ namespace MMD
 			{
 				if (Selection.objects.Length != 0)
 				{
-					string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-					string extension = Path.GetExtension(assetPath).ToLower();
+					string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+					string extension = Path.GetExtension(path).ToLower();
 
 					if (extension == ".pmd" || extension == ".pmx")
 					{
-						PMDInspector.pmd_path = assetPath;
-						SetupScriptableObject<PMDScriptableObject>(assetPath);
+						PMDInspector.pmd_path = path;
+						SetupScriptableObject<PMDScriptableObject>(path);
 					}
 					else if (extension == ".vmd")
 					{
-						VMDInspector.vmd_path = assetPath;
-						SetupScriptableObject<PMDScriptableObject>(assetPath);
+						VMDInspector.vmd_path = path;
+						SetupScriptableObject<PMDScriptableObject>(path);
 					}
 				}
 			};
 		}
 
-		static void SetupScriptableObject<T>(string assetPath) where T : ScriptableObjectBase
+		static void SetupScriptableObject<T>(string path) where T : ScriptableObjectBase
 		{
 			int count = Selection.objects.OfType<T>().Count();
 			if (count != 0) return;
 			T scriptableObject = ScriptableObject.CreateInstance<T>();
-			scriptableObject.assetPath = assetPath;
+			scriptableObject.assetPath = path;
 			Selection.activeObject = scriptableObject;
 			EditorUtility.UnloadUnusedAssets();
 		}

@@ -33,11 +33,12 @@ namespace MMD
             use_mecanim = config.pmd_config.use_mecanim;
             use_ik = config.pmd_config.use_ik;
             is_pmx_base_import = config.pmd_config.is_pmx_base_import;
-
+			
             // モデル情報
             if (config.inspector_config.use_pmd_preload)
             {
-                model_agent = new ModelAgent(pmd_path);
+				var obj = (PMDScriptableObject)target;
+				model_agent = new ModelAgent(obj.assetPath);
             }
             else
             {
@@ -81,8 +82,8 @@ namespace MMD
                 if (GUILayout.Button("Convert to Prefab"))
                 {
                     if (null == model_agent) {
-                        var pmd_path = AssetDatabase.GetAssetPath(Selection.activeObject);
-                        model_agent = new ModelAgent(pmd_path);
+						var obj = (PMDScriptableObject)target;
+                        model_agent = new ModelAgent(obj.assetPath);
                     }
                     model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, is_pmx_base_import);
                     message = "Loading done.";

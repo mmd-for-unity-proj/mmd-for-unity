@@ -33,7 +33,8 @@ namespace MMD
             // モデル情報
             if (config.inspector_config.use_vmd_preload)
             {
-                motion_agent = new MotionAgent(vmd_path);
+				var obj = (VMDScriptableObject)target;
+                motion_agent = new MotionAgent(obj.assetPath);
             }
             else
             {
@@ -66,8 +67,8 @@ namespace MMD
                 if (GUILayout.Button("Convert"))
                 {
                     if (null == motion_agent) {
-                        var vmd_path = AssetDatabase.GetAssetPath(Selection.activeObject);
-                        motion_agent = new MotionAgent(vmd_path);
+						var obj = (VMDScriptableObject)target;
+                        motion_agent = new MotionAgent(obj.assetPath);
                     }
                     motion_agent.CreateAnimationClip(pmdPrefab, createAnimationFile, interpolationQuality);
                     message = "Loading done.";
