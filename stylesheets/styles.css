@@ -532,7 +532,7 @@ body {
   padding: 0px 0 20px 0px;
   margin: 0px;
   font: 14px/1.5 "OpenSansRegular", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #171b1e;
+  color: #111;
   /*color: #f0e7d5;*/
   font-weight: normal;
   background: #252525;
@@ -693,7 +693,7 @@ hr {
 }
 
 dt {
-  color: #F0E7D5;
+  color: #111;
   font-family: 'OpenSansSemibold', "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-weight: normal;
 }
