@@ -20,8 +20,13 @@ public class MaterialMorph : MorphBase
 	/// <summary>
 	/// モーフ処理
 	/// </summary>
-	public void Compute(MaterialMorphParameter[] composite_mul, MaterialMorphParameter[] composite_add)
+	/// <returns>更新したか(true:更新した、false:未更新)</returns>
+	/// <param name='composite_mul'>乗算モーフ値</param>
+	/// <param name='composite_add'>加算モーフ値</param>
+	/// <exception cref='System.IndexOutOfRangeException'>乗算でも加算でも無い演算パラメータが設定されている</exception>
+	public bool Compute(MaterialMorphParameter[] composite_mul, MaterialMorphParameter[] composite_add)
 	{
+		bool result = false;
 		//キャッシュ設定
 		float weight = base.GetWeight(transform);
 		if ((prev_weight_ != weight) || (null == values_cache_)) {
@@ -43,6 +48,7 @@ public class MaterialMorph : MorphBase
 				}
 			}
 			prev_weight_ = weight;
+			result = true;
 		}
 		
 		//反映
@@ -62,6 +68,7 @@ public class MaterialMorph : MorphBase
 				throw new System.IndexOutOfRangeException();
 			}
 		}
+		return result;
 	}
 	
 	/// <summary>

@@ -161,14 +161,19 @@ public class MorphManager : MonoBehaviour
 			System.Array.Copy(group_morph.source, composite, group_morph.source.Length);
 	
 			// 表情ごとに計算する
+			bool is_update = false;
 			foreach (var morph in group_morph.script) {
-				morph.Compute(composite);
+				if (morph.Compute(composite)) {
+					is_update = true;
+				}
 			}
 	
 			// ここで計算結果を入れていく
-			for (int i = 0, i_max = group_morph.indices.Length; i < i_max; ++i) {
-				MorphBase morph_base = morphs[group_morph.indices[i]];
-				morph_base.group_weight = composite[i];	// ここで反映
+			if (is_update) {
+				for (int i = 0, i_max = group_morph.indices.Length; i < i_max; ++i) {
+					MorphBase morph_base = morphs[group_morph.indices[i]];
+					morph_base.group_weight = composite[i];	// ここで反映
+				}
 			}
 		}
 	}
@@ -185,14 +190,19 @@ public class MorphManager : MonoBehaviour
 			System.Array.Copy(bone_morph.source, composite, bone_morph.source.Length);
 	
 			// 表情ごとに計算する
+			bool is_update = false;
 			foreach (var morph in bone_morph.script) {
-				morph.Compute(composite);
+				if (morph.Compute(composite)) {
+					is_update = true;
+				}
 			}
 	
 			// ここで計算結果を入れていく
-			for (int i = 0, i_max = bone_morph.indices.Length; i < i_max; ++i) {
-				bones[bone_morph.indices[i]].localPosition = composite[i].position;
-				bones[bone_morph.indices[i]].localRotation = composite[i].rotation;
+			if (is_update) {
+				for (int i = 0, i_max = bone_morph.indices.Length; i < i_max; ++i) {
+					bones[bone_morph.indices[i]].localPosition = composite[i].position;
+					bones[bone_morph.indices[i]].localRotation = composite[i].rotation;
+				}
 			}
 		}
 	}
@@ -208,19 +218,24 @@ public class MorphManager : MonoBehaviour
 			System.Array.Copy(vertex_morph.source, composite, vertex_morph.source.Length);
 	
 			// 表情ごとに計算する
+			bool is_update = false;
 			foreach (var morph in vertex_morph.script) {
-				morph.Compute(composite);
+				if (morph.Compute(composite)) {
+					is_update = true;
+				}
 			}
 	
 			// ここで計算結果を入れていく
-			for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
-				var vtxs = renderer_shared_mesh_[r].vertices;	// 配列を受け入れ
-				for (int v = 0, v_max = vertex_morph.meshes[r].indices.Length; v < v_max; ++v) {
-					if (vertex_morph.meshes[r].indices[v] < vtxs.Length) {
-						vtxs[vertex_morph.meshes[r].indices[v]] = composite[v];
+			if (is_update) {
+				for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
+					var vtxs = renderer_shared_mesh_[r].vertices;	// 配列を受け入れ
+					for (int v = 0, v_max = vertex_morph.meshes[r].indices.Length; v < v_max; ++v) {
+						if (vertex_morph.meshes[r].indices[v] < vtxs.Length) {
+							vtxs[vertex_morph.meshes[r].indices[v]] = composite[v];
+						}
 					}
+					renderer_shared_mesh_[r].vertices = vtxs;	// ここで反映
 				}
-				renderer_shared_mesh_[r].vertices = vtxs;	// ここで反映
 			}
 		}
 	}
@@ -236,22 +251,27 @@ public class MorphManager : MonoBehaviour
 			System.Array.Copy(uv_morph[i].source, composite, uv_morph[i].source.Length);
 			
 			// 表情ごとに計算する
+			bool is_update = false;
 			foreach (var morph in uv_morph[i].script) {
-				morph.Compute(composite);
+				if (morph.Compute(composite)) {
+					is_update = true;
+				}
 			}
 			
 			// ここで計算結果を入れていく
-			for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
-				var uvs = ((0 == i)? renderer_shared_mesh_[r].uv: renderer_shared_mesh_[r].uv2);	// 配列を受け入れ
-				for (int v = 0, v_max = uv_morph[i].meshes[r].indices.Length; v < v_max; ++v) {
-					if (uv_morph[i].meshes[r].indices[v] < uvs.Length) {
-						uvs[uv_morph[i].meshes[r].indices[v]] = composite[v];
+			if (is_update) {
+				for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
+					var uvs = ((0 == i)? renderer_shared_mesh_[r].uv: renderer_shared_mesh_[r].uv2);	// 配列を受け入れ
+					for (int v = 0, v_max = uv_morph[i].meshes[r].indices.Length; v < v_max; ++v) {
+						if (uv_morph[i].meshes[r].indices[v] < uvs.Length) {
+							uvs[uv_morph[i].meshes[r].indices[v]] = composite[v];
+						}
 					}
-				}
-				if (0 == i) {
-					renderer_shared_mesh_[r].uv = uvs;	// ここで反映
-				} else {
-					renderer_shared_mesh_[r].uv2 = uvs;	// ここで反映
+					if (0 == i) {
+						renderer_shared_mesh_[r].uv = uvs;	// ここで反映
+					} else {
+						renderer_shared_mesh_[r].uv2 = uvs;	// ここで反映
+					}
 				}
 			}
 		}
@@ -268,35 +288,40 @@ public class MorphManager : MonoBehaviour
 			MaterialMorph.MaterialMorphParameter[] composite_add = Enumerable.Repeat(MaterialMorph.MaterialMorphParameter.zero, material_morph.source.Length).ToArray();
 			
 			// 表情ごとに計算する
+			bool is_update = false;
 			foreach (var morph in material_morph.script) {
-				morph.Compute(composite_mul, composite_add);
-			}
-			
-			//全材質計算
-			if (-1 == material_morph.meshes[0].indices.LastOrDefault()) {
-				//最後に-1(≒uint.MaxValue)が有れば
-				//全材質に反映
-				MaterialMorph.MaterialMorphParameter composite_mul_all = composite_mul.Last();
-				MaterialMorph.MaterialMorphParameter composite_add_all = composite_add.Last();
-				for (int i = 0, i_max = material_morph.source.Length - 1; i < i_max; ++i) {
-					composite_mul[i] *= composite_mul_all;
-					composite_add[i] += composite_add_all;
+				if (morph.Compute(composite_mul, composite_add)) {
+					is_update = true;
 				}
 			}
 			
-			// ここで計算結果を入れていく
-			for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
-				for (int m = 0, m_max = material_morph.source.Length - 1; m < m_max; ++m) {
-					int index = material_morph.meshes[r].indices[m];
-					if (index < renderer_shared_materials_[r].Length) {
-						ApplyMaterialMorph(renderer_shared_materials_[r][index]
-											, material_morph.source[m]
-											, composite_mul[m]
-											, composite_add[m]
-										);
+			if (is_update) {
+				//全材質計算
+				if (-1 == material_morph.meshes[0].indices.LastOrDefault()) {
+					//最後に-1(≒uint.MaxValue)が有れば
+					//全材質に反映
+					MaterialMorph.MaterialMorphParameter composite_mul_all = composite_mul.Last();
+					MaterialMorph.MaterialMorphParameter composite_add_all = composite_add.Last();
+					for (int i = 0, i_max = material_morph.source.Length - 1; i < i_max; ++i) {
+						composite_mul[i] *= composite_mul_all;
+						composite_add[i] += composite_add_all;
+					}
+				}
+				
+				// ここで計算結果を入れていく
+				for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
+					for (int m = 0, m_max = material_morph.source.Length - 1; m < m_max; ++m) {
+						int index = material_morph.meshes[r].indices[m];
+						if (index < renderer_shared_materials_[r].Length) {
+							ApplyMaterialMorph(renderer_shared_materials_[r][index]
+												, material_morph.source[m]
+												, composite_mul[m]
+												, composite_add[m]
+											);
+						}
+					}
 				}
 			}
-		}
 		}
 	}
 
