@@ -44,16 +44,15 @@ namespace MMD
 			use_ik_ = use_ik;
 			root_game_object_ = new GameObject(format_.meta_header.name);
 			MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
-		
-			Mesh mesh = CreateMesh();					// メッシュの生成・設定
-			Material[] materials = CreateMaterials();	// マテリアルの生成・設定
-			GameObject[] bones = CreateBones();			// ボーンの生成・設定
-			CreateMorph(bones);							// モーフの生成・設定
-
-	
-			// バインドポーズの作成
-			BuildingBindpose(mesh, materials, bones);
 			root_game_object_.AddComponent<Animation>();	// アニメーションを追加
+		
+			MeshCreationInfo[] creation_info = CreateMeshCreationInfo();				// メッシュを作成する為の情報を作成
+			Mesh[] mesh = CreateMesh(creation_info);									// メッシュの生成・設定
+			Material[][] materials = CreateMaterials(creation_info);					// マテリアルの生成・設定
+			GameObject[] bones = CreateBones();											// ボーンの生成・設定
+			SkinnedMeshRenderer[] renderers = BuildingBindpose(mesh, materials, bones);	// バインドポーズの作成
+			CreateMorph(mesh, materials, bones, renderers, creation_info);				// モーフの生成・設定
+			
 	
 			// IKの登録
 			if (use_ik_) {
@@ -90,34 +89,170 @@ namespace MMD
 		}
 		
 		/// <summary>
+		/// メッシュを作成する時に参照するデータの纏め
+		/// </summary>
+		class MeshCreationInfo {
+			public class Pack {
+				public uint material_index;	//マテリアル
+				public uint plane_start;	//面開始位置
+				public uint plane_count;	//面数
+				public uint[] vertices;		//頂点
+			}
+			public Pack[]					value;
+			public uint[] all_vertices;		//総頂点
+			public Dictionary<uint, uint>	reassign_dictionary; //頂点リアサインインデックス用辞書
+		}
+		
+		/// <summary>
+		/// メッシュを作成する為の情報を作成
+		/// </summary>
+		/// <returns>メッシュ作成情報</returns>
+		MeshCreationInfo[] CreateMeshCreationInfo()
+		{
+			// 1メッシュで収まる場合でも-Multi()を使っても問題は起き無いが、
+			// -Multi()では頂点数計測をマテリアル単位で行う関係上、頂点数が多く見積もられる(概算値)。
+			// (1頂点を複数のマテリアルが参照している場合に参照している分だけ計上してしまう。)
+			// 依って上限付近では本来1メッシュで収まる物が複数メッシュに分割されてしまう事が有るので注意。
+			// 
+			// -Multi()を使っても最終的には頂点数を最適化するので、
+			// 1メッシュに収まってしまえば-Single()と同じ頂点数に為る(確定値)。
+			// 
+			// 単純に-Single()の方が解析が少ない分早い。
+
+			MeshCreationInfo[] result;
+			if (format_.vertex_list.vertex.Length < c_max_vertex_count_in_mesh) {
+				//1メッシュで収まるなら
+				result = CreateMeshCreationInfoSingle();
+			} else {
+				//1メッシュで収まらず、複数メッシュに分割するなら
+				result = CreateMeshCreationInfoMulti();
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// メッシュを作成する為の情報を作成(単体メッシュ版)
+		/// </summary>
+		/// <returns>メッシュ作成情報</returns>
+		MeshCreationInfo[] CreateMeshCreationInfoSingle()
+		{
+			MeshCreationInfo[] result = new[]{new MeshCreationInfo()};
+			//全マテリアルを設定
+			result[0].value = CreateMeshCreationInfoPacks();
+			//全頂点を設定
+			result[0].all_vertices = Enumerable.Range(0, format_.vertex_list.vertex.Length).Select(x=>(uint)x).ToArray();
+			//頂点リアサインインデックス用辞書作成
+			result[0].reassign_dictionary = new Dictionary<uint, uint>(result[0].all_vertices.Length);
+			for (uint i = 0, i_max = (uint)result[0].all_vertices.Length; i < i_max; ++i) {
+				result[0].reassign_dictionary[i] = i;
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// 全マテリアルをメッシュ作成情報のマテリアルパックとして返す
+		/// </summary>
+		/// <returns>メッシュ作成情報のマテリアルパック</returns>
+		MeshCreationInfo.Pack[] CreateMeshCreationInfoPacks()
+		{
+			uint plane_start = 0;
+			//マテリアル単位のMeshCreationInfo.Packを作成する
+			return Enumerable.Range(0, format_.material_list.material.Length)
+							.Select(x=>{
+										MeshCreationInfo.Pack pack = new MeshCreationInfo.Pack();
+										pack.material_index = (uint)x;
+										pack.plane_count = format_.material_list.material[x].face_vert_count;
+										pack.plane_start = plane_start;
+										plane_start += pack.plane_count;
+										pack.vertices = format_.face_vertex_list.face_vert_index.Skip((int)pack.plane_start)
+																								.Take((int)pack.plane_count) //面頂点インデックス取り出し
+																								.Distinct() //重複削除
+																								.ToArray();
+										return pack;
+									})
+							.ToArray();
+		}
+
+		/// <summary>
+		/// メッシュを作成する為の情報を作成(複数メッシュ版)
+		/// </summary>
+		/// <returns>メッシュ作成情報</returns>
+		MeshCreationInfo[] CreateMeshCreationInfoMulti()
+		{
+			//マテリアル単位のMeshCreationInfo.Packを作成する
+			MeshCreationInfo.Pack[] packs = CreateMeshCreationInfoPacks();
+			//頂点数の多い順に並べる(メッシュ分割アルゴリズム上、後半に行く程頂点数が少ない方が敷き詰め効率が良い)
+			System.Array.Sort(packs, (x,y)=>y.vertices.Length - x.vertices.Length);
+			
+			List<MeshCreationInfo> result = new List<MeshCreationInfo>();
+			do {
+				uint vertex_sum = 0;
+				MeshCreationInfo info = new MeshCreationInfo();
+				//マテリアルパック作成
+				info.value = Enumerable.Range(0, packs.Length)
+										.Where(x=>null!=packs[x]) //有効なマテリアルに絞る
+										.Where(x=>{	//採用しても頂点数が限界を超えないなら
+													vertex_sum += (uint)packs[x].vertices.Length;
+													return vertex_sum < c_max_vertex_count_in_mesh;
+												})
+										.Select(x=>{	//マテリアルの採用と無効化
+													var pack = packs[x];
+													packs[x] = null;
+													return pack;
+												})
+										.ToArray();
+				//マテリアルインデックスに並べる(メッシュの選定が終わったので見易い様に並びを戻す)
+				System.Array.Sort(info.value, (x,y)=>((x.material_index>y.material_index)? 1: (x.material_index<y.material_index)? -1: 0));
+				//総頂点作成
+				info.all_vertices = info.value.SelectMany(x=>x.vertices).Distinct().ToArray();
+				System.Array.Sort(info.all_vertices);
+				//頂点リアサインインデックス用辞書作成
+				info.reassign_dictionary = new Dictionary<uint, uint>();
+				uint reassign_index = 0;
+				foreach (var i in info.all_vertices) {
+					info.reassign_dictionary[i] = reassign_index++;
+				}
+				//戻り値に追加
+				result.Add(info);
+			} while (packs.Any(x=>null!=x)); //使用していないマテリアルが為るならループ
+			return result.ToArray();
+		}
+
+		/// <summary>
 		/// メッシュ作成
 		/// </summary>
 		/// <returns>メッシュ</returns>
-		Mesh CreateMesh()
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		Mesh[] CreateMesh(MeshCreationInfo[] creation_info)
 		{
-			Mesh mesh = new Mesh();
-			EntryAttributesForMesh(mesh);
-			SetSubMesh(mesh);
-			CreateAssetForMesh(mesh);
-			return mesh;
+			Mesh[] result = new Mesh[creation_info.Length];
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
+				Mesh mesh = new Mesh();
+				EntryAttributesForMesh(mesh, creation_info[i]);
+				SetSubMesh(mesh, creation_info[i]);
+				CreateAssetForMesh(mesh, i);
+				result[i] = mesh;
+			}
+			return result;
 		}
 		
 		/// <summary>
 		/// メッシュに基本情報(頂点座標・法線・UV・ボーンウェイト)を登録する
 		/// </summary>
 		/// <param name='mesh'>対象メッシュ</param>
-		void EntryAttributesForMesh(Mesh mesh)
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void EntryAttributesForMesh(Mesh mesh, MeshCreationInfo creation_info)
 		{
-			mesh.vertices = format_.vertex_list.vertex.Select(x=>x.pos).ToArray();
-			mesh.normals = format_.vertex_list.vertex.Select(x=>x.normal_vec).ToArray();
-			mesh.uv = format_.vertex_list.vertex.Select(x=>x.uv).ToArray();
+			mesh.vertices = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].pos).ToArray();
+			mesh.normals = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].normal_vec).ToArray();
+			mesh.uv = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].uv).ToArray();
 			if (0 < format_.header.additionalUV) {
 				//追加UVが1つ以上有れば
 				//1つ目のみ登録
-				mesh.uv2 = format_.vertex_list.vertex.Select(x=>new Vector2(x.add_uv[0].x, x.add_uv[0].y)).ToArray();
+				mesh.uv2 = creation_info.all_vertices.Select(x=>new Vector2(format_.vertex_list.vertex[x].add_uv[0].x, format_.vertex_list.vertex[x].add_uv[0].y)).ToArray();
 			}
-			mesh.boneWeights = format_.vertex_list.vertex.Select(x=>ConvertBoneWeight(x.bone_weight)).ToArray();
-			mesh.colors = format_.vertex_list.vertex.Select(x=>new Color(0.0f, 0.0f, 0.0f, x.edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む
+			mesh.boneWeights = creation_info.all_vertices.Select(x=>ConvertBoneWeight(format_.vertex_list.vertex[x].bone_weight)).ToArray();
+			mesh.colors = creation_info.all_vertices.Select(x=>new Color(0.0f, 0.0f, 0.0f, format_.vertex_list.vertex[x].edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む(0～8迄は表せる)
 		}
 		
 		/// <summary>
@@ -161,20 +296,20 @@ namespace MMD
 		/// メッシュにサブメッシュを登録する
 		/// </summary>
 		/// <param name='mesh'>対象メッシュ</param>
-		void SetSubMesh(Mesh mesh)
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void SetSubMesh(Mesh mesh, MeshCreationInfo creation_info)
 		{
 			// マテリアル対サブメッシュ
 			// サブメッシュとはマテリアルに適用したい面頂点データのこと
 			// 面ごとに設定するマテリアルはここ
-			mesh.subMeshCount = format_.material_list.material.Length;
-			
-			int sum = 0;
-			for (int i = 0, i_max = mesh.subMeshCount; i < i_max; ++i) {
-				int count = (int)format_.material_list.material[i].face_vert_count;
-				// 面頂点は材質0から順番に加算されている
-				int[] indices = format_.face_vertex_list.face_vert_index.Skip(sum).Take(count).Select(x=>(int)x).ToArray(); //[sum](含む)から[sum+count](含まず)迄取り出し
+			mesh.subMeshCount = creation_info.value.Length;
+			for (int i = 0, i_max = creation_info.value.Length; i < i_max; ++i) {
+				//format_.face_vertex_list.face_vert_indexを[start](含む)から[start+count](含まず)迄取り出し
+				int[] indices = format_.face_vertex_list.face_vert_index.Skip((int)creation_info.value[i].plane_start)
+																		.Take((int)creation_info.value[i].plane_count)
+																		.Select(x=>(int)creation_info.reassign_dictionary[x]) //頂点リアサインインデックス変換
+																		.ToArray();
 				mesh.SetTriangles(indices, i);
-				sum += (int)format_.material_list.material[i].face_vert_count;
 			}
 		}
 		
@@ -182,30 +317,43 @@ namespace MMD
 		/// メッシュをProjectに登録する
 		/// </summary>
 		/// <param name='mesh'>対象メッシュ</param>
-		void CreateAssetForMesh(Mesh mesh)
+		/// <param name='index'>メッシュインデックス</param>
+		void CreateAssetForMesh(Mesh mesh, int index)
 		{
-			string path = format_.meta_header.folder + "/" + format_.meta_header.name + ".asset";
-			AssetDatabase.CreateAsset(mesh, path);
+			string path = format_.meta_header.folder + "/Meshes/";
+			if (!System.IO.Directory.Exists(path)) { 
+				AssetDatabase.CreateFolder(format_.meta_header.folder, "Meshes");
+			}
+			
+			string file_name = path + index.ToString() + "_" + format_.meta_header.name + ".asset";
+			AssetDatabase.CreateAsset(mesh, file_name);
 		}
 		
 		/// <summary>
 		/// マテリアル作成
 		/// </summary>
 		/// <returns>マテリアル</returns>
-		Material[] CreateMaterials()
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
 		{
-			Material[] materials = EntryAttributesForMaterials();
-			CreateAssetForMaterials(materials);
-			return materials;
+			Material[][] result = new Material[creation_info.Length][];
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
+				Material[] materials = EntryAttributesForMaterials(creation_info[i]);
+				CreateAssetForMaterials(materials, creation_info[i]);
+				result[i] = materials;
+			}
+			return result;
 		}
 
 		/// <summary>
 		/// マテリアルに基本情報(シェーダー・カラー・テクスチャ)を登録する
 		/// </summary>
 		/// <returns>マテリアル</returns>
-		Material[] EntryAttributesForMaterials()
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		Material[] EntryAttributesForMaterials(MeshCreationInfo creation_info)
 		{
-			return format_.material_list.material.Select(x=>ConvertMaterial(x)).ToArray();
+			return creation_info.value.Select(x=>ConvertMaterial(format_.material_list.material[x.material_index]))
+										.ToArray();
 		}
 		
 		/// <summary>
@@ -411,7 +559,8 @@ namespace MMD
 		/// マテリアルをProjectに登録する
 		/// </summary>
 		/// <param name='mesh'>対象マテリアル</param>
-		void CreateAssetForMaterials(Material[] materials) {
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void CreateAssetForMaterials(Material[] materials, MeshCreationInfo creation_info) {
 			// 適当なフォルダに投げる
 			string path = format_.meta_header.folder + "/Materials/";
 			if (!System.IO.Directory.Exists(path)) { 
@@ -419,7 +568,9 @@ namespace MMD
 			}
 			
 			for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
-				string file_name = path + i.ToString() + "_" + format_.material_list.material[i].name + ".asset";
+				uint material_index = creation_info.value[i].material_index;
+				string name = format_.material_list.material[material_index].name;
+				string file_name = path + material_index.ToString() + "_" + name + ".asset";
 				AssetDatabase.CreateAsset(materials[i], file_name);
 			}
 		}
@@ -471,11 +622,16 @@ namespace MMD
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// モーフ作成
 		/// </summary>
-		void CreateMorph(GameObject[] bones)
+		/// <param name='mesh'>対象メッシュ</param>
+		/// <param name='materials'>対象マテリアル</param>
+		/// <param name='bones'>対象ボーン</param>
+		/// <param name='renderers'>対象レンダラー</param>
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void CreateMorph(Mesh[] mesh, Material[][] materials, GameObject[] bones, SkinnedMeshRenderer[] renderers, MeshCreationInfo[] creation_info)
 		{
 			//表情ルートを生成してルートの子供に付ける
 			GameObject expression_root = new GameObject("Expression");
@@ -500,13 +656,18 @@ namespace MMD
 			morph_manager.bones = bones.Select(x=>x.transform).ToArray();
 			CreateBoneMorph(morph_manager, morphs);
 			//頂点モーフ作成
-			CreateVertexMorph(morph_manager, morphs);
+			CreateVertexMorph(morph_manager, morphs, creation_info);
 			//UV・追加UVモーフ作成
-			CreateUvMorph(morph_manager, morphs);
+			CreateUvMorph(morph_manager, morphs, creation_info);
 			//材質モーフ作成
-			CreateMaterialMorph(morph_manager, morphs);
+			CreateMaterialMorph(morph_manager, morphs, creation_info);
 			//モーフ一覧設定(モーフコンポーネントの情報を拾う為、最後に設定する)
 			morph_manager.morphs = morphs.Select(x=>x.GetComponent<MorphBase>()).ToArray();
+
+			//メッシュ・マテリアル設定
+			morph_manager.renderers = renderers;
+			morph_manager.mesh = mesh;
+			morph_manager.materials = materials;
 		}
 
 		/// <summary>
@@ -634,7 +795,8 @@ namespace MMD
 		/// </summary>
 		/// <param name='morph_manager'>表情マネージャー</param>
 		/// <param name='morphs'>モーフのゲームオブジェクト</param>
-		void CreateVertexMorph(MorphManager morph_manager, GameObject[] morphs)
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void CreateVertexMorph(MorphManager morph_manager, GameObject[] morphs, MeshCreationInfo[] creation_info)
 		{
 			//インデックスと元データの作成
 			List<uint> original_indices = format_.morph_list.morph_data.Where(x=>(PMXFormat.MorphData.MorphType.Vertex == x.morph_type)) //該当モーフに絞る
@@ -657,9 +819,26 @@ namespace MMD
 											.Where(x=>PMXFormat.MorphData.MorphType.Vertex == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
 											.Select(x=>AssignVertexMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
 											.ToArray();
+			
+			//メッシュ別インデックスの作成
+			int invalid_vertex_index = format_.vertex_list.vertex.Length;
+			MorphManager.VertexMorphPack.Meshes[] multi_indices = new MorphManager.VertexMorphPack.Meshes[creation_info.Length];
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
+				multi_indices[i] = new MorphManager.VertexMorphPack.Meshes();
+				multi_indices[i].indices = new int[indices.Length];
+				for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
+					if (creation_info[i].reassign_dictionary.ContainsKey((uint)indices[k])) {
+						//このメッシュで有効なら
+						multi_indices[i].indices[k] = (int)creation_info[i].reassign_dictionary[(uint)indices[k]];
+					} else {
+						//このメッシュでは無効なら
+						multi_indices[i].indices[k] = invalid_vertex_index; //最大頂点数を設定(uint.MaxValueでは無いので注意)
+					}
+				}
+			}
 
 			//表情マネージャーにインデックス・元データ・スクリプトの設定
-			morph_manager.vertex_morph = new MorphManager.VertexMorphPack(indices, source, script);
+			morph_manager.vertex_morph = new MorphManager.VertexMorphPack(multi_indices, source, script);
 		}
 
 		/// <summary>
@@ -685,7 +864,8 @@ namespace MMD
 		/// </summary>
 		/// <param name='morph_manager'>表情マネージャー</param>
 		/// <param name='morphs'>モーフのゲームオブジェクト</param>
-		void CreateUvMorph(MorphManager morph_manager, GameObject[] morphs)
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void CreateUvMorph(MorphManager morph_manager, GameObject[] morphs, MeshCreationInfo[] creation_info)
 		{
 			for (int morph_type_index = 0, morph_type_index_max = 1 + format_.header.additionalUV; morph_type_index < morph_type_index_max; ++morph_type_index) {
 				//モーフタイプ
@@ -731,8 +911,25 @@ namespace MMD
 											.Select(x=>AssignUvMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
 											.ToArray();
 				
+				//メッシュ別インデックスの作成
+				int invalid_vertex_index = format_.vertex_list.vertex.Length;
+				MorphManager.UvMorphPack.Meshes[] multi_indices = new MorphManager.UvMorphPack.Meshes[creation_info.Length];
+				for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
+					multi_indices[i] = new MorphManager.UvMorphPack.Meshes();
+					multi_indices[i].indices = new int[indices.Length];
+					for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
+						if (creation_info[i].reassign_dictionary.ContainsKey((uint)indices[k])) {
+							//このメッシュで有効なら
+							multi_indices[i].indices[k] = (int)creation_info[i].reassign_dictionary[(uint)indices[k]];
+						} else {
+							//このメッシュでは無効なら
+							multi_indices[i].indices[k] = invalid_vertex_index; //最大頂点数を設定(uint.MaxValueでは無いので注意)
+						}
+					}
+				}
+	
 				//表情マネージャーにインデックス・元データ・スクリプトの設定
-				morph_manager.uv_morph[morph_type_index] = new MorphManager.UvMorphPack(indices, source, script);
+				morph_manager.uv_morph[morph_type_index] = new MorphManager.UvMorphPack(multi_indices, source, script);
 			}
 		}
 
@@ -761,7 +958,8 @@ namespace MMD
 		/// </summary>
 		/// <param name='morph_manager'>表情マネージャー</param>
 		/// <param name='morphs'>モーフのゲームオブジェクト</param>
-		void CreateMaterialMorph(MorphManager morph_manager, GameObject[] morphs)
+		/// <param name='creation_info'>メッシュ作成情報</param>
+		void CreateMaterialMorph(MorphManager morph_manager, GameObject[] morphs, MeshCreationInfo[] creation_info)
 		{
 			//インデックスと元データの作成
 			List<uint> original_indices = format_.morph_list.morph_data.Where(x=>(PMXFormat.MorphData.MorphType.Material == x.morph_type)) //該当モーフに絞る
@@ -811,9 +1009,40 @@ namespace MMD
 												.Where(x=>PMXFormat.MorphData.MorphType.Material == format_.morph_list.morph_data[x].morph_type) //該当モーフに絞る
 												.Select(x=>AssignMaterialMorph(morphs[x], format_.morph_list.morph_data[x], index_reverse_dictionary))
 												.ToArray();
+			
+			//材質リアサイン辞書の作成
+			Dictionary<uint, uint>[] material_reassign_dictionary = new Dictionary<uint, uint>[creation_info.Length + 1];
+			for (int i = 0, i_max = creation_info.Length; i < i_max; +++i) {
+				material_reassign_dictionary[i] = new Dictionary<uint, uint>();
+				for (uint k = 0, k_max = (uint)creation_info[i].value.Length; k < k_max; ++k) {
+					material_reassign_dictionary[i][creation_info[i].value[k].material_index] = k;
+				}
+				if (-1 == indices.LastOrDefault()) {
+					//indices の最後が -1(≒uint.MaxValue) なら
+					//全材質対象が存在するので材質リアサイン辞書に追加
+					material_reassign_dictionary[i][uint.MaxValue] = uint.MaxValue;
+				}
+			}
+
+			//メッシュ別インデックスの作成
+			int invalid_material_index = format_.material_list.material.Length;
+			MorphManager.MaterialMorphPack.Meshes[] multi_indices = new MorphManager.MaterialMorphPack.Meshes[creation_info.Length];
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
+				multi_indices[i] = new MorphManager.MaterialMorphPack.Meshes();
+				multi_indices[i].indices = new int[indices.Length];
+				for (int k = 0, k_max = indices.Length; k < k_max; ++k) {
+					if (material_reassign_dictionary[i].ContainsKey((uint)indices[k])) {
+						//この材質で有効なら
+						multi_indices[i].indices[k] = (int)material_reassign_dictionary[i][(uint)indices[k]];
+					} else {
+						//この材質では無効なら
+						multi_indices[i].indices[k] = invalid_material_index; //最大材質数を設定(uint.MaxValueでは無いので注意)
+					}
+				}
+			}
 
 			//表情マネージャーにインデックス・元データ・スクリプトの設定
-			morph_manager.material_morph = new MorphManager.MaterialMorphPack(indices, source, script);
+			morph_manager.material_morph = new MorphManager.MaterialMorphPack(multi_indices, source, script);
 		}
 
 		/// <summary>
@@ -852,23 +1081,38 @@ namespace MMD
 		/// <summary>
 		/// バインドポーズの作成
 		/// </summary>
+		/// <returns>レンダラー</returns>
 		/// <param name='mesh'>対象メッシュ</param>
 		/// <param name='materials'>設定するマテリアル</param>
 		/// <param name='bones'>設定するボーン</param>
-		void BuildingBindpose(Mesh mesh, Material[] materials, GameObject[] bones)
+		SkinnedMeshRenderer[] BuildingBindpose(Mesh[] mesh, Material[][] materials, GameObject[] bones)
 		{
-			// ここで本格的な適用
-			//スキンメッシュレンダラー設定
-			SkinnedMeshRenderer smr = root_game_object_.AddComponent<SkinnedMeshRenderer>();
-			mesh.bindposes = bones.Select(x=>x.transform.worldToLocalMatrix).ToArray();
-			smr.sharedMesh = mesh;
-			smr.bones = bones.Select(x=>x.transform).ToArray();
-			smr.materials = materials;
-			smr.receiveShadows = false; //影を受けない
-			//表情マネージャ設定
-			MorphManager mm = root_game_object_.GetComponentInChildren<MorphManager>();
-			mm.mesh = mesh;
-			mm.materials = materials;
+			// メッシュルートを生成してルートの子供に付ける
+			Transform mesh_root_transform = (new GameObject("Mesh")).transform;
+			mesh_root_transform.parent = root_game_object_.transform;
+
+			//モデルルート取得
+			Transform model_root_transform = root_game_object_.transform.FindChild("Model");
+			//ボーン共通データ
+			Matrix4x4[] bindposes = bones.Select(x=>x.transform.worldToLocalMatrix).ToArray();
+			Transform[] bones_transform = bones.Select(x=>x.transform).ToArray();
+			
+			//レンダー設定
+			SkinnedMeshRenderer[] result = new SkinnedMeshRenderer[mesh.Length];
+			for (int i = 0, i_max = mesh.Length; i < i_max; ++i) {
+				Transform mesh_transform = (new GameObject("Mesh" + i.ToString())).transform;
+				mesh_transform.parent = mesh_root_transform;
+				SkinnedMeshRenderer smr = mesh_transform.gameObject.AddComponent<SkinnedMeshRenderer>();
+				mesh[i].bindposes = bindposes;
+				smr.sharedMesh = mesh[i];
+				smr.bones = bones_transform;
+				smr.materials = materials[i];
+				smr.rootBone = model_root_transform;
+				smr.receiveShadows = false; //影を受けない
+				
+				result[i] = smr;
+			}
+			return result;
 		}
 		
 		/// <summary>
@@ -1389,6 +1633,9 @@ namespace MMD
 			return format_.rigidbody_list.rigidbody.Select(x=>(int)x.ignore_collision_group).ToArray();
 		}
 	
+
+		const uint	c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
+
 		GameObject	root_game_object_;
 		PMXFormat	format_;
 		bool		use_rigidbody_;
