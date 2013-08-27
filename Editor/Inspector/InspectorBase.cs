@@ -12,9 +12,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-#ifndef UNITY_3_5
-#ifndef UNITY_3_4
-#ifndef UNITY_3_3
+#if !(UNITY_3_5 || UNITY_3_4 || UNITY_3_3)
 
 namespace MMD
 {
@@ -54,7 +52,5 @@ namespace MMD
     }
 }
 
-#endif
-#endif
 #endif
 #endif
