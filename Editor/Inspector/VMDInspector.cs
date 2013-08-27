@@ -4,6 +4,10 @@ using System.Collections;
 using MMD.PMD;
 using System.IO;
 
+#ifndef UNITY_3_5
+#ifndef UNITY_3_4
+#ifndef UNITY_3_3
+
 namespace MMD
 {
 	[CustomEditor(typeof(VMDScriptableObject))]
@@ -84,3 +88,6 @@ namespace MMD
         }
     }
 }
+#endif
+#endif
+#endif
