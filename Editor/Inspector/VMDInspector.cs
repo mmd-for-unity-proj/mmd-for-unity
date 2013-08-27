@@ -4,6 +4,8 @@ using System.Collections;
 using MMD.PMD;
 using System.IO;
 
+#if !(UNITY_3_5 || UNITY_3_4 || UNITY_3_3)
+
 namespace MMD
 {
 	[CustomEditor(typeof(VMDScriptableObject))]
@@ -84,3 +86,4 @@ namespace MMD
         }
     }
 }
+#endif

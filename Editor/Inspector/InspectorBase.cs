@@ -12,6 +12,8 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
+#if !(UNITY_3_5 || UNITY_3_4 || UNITY_3_3)
+
 namespace MMD
 {
     public class InspectorBase : Editor
@@ -50,4 +52,5 @@ namespace MMD
     }
 }
 
+#endif
 #endif
