@@ -180,6 +180,11 @@ public class PMDLoaderScript {
 						// 特に異常がない場合はそのまま代入 
 						texNameEndAssignVar = tex;
 					}
+#if UNITY_STANDALONE_OSX
+					// MACの場合，濁点のあるひらがなを使うと動かないらしいので対策
+					// http://sourceforge.jp/ticket/browse.php?group_id=6158&tid=31929
+					texNameEndAssignVar = texNameEndAssignVar.Normalize(NormalizationForm.FormKD);
+#endif
 					result.texture_file_name = texNameEndAssignVar;
 				}
 			}
