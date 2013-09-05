@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class MMDEngine : MonoBehaviour {
 
@@ -37,7 +38,8 @@ public class MMDEngine : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		foreach (var m in this.renderer.materials)
+		SkinnedMeshRenderer[] renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+		foreach (var m in renderers.SelectMany(x=>x.sharedMaterials))
 		{
 			m.SetFloat("_OutlineWidth", this.outline_width);
 		}
