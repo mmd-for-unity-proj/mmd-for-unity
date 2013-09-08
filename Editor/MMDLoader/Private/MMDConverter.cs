@@ -26,14 +26,15 @@ namespace MMD
 			/// <summary>
 			/// GameObjectを作成する
 			/// </summary>
-			/// <param name='name'>内部形式データ</param>
+			/// <param name='format'>内部形式データ</param>
 			/// <param name='shader_type'>シェーダーの種類</param>
 			/// <param name='use_rigidbody'>剛体を使用するか</param>
 			/// <param name='use_mecanim'>Mecanimを使用するか</param>
 			/// <param name='use_ik'>IKを使用するか</param>
-			public static GameObject CreateGameObject(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik) {
+			/// <param name='scale'>スケール</param>
+			public static GameObject CreateGameObject(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
 				PMDConverter converter = new PMDConverter();
-				return converter.CreateGameObject_(format, shader_type, use_rigidbody, use_mecanim, use_ik);
+				return converter.CreateGameObject_(format, shader_type, use_rigidbody, use_mecanim, use_ik, scale);
 			}
 
 			/// <summary>
@@ -44,12 +45,13 @@ namespace MMD
 			/// </remarks>
 			private PMDConverter() {}
 
-			private GameObject CreateGameObject_(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik) {
+			private GameObject CreateGameObject_(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
 				format_ = format;
 				shader_type_ = shader_type;
 				use_rigidbody_ = use_rigidbody;
 				use_mecanim_ = use_mecanim;
 				use_ik_ = use_ik;
+				scale_ = scale;
 				root_game_object_ = new GameObject(format_.name);
 			
 				Mesh mesh = CreateMesh();					// メッシュの生成・設定
@@ -81,7 +83,7 @@ namespace MMD
 						List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
 						int[] groupTarget = GetRigidbodyGroupTargets(rigids);
 		
-						MMDEngine.Initialize(engine, groupTarget, ignoreGroups, rigids);
+						MMDEngine.Initialize(engine, scale_, groupTarget, ignoreGroups, rigids);
 					}
 					catch { }
 				}
@@ -102,7 +104,7 @@ namespace MMD
 				int vcount = (int)format_.vertex_list.vert_count;
 				Vector3[] vpos = new Vector3[vcount];
 				for (int i = 0; i < vcount; i++)
-					vpos[i] = format_.vertex_list.vertex[i].pos;
+					vpos[i] = format_.vertex_list.vertex[i].pos * scale_;
 				return vpos;
 			}
 			
@@ -443,7 +445,7 @@ namespace MMD
 				for (int i = 0; i < count; i++) {
 					bones[i] = new GameObject(format_.bone_list.bone[i].bone_name);
 					bones[i].transform.name = bones[i].name;
-					bones[i].transform.position = format_.bone_list.bone[i].bone_head_pos;
+					bones[i].transform.position = format_.bone_list.bone[i].bone_head_pos * scale_;
 				}
 				return bones;
 			}
@@ -494,7 +496,7 @@ namespace MMD
 					// モーフ先 - 元頂点
 					//morph_target[i] = (data.skin_vert_data[i].skin_vert_pos - vtxs.vertex[indices[i]].pos).normalized;
 					//morph_target[i] = data.skin_vert_data[i].skin_vert_pos - vtxs.vertex[indices[i]].pos;
-					morph_target[i] = data.skin_vert_data[i].skin_vert_pos;
+					morph_target[i] = data.skin_vert_data[i].skin_vert_pos * scale_;
 				}
 
 				// スクリプトに記憶させる
@@ -582,7 +584,7 @@ namespace MMD
 			Collider EntrySphereCollider(PMDFormat.Rigidbody rigid, GameObject obj)
 			{
 				SphereCollider collider = obj.AddComponent<SphereCollider>();
-				collider.radius = rigid.shape_w;
+				collider.radius = rigid.shape_w * scale_;
 				return collider;
 			}
 
@@ -591,9 +593,9 @@ namespace MMD
 			{
 				BoxCollider collider = obj.AddComponent<BoxCollider>();
 				collider.size = new Vector3(
-					rigid.shape_w * 2f,
-					rigid.shape_h * 2f, 
-					rigid.shape_d * 2f);
+					rigid.shape_w * 2f * scale_,
+					rigid.shape_h * 2f * scale_, 
+					rigid.shape_d * 2f * scale_);
 				return collider;
 			}
 
@@ -601,8 +603,8 @@ namespace MMD
 			Collider EntryCapsuleCollider(PMDFormat.Rigidbody rigid, GameObject obj)
 			{
 				CapsuleCollider collider = obj.AddComponent<CapsuleCollider>();
-				collider.radius = rigid.shape_w;
-				collider.height = rigid.shape_h + rigid.shape_w * 2;
+				collider.radius = rigid.shape_w * scale_;
+				collider.height = (rigid.shape_h + rigid.shape_w * 2) * scale_;
 				return collider;
 			}
 
@@ -651,7 +653,7 @@ namespace MMD
 					int rigidRefIndex = list.rigidbody[i].rigidbody_rel_bone_index;
 
 					// ローカル座標の確定
-					Vector3 localPos = list.rigidbody[i].pos_pos;// - rigid[i].transform.position;
+					Vector3 localPos = list.rigidbody[i].pos_pos * scale_;// - rigid[i].transform.position;
 
 					// ここで位置の決定
 					if (rigidRefIndex >= ushort.MaxValue)
@@ -663,7 +665,7 @@ namespace MMD
 						rigid[i].transform.localPosition = localPos;
 						
 						// 関連ボーンなしの剛体はセンターボーンに接続している
-						rigid[i].transform.position = localPos + format_.bone_list.bone[0].bone_head_pos;
+						rigid[i].transform.position = localPos + format_.bone_list.bone[0].bone_head_pos * scale_;
 						// 回転の値を決める
 						Vector3 rot = list.rigidbody[i].pos_rot * Mathf.Rad2Deg;
 						rigid[i].transform.rotation = Quaternion.Euler(rot);
@@ -853,19 +855,19 @@ namespace MMD
 				if (joint.spring_pos.x != 0f)
 				{
 					drive = new JointDrive();
-					drive.positionSpring = joint.spring_pos.x;
+					drive.positionSpring = joint.spring_pos.x * scale_;
 					conf.xDrive = drive;
 				}
 				if (joint.spring_pos.y != 0f)
 				{
 					drive = new JointDrive();
-					drive.positionSpring = joint.spring_pos.y;
+					drive.positionSpring = joint.spring_pos.y * scale_;
 					conf.yDrive = drive;
 				}
 				if (joint.spring_pos.z != 0f)
 				{
 					drive = new JointDrive();
-					drive.positionSpring = joint.spring_pos.z;
+					drive.positionSpring = joint.spring_pos.z * scale_;
 					conf.zDrive = drive;
 				}
 
@@ -1008,6 +1010,7 @@ namespace MMD
 			bool		use_rigidbody_;
 			bool		use_mecanim_;
 			bool		use_ik_;
+			float		scale_;
 		}
 	}
 	
@@ -1037,6 +1040,15 @@ namespace MMD
 			// クリップをアニメーションに登録する
 			private AnimationClip CreateAnimationClip_(MMD.VMD.VMDFormat format, GameObject assign_pmd, int interpolationQuality)
 			{
+				//スケール設定
+				scale_ = 1.0f;
+				if (assign_pmd) {
+					MMDEngine engine = assign_pmd.GetComponent<MMDEngine>();
+					if (engine) {
+						scale_ = engine.scale;
+					}
+				}
+
 				//Animation anim = assign_pmd.GetComponent<Animation>();
 				
 				// クリップの作成
@@ -1365,9 +1377,9 @@ namespace MMD
 						
 						float tick = mlist[i].flame_no * tick_time;
 						
-						FloatKeyframe lx_cur_key=new FloatKeyframe(tick,mlist[i].location.x + default_position.x);
-						FloatKeyframe ly_cur_key=new FloatKeyframe(tick,mlist[i].location.y + default_position.y);
-						FloatKeyframe lz_cur_key=new FloatKeyframe(tick,mlist[i].location.z + default_position.z);
+						FloatKeyframe lx_cur_key=new FloatKeyframe(tick,mlist[i].location.x * scale_ + default_position.x);
+						FloatKeyframe ly_cur_key=new FloatKeyframe(tick,mlist[i].location.y * scale_ + default_position.y);
+						FloatKeyframe lz_cur_key=new FloatKeyframe(tick,mlist[i].location.z * scale_ + default_position.z);
 						
 						// 各軸別々に補間が付いてる
 						FloatKeyframe.AddBezierKeyframes(mlist[i].interpolation,0,lx_prev_key,lx_cur_key,interpolationQuality,ref lx_keys,ref ix);
@@ -1514,6 +1526,8 @@ namespace MMD
 					GetGameObjects(obj, transf.gameObject);
 				}
 			}
+
+			private float scale_ = 1.0f;
 		}
 	}
 }

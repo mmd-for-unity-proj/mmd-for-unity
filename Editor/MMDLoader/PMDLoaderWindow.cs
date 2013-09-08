@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 using MMD.PMD;
@@ -10,6 +10,7 @@ public class PMDLoaderWindow : EditorWindow {
 	PMDConverter.ShaderType shader_type = PMDConverter.ShaderType.MMDShader;
 
 	bool use_ik = true;
+	float scale = 0.085f;
 	bool is_pmx_base_import = false;
 
 	[MenuItem("Plugins/MMD Loader/PMD Loader")]
@@ -30,42 +31,54 @@ public class PMDLoaderWindow : EditorWindow {
     }
 	
 	void OnGUI() {
-		const int height = 20;
-		int width = (int)position.width;// -16;
-		
-		pmdFile = EditorGUI.ObjectField(
-			new Rect(0, 0, width, height), "PMD File" , pmdFile, typeof(Object), false);
+		pmdFile = EditorGUILayout.ObjectField("PMD File" , pmdFile, typeof(Object));
 		
 		// シェーダの種類
-		shader_type = (PMDConverter.ShaderType)EditorGUI.EnumPopup(new Rect(0, height, width, height), "Shader Type", shader_type);
+		shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
 
 		// 剛体を入れるかどうか
-		rigidFlag = EditorGUI.Toggle(new Rect(0, height * 2, width / 2, height), "Rigidbody", rigidFlag);
+		rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
 		// Mecanimを使うかどうか
-		use_mecanim = false; // EditorGUI.Toggle(new Rect(0, height * 3, width / 2, height), "Use Mecanim", use_mecanim);
+		bool old_gui_enabled = GUI.enabled;
+		GUI.enabled = false;
+		use_mecanim = EditorGUILayout.Toggle("Use Mecanim", false);
+		GUI.enabled = old_gui_enabled;
 
 		// IKを使うかどうか
-		use_ik = EditorGUI.Toggle(new Rect(0, height * 4, width / 2, height), "Use IK", use_ik);
+		use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
+
+		// スケール
+		scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
+		EditorGUILayout.BeginHorizontal();
+		{
+			EditorGUILayout.PrefixLabel(" ");
+			if (GUILayout.Button("0.085", EditorStyles.miniButtonLeft)) {
+				scale = 0.085f;
+			}
+			if (GUILayout.Button("1.0", EditorStyles.miniButtonRight)) {
+				scale = 1.0f;
+			}
+		}
+		EditorGUILayout.EndHorizontal();
 
 		// PMX Baseでインポートするかどうか
-		is_pmx_base_import = EditorGUI.Toggle(new Rect(0, height * 5, width / 2, height), "Use PMX Base Import", is_pmx_base_import);
+		is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
 		
-		int buttonHeight = height * 6;
 		if (pmdFile != null) {
-			if (GUI.Button(new Rect(0, buttonHeight, width / 2, height), "Convert")) {
+			if (GUILayout.Button("Convert")) {
 				LoadModel();
 				pmdFile = null;		// 読み終わったので空にする 
 			}
 		} else {
-			EditorGUI.LabelField(new Rect(0, buttonHeight, width, height), "Missing", "Select PMD File");
+			EditorGUILayout.LabelField("Missing", "Select PMD File");
 		}
 	}
 
 	void LoadModel() {
 		string file_path = AssetDatabase.GetAssetPath(pmdFile);
 		MMD.ModelAgent model_agent = new MMD.ModelAgent(file_path);
-		model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, is_pmx_base_import);
+		model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, scale, is_pmx_base_import);
 		
 		// 読み込み完了メッセージ
 		var window = LoadedWindow.Init();
