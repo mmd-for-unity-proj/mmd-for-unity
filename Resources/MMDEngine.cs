@@ -86,19 +86,20 @@ public class MMDEngine : MonoBehaviour {
 
 	void LateUpdate() 
 	{
+		//IK反映
+		foreach (CCDIKSolver ik_script in this.ik_list) {
+			ik_script.Solve();
+		}
+
 		if (0 < bone_controllers.Length) {
 			//ボーンコントローラーが有れば(PMXなら)
+			//ボーン計算
 			foreach (BoneController bone_controller in bone_controllers) {
 				bone_controller.Process();
 			}
 			//差分基点座標更新
 			foreach (BoneController bone_controller in bone_controllers) {
 				bone_controller.UpdatePrevTransform();
-			}
-		} else {
-			//ボーンコントローラーが無ければ(PMDなら)
-			foreach (CCDIKSolver ik_script in this.ik_list) {
-				ik_script.Solve();
 			}
 		}
 	}
