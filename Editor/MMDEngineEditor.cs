@@ -2,6 +2,7 @@
 using UnityEditor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// MMDEngine用Inspector拡張
@@ -143,8 +144,21 @@ public sealed class MMDEngineEditor : Editor
 		//シェーダーリスト内部
 		if (shader_display_) {
 			//シェーダーリストを表示するなら
-			SkinnedMeshRenderer renderer = self.GetComponent<SkinnedMeshRenderer>();
-			Material[] materials = 	renderer.sharedMaterials;
+			SkinnedMeshRenderer[] renderers = self.GetComponentsInChildren<SkinnedMeshRenderer>();
+			Material[] materials = renderers.SelectMany(x=>x.sharedMaterials).ToArray();
+			if (1 < renderers.Length) {
+				//rendererが複数有る(≒PMX)なら
+				//PMXでは名前の先頭にはマテリアルインデックスが有るのでそれを参考にソート
+				//PMDではrendererが1つしか無く、かつソート済みの為不要
+				System.Array.Sort(materials, (x,y)=>{ 
+												string x_name = x.name.Substring(0, x.name.IndexOf('_'));
+												string y_name = y.name.Substring(0, y.name.IndexOf('_'));
+												int x_int, y_int;
+												Int32.TryParse(x_name, out x_int);
+												Int32.TryParse(y_name, out y_int);
+												return x_int - y_int;
+											});
+			}
 			GUIStyle style = new GUIStyle();
 			style.margin.left = 10;
 			EditorGUILayout.BeginVertical(style);
