@@ -297,8 +297,14 @@ public class MorphManager : MonoBehaviour
 			
 			if (is_update) {
 				//全材質計算
+				bool has_all_target = false;
 				if (-1 == material_morph.meshes[0].indices.LastOrDefault()) {
 					//最後に-1(≒uint.MaxValue)が有れば
+					//全材質モーフが有る
+					has_all_target = true;
+				}
+				if (has_all_target) {
+					//全材質モーフが有れば
 					//全材質に反映
 					MaterialMorph.MaterialMorphParameter composite_mul_all = composite_mul.Last();
 					MaterialMorph.MaterialMorphParameter composite_add_all = composite_add.Last();
@@ -310,7 +316,7 @@ public class MorphManager : MonoBehaviour
 				
 				// ここで計算結果を入れていく
 				for (int r = 0, r_max = renderers.Length; r < r_max; ++r) {
-					for (int m = 0, m_max = material_morph.source.Length - 1; m < m_max; ++m) {
+					for (int m = 0, m_max = material_morph.source.Length - ((has_all_target)? 1: 0); m < m_max; ++m) {
 						int index = material_morph.meshes[r].indices[m];
 						if (index < renderer_shared_materials_[r].Length) {
 							ApplyMaterialMorph(renderer_shared_materials_[r][index]
