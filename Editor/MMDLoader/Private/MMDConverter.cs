@@ -614,7 +614,7 @@ namespace MMD
 				material.staticFriction = rigid.rigidbody_friction;
 				material.dynamicFriction = rigid.rigidbody_friction;
 
-				AssetDatabase.CreateAsset(material, format_.folder + "/Physics/" + material.name + ".asset");
+				AssetDatabase.CreateAsset(material, format_.folder + "/Physics/" + GetFilePathString(material.name) + ".asset");
 				return material;
 			}
 
@@ -982,7 +982,26 @@ namespace MMD
 				}
 				return result;
 			}
-		
+			
+			/// <summary>
+			/// ファイルパス文字列の取得
+			/// </summary>
+			/// <returns>ファイルパスに使用可能な文字列</returns>
+			/// <param name='src'>ファイルパスに使用したい文字列</param>
+			private static string GetFilePathString(string src) {
+				return src.Replace('\\', '＼')
+							.Replace('/',  '／')
+							.Replace(':',  '：')
+							.Replace('*',  '＊')
+							.Replace('?',  '？')
+							.Replace('"',  '”')
+							.Replace('<',  '＜')
+							.Replace('>',  '＞')
+							.Replace('|',  '｜')
+							.Replace("\n",  string.Empty)
+							.Replace("\r",  string.Empty);
+			}
+
 			GameObject	root_game_object_;
 			PMDFormat	format_;
 			ShaderType	shader_type_;
