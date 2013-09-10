@@ -325,7 +325,8 @@ namespace MMD
 				AssetDatabase.CreateFolder(format_.meta_header.folder, "Meshes");
 			}
 			
-			string file_name = path + index.ToString() + "_" + format_.meta_header.name + ".asset";
+			string name = GetFilePathString(format_.meta_header.name);
+			string file_name = path + index.ToString() + "_" + name + ".asset";
 			AssetDatabase.CreateAsset(mesh, file_name);
 		}
 		
@@ -569,7 +570,7 @@ namespace MMD
 			
 			for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
 				uint material_index = creation_info.value[i].material_index;
-				string name = format_.material_list.material[material_index].name;
+				string name = GetFilePathString(format_.material_list.material[material_index].name);
 				string file_name = path + material_index.ToString() + "_" + name + ".asset";
 				AssetDatabase.CreateAsset(materials[i], file_name);
 			}
@@ -1283,8 +1284,10 @@ namespace MMD
 			material.bounciness = rigidbody.recoil;
 			material.staticFriction = rigidbody.friction;
 			material.dynamicFriction = rigidbody.friction;
-
-			AssetDatabase.CreateAsset(material, format_.meta_header.folder + "/Physics/" + index.ToString() + "_" + rigidbody.name + ".asset");
+			
+			string name = GetFilePathString(rigidbody.name);
+			string file_name = format_.meta_header.folder + "/Physics/" + index.ToString() + "_" + name + ".asset";
+			AssetDatabase.CreateAsset(material, file_name);
 			return material;
 		}
 
@@ -1632,7 +1635,25 @@ namespace MMD
 		{
 			return format_.rigidbody_list.rigidbody.Select(x=>(int)x.ignore_collision_group).ToArray();
 		}
-	
+		
+		/// <summary>
+		/// ファイルパス文字列の取得
+		/// </summary>
+		/// <returns>ファイルパスに使用可能な文字列</returns>
+		/// <param name='src'>ファイルパスに使用したい文字列</param>
+		private static string GetFilePathString(string src) {
+			return src.Replace('\\', '＼')
+						.Replace('/',  '／')
+						.Replace(':',  '：')
+						.Replace('*',  '＊')
+						.Replace('?',  '？')
+						.Replace('"',  '”')
+						.Replace('<',  '＜')
+						.Replace('>',  '＞')
+						.Replace('|',  '｜')
+						.Replace("\n",  string.Empty)
+						.Replace("\r",  string.Empty);
+		}
 
 		const uint	c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
 
