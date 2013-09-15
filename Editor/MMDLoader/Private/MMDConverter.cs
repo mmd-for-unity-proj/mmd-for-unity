@@ -132,8 +132,8 @@ namespace MMD
 				{
 					weights[i].boneIndex0 = (int)format_.vertex_list.vertex[i].bone_num[0];
 					weights[i].boneIndex1 = (int)format_.vertex_list.vertex[i].bone_num[1];
-					weights[i].weight0 = format_.vertex_list.vertex[i].bone_weight;
-					weights[i].weight1 = 100 - format_.vertex_list.vertex[i].bone_weight;
+					weights[i].weight0 = (float)format_.vertex_list.vertex[i].bone_weight / 100.0f;
+					weights[i].weight1 = 1.0f - weights[i].weight0;
 				}
 				return weights;
 			}
