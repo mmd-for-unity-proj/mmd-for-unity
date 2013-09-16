@@ -11,14 +11,14 @@ namespace MMD
 		/// <summary>
 		/// GameObjectを作成する
 		/// </summary>
-		/// <param name='name'>内部形式データ</param>
-		/// <param name='shader_type'>シェーダーの種類</param>
+		/// <param name='format'>内部形式データ</param>
 		/// <param name='use_rigidbody'>剛体を使用するか</param>
 		/// <param name='use_mecanim'>Mecanimを使用するか</param>
 		/// <param name='use_ik'>IKを使用するか</param>
-		public static GameObject CreateGameObject(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik) {
+		/// <param name='scale'>スケール</param>
+		public static GameObject CreateGameObject(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
 			PMXConverter converter = new PMXConverter();
-			return converter.CreateGameObject_(format, use_rigidbody, use_mecanim, use_ik);
+			return converter.CreateGameObject_(format, use_rigidbody, use_mecanim, use_ik, scale);
 		}
 
 		/// <summary>
@@ -32,16 +32,17 @@ namespace MMD
 		/// <summary>
 		/// GameObjectを作成する
 		/// </summary>
-		/// <param name='name'>内部形式データ</param>
-		/// <param name='shader_type'>シェーダーの種類</param>
+		/// <param name='format'>内部形式データ</param>
 		/// <param name='use_rigidbody'>剛体を使用するか</param>
 		/// <param name='use_mecanim'>Mecanimを使用するか</param>
 		/// <param name='use_ik'>IKを使用するか</param>
-		private GameObject CreateGameObject_(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik) {
+		/// <param name='scale'>スケール</param>
+		private GameObject CreateGameObject_(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
 			format_ = format;
 			use_rigidbody_ = use_rigidbody;
 			use_mecanim_ = use_mecanim;
 			use_ik_ = use_ik;
+			scale_ = scale;
 			root_game_object_ = new GameObject(format_.meta_header.name);
 			MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
 			root_game_object_.AddComponent<Animation>();	// アニメーションを追加
@@ -74,7 +75,7 @@ namespace MMD
 				List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
 				int[] groupTarget = GetRigidbodyGroupTargets(rigids);
 
-				MMDEngine.Initialize(engine, groupTarget, ignoreGroups, rigids);
+				MMDEngine.Initialize(engine, scale_, groupTarget, ignoreGroups, rigids);
 			}
 	
 			// Mecanim設定 (not work yet..)
@@ -243,7 +244,7 @@ namespace MMD
 		/// <param name='creation_info'>メッシュ作成情報</param>
 		void EntryAttributesForMesh(Mesh mesh, MeshCreationInfo creation_info)
 		{
-			mesh.vertices = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].pos).ToArray();
+			mesh.vertices = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].pos * scale_).ToArray();
 			mesh.normals = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].normal_vec).ToArray();
 			mesh.uv = creation_info.all_vertices.Select(x=>format_.vertex_list.vertex[x].uv).ToArray();
 			if (0 < format_.header.additionalUV) {
@@ -594,10 +595,10 @@ namespace MMD
 		GameObject[] EntryAttributeForBones()
 		{
 			return format_.bone_list.bone.Select(x=>{
-				GameObject game_object = new GameObject(x.bone_name);
-				game_object.transform.position = x.bone_position;
-				return game_object;
-			}).ToArray();
+													GameObject game_object = new GameObject(x.bone_name);
+													game_object.transform.position = x.bone_position * scale_;
+													return game_object;
+												}).ToArray();
 		}
 		
 		/// <summary>
@@ -745,6 +746,7 @@ namespace MMD
 																		//親が居たらローカル座標化
 																		result.position -= format_.bone_list.bone[y.parent_bone_index].bone_position;
 																	}
+																	result.position *= scale_;
 																	result.rotation = Quaternion.identity;
 																	return result;
 																})
@@ -783,7 +785,7 @@ namespace MMD
 			result.values = data.morph_offset.Select(x=>{
 														PMXFormat.BoneMorphOffset y = (PMXFormat.BoneMorphOffset)x;
 														BoneMorph.BoneMorphParameter param = new BoneMorph.BoneMorphParameter();
-														param.position = y.move_value;
+														param.position = y.move_value * scale_;
 														param.rotation = y.rotate_value;
 														return param;
 													})
@@ -806,7 +808,7 @@ namespace MMD
 																		.ToList(); //ソートに向けて一旦リスト化
 			original_indices.Sort(); //ソート
 			int[] indices = original_indices.Select(x=>(int)x).ToArray();
-			Vector3[] source = indices.Select(x=>format_.vertex_list.vertex[x].pos) //インデックスを用いて、元データをパック
+			Vector3[] source = indices.Select(x=>format_.vertex_list.vertex[x].pos * scale_) //インデックスを用いて、元データをパック
 									.ToArray();
 			
 			//インデックス逆引き用辞書の作成
@@ -856,7 +858,7 @@ namespace MMD
 			result.indices = data.morph_offset.Select(x=>((PMXFormat.VertexMorphOffset)x).vertex_index) //インデックスを取り出し
 												.Select(x=>(int)index_reverse_dictionary[x]) //逆変換を掛ける
 												.ToArray();
-			result.values = data.morph_offset.Select(x=>((PMXFormat.VertexMorphOffset)x).position_offset).ToArray();
+			result.values = data.morph_offset.Select(x=>((PMXFormat.VertexMorphOffset)x).position_offset * scale_).ToArray();
 			return result;
 		}
 
@@ -1214,7 +1216,7 @@ namespace MMD
 			//result.AddComponent<Rigidbody>();	// 1つのゲームオブジェクトに複数の剛体が付く事が有るので本体にはrigidbodyを適用しない
 			
 			//位置・回転の設定
-			result.transform.position = rigidbody.collider_position;
+			result.transform.position = rigidbody.collider_position * scale_;
 			result.transform.rotation = Quaternion.Euler(rigidbody.collider_rotation * Mathf.Rad2Deg);
 			
 			// Colliderの設定
@@ -1242,7 +1244,7 @@ namespace MMD
 		void EntrySphereCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
 		{
 			SphereCollider collider = obj.AddComponent<SphereCollider>();
-			collider.radius = rigidbody.shape_size.x;
+			collider.radius = rigidbody.shape_size.x * scale_;
 		}
 
 		/// <summary>
@@ -1253,10 +1255,7 @@ namespace MMD
 		void EntryBoxCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
 		{
 			BoxCollider collider = obj.AddComponent<BoxCollider>();
-			collider.size = new Vector3(
-				rigidbody.shape_size.x * 2.0f,
-				rigidbody.shape_size.y * 2.0f, 
-				rigidbody.shape_size.z * 2.0f);
+			collider.size = rigidbody.shape_size * 2.0f * scale_;
 		}
 
 		/// <summary>
@@ -1267,8 +1266,8 @@ namespace MMD
 		void EntryCapsuleCollider(PMXFormat.Rigidbody rigidbody, GameObject obj)
 		{
 			CapsuleCollider collider = obj.AddComponent<CapsuleCollider>();
-			collider.radius = rigidbody.shape_size.x;
-			collider.height = rigidbody.shape_size.y + rigidbody.shape_size.x * 2.0f;
+			collider.radius = rigidbody.shape_size.x * scale_;
+			collider.height = (rigidbody.shape_size.y + rigidbody.shape_size.x * 2.0f) * scale_;
 		}
 
 		/// <summary>
@@ -1552,17 +1551,17 @@ namespace MMD
 			// Position
 			if (joint.spring_position.x != 0.0f) {
 				drive = new JointDrive();
-				drive.positionSpring = joint.spring_position.x;
+				drive.positionSpring = joint.spring_position.x * scale_;
 				conf.xDrive = drive;
 			}
 			if (joint.spring_position.y != 0.0f) {
 				drive = new JointDrive();
-				drive.positionSpring = joint.spring_position.y;
+				drive.positionSpring = joint.spring_position.y * scale_;
 				conf.yDrive = drive;
 			}
 			if (joint.spring_position.z != 0.0f) {
 				drive = new JointDrive();
-				drive.positionSpring = joint.spring_position.z;
+				drive.positionSpring = joint.spring_position.z * scale_;
 				conf.zDrive = drive;
 			}
 
@@ -1662,5 +1661,6 @@ namespace MMD
 		bool		use_rigidbody_;
 		bool		use_mecanim_;
 		bool		use_ik_;
+		float		scale_;
 	}
 }

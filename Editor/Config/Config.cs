@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
@@ -116,6 +116,7 @@ namespace MMD
         public bool use_mecanim = false;
         public bool rigidFlag = true;
         public bool use_ik = true;
+        public float scale = 0.085f;
         public bool is_pmx_base_import = false;
 
         public DefaultPMDImportConfig()

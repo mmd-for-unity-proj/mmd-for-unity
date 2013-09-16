@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using MMD.PMD;
@@ -15,6 +15,7 @@ namespace MMD
         public bool rigidFlag;
         public bool use_mecanim;
         public bool use_ik;
+        public float scale;
         public bool is_pmx_base_import;
 
         // last selected item
@@ -32,6 +33,7 @@ namespace MMD
             rigidFlag = config.pmd_config.rigidFlag;
             use_mecanim = config.pmd_config.use_mecanim;
             use_ik = config.pmd_config.use_ik;
+            scale = config.pmd_config.scale;
             is_pmx_base_import = config.pmd_config.is_pmx_base_import;
 			
             // モデル情報
@@ -63,13 +65,29 @@ namespace MMD
             rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
             // Mecanimを使うかどうか
-            use_mecanim = EditorGUILayout.Toggle("Use Mecanim (not work)", use_mecanim);
+            GUI.enabled = false;
+            use_mecanim = EditorGUILayout.Toggle("Use Mecanim", false);
+            GUI.enabled = !EditorApplication.isPlaying;
 
             // IKを使うかどうか
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
 
+            // スケール
+            scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.PrefixLabel(" ");
+                if (GUILayout.Button("0.085", EditorStyles.miniButtonLeft)) {
+                    scale = 0.085f;
+                }
+                if (GUILayout.Button("1.0", EditorStyles.miniButtonRight)) {
+                    scale = 1.0f;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
             // PMX Baseでインポートするかどうか
-            is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Exporter", is_pmx_base_import);
+            is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
 
             // Convertボタン
             EditorGUILayout.Space();
@@ -85,7 +103,7 @@ namespace MMD
 						var obj = (PMDScriptableObject)target;
                         model_agent = new ModelAgent(obj.assetPath);
                     }
-                    model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, is_pmx_base_import);
+                    model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, scale, is_pmx_base_import);
                     message = "Loading done.";
                 }
             }
