@@ -35,8 +35,9 @@ namespace MMD {
 		/// <param name='use_rigidbody'>剛体を使用するか</param>
 		/// <param name='use_mecanim'>Mecanimを使用するか</param>
 		/// <param name='use_ik'>IKを使用するか</param>
+		/// <param name='scale'>スケール</param>
 		/// <param name='is_pmx_base_import'>PMX Baseでインポートするか</param>
-		public void CreatePrefab(PMD.PMDConverter.ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, bool is_pmx_base_import) {
+		public void CreatePrefab(PMD.PMDConverter.ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale, bool is_pmx_base_import) {
 			GameObject game_object;
 			Object prefab;
 			if (is_pmx_base_import) {
@@ -44,7 +45,7 @@ namespace MMD {
 				//PMXファイルのインポート
 				PMX.PMXFormat format = PMXLoaderScript.Import(file_path_);
 				//ゲームオブジェクトの作成
-				game_object = PMXConverter.CreateGameObject(format, use_rigidbody, use_mecanim, use_ik);
+				game_object = PMXConverter.CreateGameObject(format, use_rigidbody, use_mecanim, use_ik, scale);
 	
 				// プレファブに登録
 				prefab = PrefabUtility.CreateEmptyPrefab(format.meta_header.folder + "/" + format.meta_header.name + ".prefab");
@@ -65,7 +66,7 @@ namespace MMD {
 				}
 	
 				//ゲームオブジェクトの作成
-				game_object = PMDConverter.CreateGameObject(format_, shader_type, use_rigidbody, use_mecanim, use_ik);
+				game_object = PMDConverter.CreateGameObject(format_, shader_type, use_rigidbody, use_mecanim, use_ik, scale);
 	
 				// プレファブに登録
 				prefab = PrefabUtility.CreateEmptyPrefab(format_.folder + "/" + format_.name + ".prefab");

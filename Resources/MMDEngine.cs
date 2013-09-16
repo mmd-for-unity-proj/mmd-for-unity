@@ -5,6 +5,7 @@ using System.Linq;
 
 public class MMDEngine : MonoBehaviour {
 
+	public float scale = 1.0f;		//読み込みスケール
 	public float outline_width = 0.1f;
 	public bool useRigidbody = false;
 	public int[] groupTarget;		// 非衝突剛体リスト
@@ -104,10 +105,11 @@ public class MMDEngine : MonoBehaviour {
 		}
 	}
 
-	public static void Initialize(MMDEngine engine, int[] groupTarget, List<int>[] ignoreGroups, GameObject[] rigidArray)
+	public static void Initialize(MMDEngine engine, float scale, int[] groupTarget, List<int>[] ignoreGroups, GameObject[] rigidArray)
 	{
 		if (!engine.useRigidbody)
 		{
+			engine.scale = scale;
 			engine.groupTarget = groupTarget;
 			engine.rigids = rigidArray;
 			engine.useRigidbody = true;
