@@ -566,9 +566,35 @@ namespace MMD
 		/// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
 		bool IsTransparentMaterial(PMXFormat.Material material, Texture2D texture) {
 			bool result = false;
-			result = result || (material.diffuse_color.a < 1.0f);
+			result = result || (material.diffuse_color.a < 1.0f); //アルファ値が透過かの確認
 			if (null != texture) {
-				result = result || texture.alphaIsTransparency;
+				result = result || texture.alphaIsTransparency; //alphaIsTransparencyフラグが透過かの確認
+				if (!result) {
+					//テクスチャフォーマットから透過かの確認
+					switch (texture.format) {
+					case TextureFormat.RGB24:			break;	//各色が8 ビットのテクスチャフォーマット
+					case TextureFormat.RGB565:			break;	//赤（5ビット）、緑（6ビット）、青（5ビット）のテクスチャフォーマット
+					case TextureFormat.DXT1:			break;	//圧縮されたテクスチャフォーマット
+					case TextureFormat.PVRTC_RGB2:		break;	//1ピクセル2ビットの圧縮されたテクスチャフォーマット（iOS 専用）
+					case TextureFormat.PVRTC_RGB4:		break;	//1ピクセル4ビットの圧縮されたテクスチャフォーマット（iOS 専用）
+					case TextureFormat.ETC_RGB4:		break;	//1ピクセル4ビットの圧縮されたテクスチャフォーマット（OpenGL ES 2.0 専用）
+					case TextureFormat.ATC_RGB4:		break;	//1ピクセル4ビットの圧縮されたテクスチャフォーマット（ATITC専用）
+					case TextureFormat.ATC_RGBA8:		break;	//1ピクセル8ビットの圧縮されたテクスチャフォーマット（ATITC専用）
+					case TextureFormat.BGRA32:			break;	//iPhoneのカメラによって返されるフォーマット
+					case TextureFormat.ATF_RGB_DXT1:	break;	//FlashでDXT1圧縮されたテクスチャフォーマット
+					case TextureFormat.ATF_RGBA_JPG:	break;	//FlashでJPG圧縮されたテクスチャフォーマット
+					case TextureFormat.ATF_RGB_JPG:		break;	//FlashでJPG圧縮されたテクスチャフォーマット
+#if UNITY_WII
+					case TextureFormat.WiiCMPR:			break;	//1テクセル4ビットの圧縮されたテクスチャフォーマット。アルファは現在サポート されていない
+					case TextureFormat.WiiI4:			break;	//Wii 専用のテクスチャフォーマット
+					case TextureFormat.WiiI8:			break;	//Wii 専用のテクスチャフォーマット。明度が8ビット
+					case TextureFormat.WiiRGB565:		break;	//Wii 専用の赤（5 ビット）、緑（6 ビット）、青（5 ビット）のテクスチャフォーマット
+#endif //UNITY_WII
+					default:			//それ以外なら
+						result = true;	//透過
+						break;
+					}
+				}
 			}
 			return result;
 		}
