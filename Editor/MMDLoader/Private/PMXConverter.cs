@@ -444,16 +444,52 @@ namespace MMD
 		/// <returns>マテリアル</returns>
 		Material[] EntryAttributesForMaterials()
 		{
-			return format_.material_list.material.Select(x=>ConvertMaterial(x))
-												.ToArray();
+			//材質モーフが透過を要望するか
+			bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph();
+
+			return Enumerable.Range(0, format_.material_list.material.Length)
+							.Select(x=>ConvertMaterial(format_.material_list.material[x], is_transparent_by_material_morph[x]))
+							.ToArray();
 		}
 		
+		/// <summary>
+		/// 材質モーフに依る透過要望
+		/// </summary>
+		/// <returns>透過要望リスト</returns>
+		bool[] IsTransparentByMaterialMorph()
+		{
+			bool[] result = Enumerable.Repeat(false, format_.material_list.material.Length)
+										.ToArray();
+			var transparent_material_indices = format_.morph_list.morph_data.Where(x=>PMXFormat.MorphData.MorphType.Material==x.morph_type) //材質モーフなら
+																			.SelectMany(x=>x.morph_offset) //材質モーフオフセット取得
+																			.Select(x=>(PMXFormat.MaterialMorphOffset)x) //材質モーフオフセットにキャスト
+																			.Where(x=>(PMXFormat.MaterialMorphOffset.OffsetMethod.Mul==x.offset_method)&&(x.diffuse.a < 1.0f)) //拡散色が透過に為るなら
+																			.Select(x=>x.material_index) //マテリアルインデックス取得
+																			.Distinct(); //重複除去
+			foreach (uint material_index in transparent_material_indices) {
+				//材質モーフに依って透過が要望されているなら
+				//透過扱いにする
+				if (material_index < (uint)format_.material_list.material.Length) {
+					//単体モーフのマテリアルインデックスなら
+					//対象マテリアルだけ透過扱い
+					result[material_index] = true;
+				} else {
+					//全対象モーフのマテリアルインデックスなら
+					//全て透過扱い
+					result = Enumerable.Repeat(true, result.Length).ToArray();
+					break;
+				}
+			}
+			return result;
+		}
+			
 		/// <summary>
 		/// マテリアルをUnity用に変換する
 		/// </summary>
 		/// <returns>Unity用マテリアル</returns>
 		/// <param name='material'>PMX用マテリアル</param>
-		Material ConvertMaterial(PMXFormat.Material material)
+		/// <param name='is_force_transparent'>強制透過</param>
+		Material ConvertMaterial(PMXFormat.Material material, bool is_force_transparent)
 		{
 			//先にテクスチャ情報を検索
 			Texture2D main_texture = null;
@@ -464,7 +500,7 @@ namespace MMD
 			}
 			
 			//マテリアルに設定
-			Material result = new Material(Shader.Find(GetMmdShaderPath(material, main_texture)));
+			Material result = new Material(Shader.Find(GetMmdShaderPath(material, main_texture, is_force_transparent)));
 		
 			// シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
 			result.SetColor("_Color", material.diffuse_color);
@@ -535,9 +571,10 @@ namespace MMD
 		/// <returns>MMDシェーダーパス</returns>
 		/// <param name='material'>シェーダーを設定するマテリアル</param>
 		/// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
-		string GetMmdShaderPath(PMXFormat.Material material, Texture2D texture) {
+		/// <param name='is_force_transparent'>強制透過</param>
+		string GetMmdShaderPath(PMXFormat.Material material, Texture2D texture, bool is_force_transparent) {
 			string result = "MMD/";
-			if (IsTransparentMaterial(material, texture)) {
+			if (IsTransparentMaterial(material, texture, is_force_transparent)) {
 				result += "Transparent/";
 			}
 			result += "PMDMaterial";
@@ -564,8 +601,9 @@ namespace MMD
 		/// <returns>true:透過, false:不透明</returns>
 		/// <param name='material'>シェーダーを設定するマテリアル</param>
 		/// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
-		bool IsTransparentMaterial(PMXFormat.Material material, Texture2D texture) {
-			bool result = false;
+		/// <param name='is_force_transparent'>強制透過</param>
+		bool IsTransparentMaterial(PMXFormat.Material material, Texture2D texture, bool is_force_transparent) {
+			bool result = is_force_transparent; //強制透過かの確認
 			result = result || (material.diffuse_color.a < 1.0f); //アルファ値が透過かの確認
 			if (null != texture) {
 				result = result || texture.alphaIsTransparency; //alphaIsTransparencyフラグが透過かの確認
