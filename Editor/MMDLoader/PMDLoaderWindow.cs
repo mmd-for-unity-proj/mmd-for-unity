@@ -24,7 +24,6 @@ public class PMDLoaderWindow : EditorWindow {
         // デフォルトコンフィグ
 		var config = MMD.Config.LoadAndCreate();
 		shader_type = config.pmd_config.shader_type;
-		Debug.Log("test");
 		rigidFlag = config.pmd_config.rigidFlag;
 		use_mecanim = config.pmd_config.use_mecanim;
 		use_ik = config.pmd_config.use_ik;
