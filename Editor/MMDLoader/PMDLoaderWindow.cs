@@ -54,7 +54,7 @@ public class PMDLoaderWindow : EditorWindow {
 		EditorGUILayout.BeginHorizontal();
 		{
 			EditorGUILayout.PrefixLabel(" ");
-			if (GUILayout.Button("0.085", EditorStyles.miniButtonLeft)) {
+			if (GUILayout.Button("Original", EditorStyles.miniButtonLeft)) {
 				scale = 0.085f;
 			}
 			if (GUILayout.Button("1.0", EditorStyles.miniButtonRight)) {
