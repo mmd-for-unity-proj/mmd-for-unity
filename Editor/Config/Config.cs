@@ -68,15 +68,16 @@ namespace MMD
         public static Config LoadAndCreate()
         {
             var path = Config.GetConfigPath();
-            var config = AssetDatabase.LoadAssetAtPath(path, typeof(Config)) as Config;
+            var config = (Config)AssetDatabase.LoadAssetAtPath(path, typeof(Config));
 
             //// なかったら作成する
-            if (config == null && !System.IO.File.Exists(path))
+            if (config == null)
             {
                 config = CreateInstance<Config>();
                 AssetDatabase.CreateAsset(config, path);
                 EditorUtility.SetDirty(config);
             }
+			Debug.Log(config);
             return config;
         }
     }
