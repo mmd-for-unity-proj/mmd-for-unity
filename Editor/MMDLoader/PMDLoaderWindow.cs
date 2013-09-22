@@ -22,12 +22,13 @@ public class PMDLoaderWindow : EditorWindow {
     public PMDLoaderWindow()
     {
         // デフォルトコンフィグ
-        var config = MMD.Config.LoadAndCreate();
-        shader_type = config.pmd_config.shader_type;
-        rigidFlag = config.pmd_config.rigidFlag;
-        use_mecanim = config.pmd_config.use_mecanim;
-        use_ik = config.pmd_config.use_ik; 
-        is_pmx_base_import = config.pmd_config.is_pmx_base_import;
+		var config = MMD.Config.LoadAndCreate();
+		shader_type = config.pmd_config.shader_type;
+		Debug.Log("test");
+		rigidFlag = config.pmd_config.rigidFlag;
+		use_mecanim = config.pmd_config.use_mecanim;
+		use_ik = config.pmd_config.use_ik;
+		is_pmx_base_import = config.pmd_config.is_pmx_base_import;
     }
 	
 	void OnGUI() {
