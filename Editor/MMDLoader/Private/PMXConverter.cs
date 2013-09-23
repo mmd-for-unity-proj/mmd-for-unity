@@ -45,6 +45,7 @@ namespace MMD
 			scale_ = scale;
 			root_game_object_ = new GameObject(format_.meta_header.name);
 			MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
+			engine.scale = scale_;
 			root_game_object_.AddComponent<Animation>();	// アニメーションを追加
 		
 			MeshCreationInfo[] creation_info = CreateMeshCreationInfo();				// メッシュを作成する為の情報を作成
@@ -75,7 +76,7 @@ namespace MMD
 				List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
 				int[] groupTarget = GetRigidbodyGroupTargets(rigids);
 
-				MMDEngine.Initialize(engine, scale_, groupTarget, ignoreGroups, rigids);
+				MMDEngine.Initialize(engine, groupTarget, ignoreGroups, rigids);
 			}
 	
 			// Mecanim設定 (not work yet..)

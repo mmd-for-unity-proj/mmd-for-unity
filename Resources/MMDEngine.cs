@@ -105,11 +105,10 @@ public class MMDEngine : MonoBehaviour {
 		}
 	}
 
-	public static void Initialize(MMDEngine engine, float scale, int[] groupTarget, List<int>[] ignoreGroups, GameObject[] rigidArray)
+	public static void Initialize(MMDEngine engine, int[] groupTarget, List<int>[] ignoreGroups, GameObject[] rigidArray)
 	{
 		if (!engine.useRigidbody)
 		{
-			engine.scale = scale;
 			engine.groupTarget = groupTarget;
 			engine.rigids = rigidArray;
 			engine.useRigidbody = true;

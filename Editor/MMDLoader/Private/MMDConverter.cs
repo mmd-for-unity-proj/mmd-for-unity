@@ -63,6 +63,7 @@ namespace MMD
 				root_game_object_.AddComponent<Animation>();	// アニメーションを追加
 		
 				MMDEngine engine = root_game_object_.AddComponent<MMDEngine>();
+				engine.scale = scale_;
 		
 				// IKの登録
 				if (use_ik_)
@@ -83,7 +84,7 @@ namespace MMD
 						List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
 						int[] groupTarget = GetRigidbodyGroupTargets(rigids);
 		
-						MMDEngine.Initialize(engine, scale_, groupTarget, ignoreGroups, rigids);
+						MMDEngine.Initialize(engine, groupTarget, ignoreGroups, rigids);
 					}
 					catch { }
 				}
