@@ -31,7 +31,7 @@ public class PMDLoaderWindow : EditorWindow {
     }
 	
 	void OnGUI() {
-		pmdFile = EditorGUILayout.ObjectField("PMD File" , pmdFile, typeof(Object));
+		pmdFile = EditorGUILayout.ObjectField("PMD File" , pmdFile, typeof(Object), false);
 		
 		// シェーダの種類
 		shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
