@@ -1455,7 +1455,7 @@ namespace MMD
 			// ボーンの子供を再帰的に走査
 			void FullSearchBonePath(Transform transform, Dictionary<string, string> dic)
 			{
-				int count = transform.GetChildCount();
+				int count = transform.childCount;
 				for (int i = 0; i < count; i++)
 				{
 					Transform t = transform.GetChild(i);
