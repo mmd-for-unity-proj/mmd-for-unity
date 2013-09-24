@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -194,6 +195,203 @@ namespace MMD
 				if (null != texture) {
 #if UNITY_4_2
 					result = result || texture.alphaIsTransparency;
+=======
+﻿using UnityEngine;
+using UnityEditor;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System;
+using System.IO;
+using System.Linq;
+
+namespace MMD
+{
+	namespace PMD
+	{
+		public class PMDConverter
+		{
+			/// <summary>
+			/// シェーダの種類
+			/// </summary>
+			public enum ShaderType
+			{
+				Default,		/// Unityのデフォルトシェーダ
+				HalfLambert,	/// もやっとしたLambertっぽくなる
+				MMDShader		/// MMDっぽいシェーダ
+			}
+			
+			/// <summary>
+			/// GameObjectを作成する
+			/// </summary>
+			/// <param name='format'>内部形式データ</param>
+			/// <param name='shader_type'>シェーダーの種類</param>
+			/// <param name='use_rigidbody'>剛体を使用するか</param>
+			/// <param name='use_mecanim'>Mecanimを使用するか</param>
+			/// <param name='use_ik'>IKを使用するか</param>
+			/// <param name='scale'>スケール</param>
+			public static GameObject CreateGameObject(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
+				PMDConverter converter = new PMDConverter();
+				return converter.CreateGameObject_(format, shader_type, use_rigidbody, use_mecanim, use_ik, scale);
+			}
+
+			/// <summary>
+			/// デフォルトコンストラクタ
+			/// </summary>
+			/// <remarks>
+			/// ユーザーに依るインスタンス作成を禁止する
+			/// </remarks>
+			private PMDConverter() {}
+
+			private GameObject CreateGameObject_(PMDFormat format, ShaderType shader_type, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
+				format_ = format;
+				shader_type_ = shader_type;
+				use_rigidbody_ = use_rigidbody;
+				use_mecanim_ = use_mecanim;
+				use_ik_ = use_ik;
+				scale_ = scale;
+				root_game_object_ = new GameObject(format_.name);
+			
+				Mesh mesh = CreateMesh();					// メッシュの生成・設定
+				Material[] materials = CreateMaterials();	// マテリアルの生成・設定
+				GameObject[] bones = CreateBones();			// ボーンの生成・設定
+		
+				// バインドポーズの作成
+				BuildingBindpose(mesh, materials, bones);
+				root_game_object_.AddComponent<Animation>();	// アニメーションを追加
+		
+				MMDEngine engine = root_game_object_.AddComponent<MMDEngine>();
+		
+				// IKの登録
+				if (use_ik_)
+					engine.ik_list = EntryIKSolver(bones);
+		
+				// 剛体関連
+				if (use_rigidbody_)
+				{
+					try
+					{
+						var rigids = CreateRigids(bones);
+						AssignRigidbodyToBone(bones, rigids);
+						SetRigidsSettings(bones, rigids);
+						GameObject[] joints = SettingJointComponent(bones, rigids);
+						GlobalizeRigidbody(joints);
+		
+						// 非衝突グループ
+						List<int>[] ignoreGroups = SettingIgnoreRigidGroups(rigids);
+						int[] groupTarget = GetRigidbodyGroupTargets(rigids);
+		
+						MMDEngine.Initialize(engine, scale_, groupTarget, ignoreGroups, rigids);
+					}
+					catch { }
+				}
+		
+				// Mecanim設定 (not work yet..)
+#if UNITY_4_0 || UNITY_4_1
+				if (use_mecanim_) {
+					AvatarSettingScript avt_setting = new AvatarSettingScript(root_game_object_);
+					avt_setting.SettingAvatar();
+				}
+#endif
+
+				return root_game_object_;
+			}
+
+			Vector3[] EntryVertices()
+			{
+				int vcount = (int)format_.vertex_list.vert_count;
+				Vector3[] vpos = new Vector3[vcount];
+				for (int i = 0; i < vcount; i++)
+					vpos[i] = format_.vertex_list.vertex[i].pos * scale_;
+				return vpos;
+			}
+			
+			Vector3[] EntryNormals()
+			{
+				int vcount = (int)format_.vertex_list.vert_count;
+				Vector3[] normals = new Vector3[vcount];
+				for (int i = 0; i < vcount; i++)
+					normals[i] = format_.vertex_list.vertex[i].normal_vec;
+				return normals;
+			}
+			
+			Vector2[] EntryUVs()
+			{
+				int vcount = (int)format_.vertex_list.vert_count;
+				Vector2[] uvs = new Vector2[vcount];
+				for (int i = 0; i < vcount; i++)
+					uvs[i] = format_.vertex_list.vertex[i].uv;
+				return uvs;
+			}
+			
+			BoneWeight[] EntryBoneWeights()
+			{
+				int vcount = (int)format_.vertex_list.vert_count;
+				BoneWeight[] weights = new BoneWeight[vcount];
+				for (int i = 0; i < vcount; i++)
+				{
+					weights[i].boneIndex0 = (int)format_.vertex_list.vertex[i].bone_num[0];
+					weights[i].boneIndex1 = (int)format_.vertex_list.vertex[i].bone_num[1];
+					weights[i].weight0 = (float)format_.vertex_list.vertex[i].bone_weight / 100.0f;
+					weights[i].weight1 = 1.0f - weights[i].weight0;
+				}
+				return weights;
+			}
+			
+			// 頂点座標やUVなどの登録だけ
+			void EntryAttributesForMesh(Mesh mesh)
+			{
+				//mesh.vertexCount = (int)format_.vertex_list.vert_count;
+				mesh.vertices = EntryVertices();
+				mesh.normals = EntryNormals();
+				mesh.uv = EntryUVs();
+				mesh.boneWeights = EntryBoneWeights();
+			}
+			
+			void SetSubMesh(Mesh mesh)
+			{
+				// マテリアル対サブメッシュ
+				// サブメッシュとはマテリアルに適用したい面頂点データのこと
+				// 面ごとに設定するマテリアルはここ
+				mesh.subMeshCount = (int)format_.material_list.material_count;
+				
+				int sum = 0;
+				for (int i = 0; i < mesh.subMeshCount; i++)
+				{
+					int count = (int)format_.material_list.material[i].face_vert_count;
+					int[] indices = new int[count];
+					
+					// 面頂点は材質0から順番に加算されている
+					for (int j = 0; j < count; j++)
+						indices[j] = format_.face_vertex_list.face_vert_index[j+sum];
+					mesh.SetTriangles(indices, i);
+					sum += (int)format_.material_list.material[i].face_vert_count;
+				}
+			}
+			
+			// メッシュをProjectに登録
+			void CreateAssetForMesh(Mesh mesh)
+			{
+				AssetDatabase.CreateAsset(mesh, format_.folder + "/" + format_.name + ".asset");
+			}
+			
+			Mesh CreateMesh()
+			{
+				Mesh mesh = new Mesh();
+				EntryAttributesForMesh(mesh);
+				SetSubMesh(mesh);
+				CreateAssetForMesh(mesh);
+				return mesh;
+			}
+			
+			//透過マテリアル確認(true:透過, false:不透明)
+			bool IsTransparentMaterial(PMD.PMDFormat.Material model_material, Texture2D texture) {
+				bool result = false;
+				result = result || (model_material.alpha < 0.98f); //0.98f以上は不透明と見做す(0.98fに影生成情報を埋め込んでいる為)
+				if (null != texture) {
+#if UNITY_4_2
+					result = result || texture.alphaIsTransparency;
+>>>>>>> 73d7255cabc2cafb49d2531f2408954c169a5e7c
 #else
 					// TODO: 上記のif内の代替コードが必要です
 					//result = result;
@@ -1456,7 +1654,7 @@ namespace MMD
 			// ボーンの子供を再帰的に走査
 			void FullSearchBonePath(Transform transform, Dictionary<string, string> dic)
 			{
-				int count = transform.GetChildCount();
+				int count = transform.childCount;
 				for (int i = 0; i < count; i++)
 				{
 					Transform t = transform.GetChild(i);

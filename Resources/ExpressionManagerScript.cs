@@ -62,7 +62,7 @@ public class ExpressionManagerScript : MonoBehaviour
 	MMDSkinsScript[] GetSkinScripts()
 	{
 		// 表情のスクリプトを拾ってくる
-		var scripts = new MMDSkinsScript[transform.GetChildCount()];
+		var scripts = new MMDSkinsScript[transform.childCount];
 		for (int i = 0; i < scripts.Length; i++)
 			scripts[i] = transform.GetChild(i).GetComponent<MMDSkinsScript>();
 

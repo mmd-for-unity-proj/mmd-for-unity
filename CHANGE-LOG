@@ -1,5 +1,10 @@
 -----ここからGitHUBでの開発-----
+【2.0b】
+GitHUBで開発された分をリリース．
 
+【2.0.14b】
+Configがうまくロードされない場合があるので対処
+マイナー以降のナンバリングはGitHUBのPullRequestに準拠
 
 -----ここまでSorceForge.jpのSVNで開発-----
 

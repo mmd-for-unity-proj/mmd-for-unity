@@ -22,12 +22,12 @@ public class PMDLoaderWindow : EditorWindow {
     public PMDLoaderWindow()
     {
         // デフォルトコンフィグ
-        var config = MMD.Config.LoadAndCreate();
-        shader_type = config.pmd_config.shader_type;
-        rigidFlag = config.pmd_config.rigidFlag;
-        use_mecanim = config.pmd_config.use_mecanim;
-        use_ik = config.pmd_config.use_ik; 
-        is_pmx_base_import = config.pmd_config.is_pmx_base_import;
+		var config = MMD.Config.LoadAndCreate();
+		shader_type = config.pmd_config.shader_type;
+		rigidFlag = config.pmd_config.rigidFlag;
+		use_mecanim = config.pmd_config.use_mecanim;
+		use_ik = config.pmd_config.use_ik;
+		is_pmx_base_import = config.pmd_config.is_pmx_base_import;
     }
 	
 	void OnGUI() {
@@ -53,7 +53,7 @@ public class PMDLoaderWindow : EditorWindow {
 		EditorGUILayout.BeginHorizontal();
 		{
 			EditorGUILayout.PrefixLabel(" ");
-			if (GUILayout.Button("0.085", EditorStyles.miniButtonLeft)) {
+			if (GUILayout.Button("Original", EditorStyles.miniButtonLeft)) {
 				scale = 0.085f;
 			}
 			if (GUILayout.Button("1.0", EditorStyles.miniButtonRight)) {
