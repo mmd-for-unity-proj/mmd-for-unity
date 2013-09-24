@@ -6,7 +6,7 @@ using MMD.PMD;
 public class PMDLoaderWindow : EditorWindow {
 	Object pmdFile = null;
 	bool rigidFlag = true;
-	bool use_mecanim = true;
+	bool use_mecanim = false;
 	PMDConverter.ShaderType shader_type = PMDConverter.ShaderType.MMDShader;
 
 	bool use_ik = true;
@@ -40,10 +40,14 @@ public class PMDLoaderWindow : EditorWindow {
 		rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
 		// Mecanimを使うかどうか
+#if UNITY_4_2
+		use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);
+#else //UNITY_4_2
 		bool old_gui_enabled = GUI.enabled;
 		GUI.enabled = false;
 		use_mecanim = EditorGUILayout.Toggle("Use Mecanim", false);
 		GUI.enabled = old_gui_enabled;
+#endif //UNITY_4_2
 
 		// IKを使うかどうか
 		use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
