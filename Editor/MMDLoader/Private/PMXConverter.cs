@@ -46,7 +46,6 @@ namespace MMD
 			root_game_object_ = new GameObject(format_.meta_header.name);
 			MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
 			engine.scale = scale_;
-			root_game_object_.AddComponent<Animation>();	// アニメーションを追加
 		
 			MeshCreationInfo[] creation_info = CreateMeshCreationInfo();				// メッシュを作成する為の情報を作成
 			Mesh[] mesh = CreateMesh(creation_info);									// メッシュの生成・設定
@@ -79,13 +78,23 @@ namespace MMD
 				MMDEngine.Initialize(engine, groupTarget, ignoreGroups, rigids);
 			}
 	
-			// Mecanim設定 (not work yet..)
-#if UNITY_4_0 || UNITY_4_1
+			// Mecanim設定
+#if UNITY_4_2
 			if (use_mecanim_) {
-				AvatarSettingScript avt_setting = new AvatarSettingScript(root_game_object_);
-				avt_setting.SettingAvatar();
+				//アニメーター追加
+				AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
+				avatar_setting.SettingAvatar();
+				
+				string path = format_.meta_header.folder + "/";
+				string name = GetFilePathString(format_.meta_header.name);
+				string file_name = path + name + ".avatar.asset";
+				avatar_setting.CreateAsset(file_name);
+			} else {
+				root_game_object_.AddComponent<Animation>();	// アニメーション追加
 			}
-#endif
+#else //UNITY_4_2
+			root_game_object_.AddComponent<Animation>();	// アニメーション追加
+#endif //UNITY_4_2
 
 			return root_game_object_;
 		}
