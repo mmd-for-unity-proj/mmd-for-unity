@@ -60,7 +60,6 @@ namespace MMD
 		
 				// バインドポーズの作成
 				BuildingBindpose(mesh, materials, bones);
-				root_game_object_.AddComponent<Animation>();	// アニメーションを追加
 		
 				MMDEngine engine = root_game_object_.AddComponent<MMDEngine>();
 				engine.scale = scale_;
@@ -89,13 +88,22 @@ namespace MMD
 					catch { }
 				}
 		
-				// Mecanim設定 (not work yet..)
-#if UNITY_4_0 || UNITY_4_1
+				// Mecanim設定
+#if UNITY_4_2
 				if (use_mecanim_) {
-					AvatarSettingScript avt_setting = new AvatarSettingScript(root_game_object_);
-					avt_setting.SettingAvatar();
+					AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
+					avatar_setting.SettingAvatar();
+					
+					string path = format_.folder + "/";
+					string name = GetFilePathString(format_.name);
+					string file_name = path + name + ".avatar.asset";
+					avatar_setting.CreateAsset(file_name);
+				} else {
+					root_game_object_.AddComponent<Animation>();	// アニメーション追加
 				}
-#endif
+#else //UNITY_4_2
+				root_game_object_.AddComponent<Animation>();	// アニメーション追加
+#endif //UNITY_4_2
 
 				return root_game_object_;
 			}
