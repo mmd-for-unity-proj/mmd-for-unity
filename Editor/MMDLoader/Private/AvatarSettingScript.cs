@@ -86,19 +86,26 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
-	/// 親子関係を見てボーンを水平にする
+	/// 対象のボーンの中からより深く枝分かれする子ボーンを選び出す
 	/// </summary>
 	/// <param name="transform">対象のボーン</param>
-	/// <returns>Z軸のみを回転させるQuaternion</returns>
-	Quaternion ResetHorizontalPose(Transform transform)
+	/// <returns>さらに枝分かれする子ボーン</returns>
+	Transform SelectBranchedChildWhereManyChildren(Transform transform)
 	{
-		// 最も子オブジェクトの多いもの != 剛体ボーン
 		var children = new List<Transform>(transform.childCount);
 		for (int i = 0; i < transform.childCount; i++)
 			children.Add(transform.GetChild(i));
 		int child_index = children.Max(x => x.childCount);
-		var child_transform = transform.GetChild(child_index);
+		return transform.GetChild(child_index);
+	}
 
+	/// <summary>
+	/// 親子関係を見てボーンを水平にする
+	/// </summary>
+	/// <param name="transform">対象のボーン</param>
+	/// <returns>Z軸のみを回転させるQuaternion</returns>
+	Quaternion ResetHorizontalPose(Transform transform, Transform child_transform)
+	{
 		// ボーンの向きを取得
 		var bone_vector = child_transform.position - transform.position;
 		bone_vector.z = 0f;			// 平面化
