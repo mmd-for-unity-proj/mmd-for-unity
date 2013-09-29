@@ -86,6 +86,35 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
+	/// 親子関係を見てボーンを水平にする
+	/// </summary>
+	/// <param name="transform">対象のボーン</param>
+	/// <returns>Z軸のみを回転させるQuaternion</returns>
+	Quaternion ResetHorizontalPose(Transform transform)
+	{
+		// 最も子オブジェクトの多いもの != 剛体ボーン
+		var children = new List<Transform>(transform.childCount);
+		for (int i = 0; i < transform.childCount; i++)
+			children.Add(transform.GetChild(i));
+		int child_index = children.Max(x => x.childCount);
+		var child_transform = transform.GetChild(child_index);
+
+		// ボーンの向きを取得
+		var bone_vector = child_transform.position - transform.position;
+		bone_vector.z = 0f;			// 平面化
+		bone_vector.Normalize();
+
+		// 平面化した正規化ベクトルと単位ベクトルを比較して，角度を取得する
+		Vector3 normalized_vector = bone_vector.x >= 0 ? Vector3.right : Vector3.left;
+		float cos_value = Vector3.Dot(bone_vector, normalized_vector);
+		float theta = Mathf.Acos(cos_value) * Mathf.Rad2Deg;
+
+		theta = bone_vector.x >= 0 ? theta : -theta;	// ボーンの向きによって回転方向が違う
+
+		return Quaternion.Euler(0f, 0f, theta);
+	}
+
+	/// <summary>
 	/// 生成済みのボーンをUnity推奨ポーズに設定
 	/// </summary>
 	/// <param name='transform'>ボーンのトランスフォーム</param>
