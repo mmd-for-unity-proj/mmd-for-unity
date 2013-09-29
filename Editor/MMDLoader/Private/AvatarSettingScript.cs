@@ -98,7 +98,7 @@ public class AvatarSettingScript
 		for (int i = 0; i < transform.childCount; i++)
 			children[i] = transform.GetChild(i);
 		int max = children.Max(x => x.childCount);
-		return children.Where(x => x.childCount == max).ToArray()[0];
+		return children.Where(x => x.childCount == max).First();
 	}
 
 	/// <summary>
@@ -118,7 +118,7 @@ public class AvatarSettingScript
 		float cos_value = Vector3.Dot(bone_vector, normalized_vector);
 		float theta = Mathf.Acos(cos_value) * Mathf.Rad2Deg;
 
-		theta = bone_vector.x >= 0 ? theta : -theta;	// ボーンの向きによって回転方向が違う
+		theta = bone_vector.x >= 0 ? -theta : theta;	// ボーンの向きによって回転方向が違う
 
 		return Quaternion.Euler(0f, 0f, theta);
 	}
