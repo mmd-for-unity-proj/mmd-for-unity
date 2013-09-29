@@ -98,6 +98,10 @@ public class AvatarSettingScript
 		case "右肩":	//Tポーズにする為に腕を持ち上げる
 			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -9.0f);
 			break;
+		case "左ひじ":	//稀に肘が曲がっていることがあるので矯正
+			break;
+		case "右ひじ":	//上に同様に肘を矯正
+			break;
 		case "左腕":	//Tポーズにする為に腕を持ち上げる
 			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 27.0f);
 			break;
