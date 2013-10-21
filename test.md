@@ -3,8 +3,8 @@ layout: default
 title: Index
 ---
  
-MikuMikuDance for Unity
-===================
+# MikuMikuDance for Unity
+Welcome to the project site.
 
 ### MikuMikuDance for Unityとは？
 
