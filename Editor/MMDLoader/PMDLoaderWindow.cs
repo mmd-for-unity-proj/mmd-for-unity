@@ -13,7 +13,7 @@ public class PMDLoaderWindow : EditorWindow {
 	float scale = 0.085f;
 	bool is_pmx_base_import = false;
 
-	[MenuItem("Plugins/MMD Loader/PMD Loader")]
+	[MenuItem("MMD for Unity/PMD Loader")]
 	static void Init() {        
         var window = (PMDLoaderWindow)EditorWindow.GetWindow<PMDLoaderWindow>(true, "PMDLoader");
 		window.Show();
