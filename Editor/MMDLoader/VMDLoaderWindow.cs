@@ -8,7 +8,7 @@ public class VMDLoaderWindow : EditorWindow {
 	bool createAnimationFile;
 	int interpolationQuality;
 
-	[MenuItem ("Plugins/MMD Loader/VMD Loader")]
+	[MenuItem ("MMD for Unity/VMD Loader")]
 	static void Init() {
 		var window = (VMDLoaderWindow)EditorWindow.GetWindow<VMDLoaderWindow>(true, "VMDLoader");
 		window.Show();
