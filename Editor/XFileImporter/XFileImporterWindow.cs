@@ -5,7 +5,7 @@ using System.Collections;
 public class XFileImporterWindow : EditorWindow {
 	Object xFile = null;
 	
-	[MenuItem ("Plugins/XFile Importer")]
+	[MenuItem ("MMD for Unity/XFile Importer")]
 	static void Init() {
 		var window = (XFileImporterWindow)EditorWindow.GetWindow<XFileImporterWindow>(true, "XFile Importer");
 		window.Show();
