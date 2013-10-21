@@ -1,5 +1,8 @@
 ---
-title: Hello, world!
+layout: default
+title: プロジェクト・タイトル
 ---
-
-###MikuMikuDance for Unityとは？
+ 
+プロジェクト・タイトル
+===================
+ここにプロジェクトの紹介を書きます。
