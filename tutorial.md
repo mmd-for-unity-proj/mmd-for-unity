@@ -55,7 +55,12 @@ MikuMikuDanceのキャラクターでゲームを作るのに，
 選択したボーンだけを保存することのできる機能もあります．
 
 ## MMD for Unityのインストール
-MMD for UnityのフォルダをUnityのProjectに置くだけです．
+MMD for Unityでは，パッケージではなく圧縮ファイルで提供しています．
+ページ上部のZIPボタンから圧縮ファイルをダウンロードすることができます．
+ダウンロードした圧縮ファイルを解凍すると，mmd-for-unityというフォルダが現れます．
+このフォルダがMMD for Unityとなります．
+
+MMD for UnityのフォルダをUnityのProjectに置くだけでインストールが完了します．
 
 ## MMD for Unityの使い方
 MMD for Unityでは，PMD/PMXファイルの読み込みと，VMDファイルの読み込みができます．
@@ -99,3 +104,18 @@ VMD LoaderはメニューバーのMMD for Unity（旧バージョンではPlugin
 
 ![メニューバーから呼び出したVMD Loader](images/vmd-loader.png)
 
+PMD Prefabには，PMD Loaderで生成されたPrefabをドラッグ＆ドロップします．
+また，VMD Fileには，VMDファイルをドラッグ＆ドロップしてください．
+VMD Loaderでは，PMD Prefabにモーションデータを流し込み，アニメーションクリップを生成します．
+この2つの項目を埋めることでConvertボタンが出現します．
+クリックすると変換が始まります．
+
+それぞれの項目の意味について説明します．
+
+Create Assetをチェックすると，アニメーションクリップをPrefabの中だけでなく，アセットファイルとして出力します．
+Interpolation Qualityは，線形補間の品質です．
+UnityとMikuMikuDanceでは線形補間の方法が異なります．
+そのため，擬似的にMikuMikuDanceの線形補間を再現するため，
+アニメーションの中にキーフレームをいくつか打つ方式を取っています．
+Interpolation Qualityを高くするほど多くのキーフレームを打ちますが，
+それだけデータ量が多くなるので注意してください．
