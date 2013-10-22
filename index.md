@@ -4,7 +4,6 @@ title: Index
 ---
 
 What is MikuMikuDance for Unity?
-　
 ===========
 
 MikuMikuDance for Unityとは，MikuMikuDanceのモデルデータやモーションデータをUnityに取り込むためのツールです．
