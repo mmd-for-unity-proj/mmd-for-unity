@@ -6,7 +6,7 @@ title: Tutorial
 MMD for Unityの使い方
 ========================
 
-### MikuMikuDanceの基礎
+## MikuMikuDanceの基礎
 MikuMikuDanceとは，樋口優氏が開発した3DCGアニメーションソフトの1種です．
 3DCGの初音ミクが踊っている動画を作成するために作られたフリーソフトです．
 
@@ -14,7 +14,7 @@ MikuMikuDanceではニコニコ動画やYoutubeを中心に，多くの動画が
 また，有志によって多くのモデルデータやモーションデータが公開されているため，
 初音ミクの他に色々なキャラクターが踊る動画を作ることができます．
 
-#### データの基本
+### データの基本
 MikuMikuDanceでは，3種類のデータを扱うことができます．
 シーンデータを扱うための **PMMファイル** ，
 モデルデータを扱うための **PMD/PMXファイル** ，
@@ -34,7 +34,7 @@ PMMファイルはMikuMikuDanceで編集している場面全体を保存する�
 VMDファイルはキャラクター1体だけのモーションを保存するためのデータとなっていることです．
 このことから，場面全体を保存したい場合はPMM，モーションを公開したい場合はVMDになっています．
 
-#### モーションを保存する
+### モーションを保存する
 MikuMikuDanceのキャラクターでゲームを作るのに，
 ダウンロードしたモーションだけでは足りないこともあります．
 その時はMikuMikuDanceでモーションを自作し，
@@ -54,19 +54,20 @@ MikuMikuDanceのキャラクターでゲームを作るのに，
 他にも，プルダウンメニューから「選択ボーン」を選ぶことで，
 選択したボーンだけを保存することのできる機能もあります．
 
-### MMD for Unityのインストール
+## MMD for Unityのインストール
 MMD for UnityのフォルダをUnityのProjectに置くだけです．
 
-### MMD for Unityの使い方
+## MMD for Unityの使い方
 MMD for Unityでは，PMD/PMXファイルの読み込みと，VMDファイルの読み込みができます．
 それぞれの操作方法について説明します．
 
-#### PMD Loader
+### PMD Loader
 PMD Loaderとは，PMDファイルを読み込むための機能です．
+MikuMikuDanceのモデルデータをUnityにインポートします．
 PMD LoaderはメニューバーのMMD for Unity（旧バージョンではPlugins），
-もしくはPMDファイルをクリックすることで利用することができます．
+もしくはPMDファイルをクリックし，Inspectorを操作することで利用できます．
 
-![メニューバーから呼び出したPMD Loader](/images/pmd-loader.png)
+![メニューバーから呼び出したPMD Loader](images/pmd-loader.png)
 
 まず，PMD Loaderを起動する前にモデルデータをProjectに追加する必要があります．
 モデルデータが入っているフォルダごと，Projectへドラッグ＆ドロップしてください．
@@ -74,7 +75,8 @@ PMD LoaderはメニューバーのMMD for Unity（旧バージョンではPlugin
 
 PMD Fileには，MikuMikuDanceのPMDファイルをドラッグ＆ドロップしてください．
 PMDファイルをドラッグ＆ドロップすると，Convertボタンが現れるのでクリックすると読み込みが始まります．
-読み込みに成功すると，読み込んだキャラクターがHierarchyに追加されるので目安にしてください．
+読み込みが完了するとProjectにPrefabが追加されます．
+また，読み込んだキャラクターがHierarchyに追加されるので，成功の目安にしてください．
 
 それぞれの項目の意味について説明します．
 
@@ -88,4 +90,12 @@ MikuMikuDanceからUnityへ大きさを揃える必要があります．
 Originalボタンを押すと，1メートルを基準とした大きさに揃えられます．
 1.0ボタンを押すと，MikuMikuDanceを基準とした大きさに揃えられます．
 Use PMX Base Importは，PMXファイルを読み込みたいときにチェックします．
+
+### VMD Loader
+VMD Loaderとは，VMDファイルを読み込むための機能です．
+MikuMikuDanceのモーションデータをUnityにインポートします．
+VMD LoaderはメニューバーのMMD for Unity（旧バージョンではPlugins），
+もしくはVMDファイルをクリックし，Inspectorを操作することで利用できます．
+
+![メニューバーから呼び出したVMD Loader](images/vmd-loader.png)
 
