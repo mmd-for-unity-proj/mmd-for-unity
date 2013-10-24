@@ -86,27 +86,67 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
+	/// 対象のボーンの中からより深く枝分かれする子ボーンを選び出す
+	/// 剛体用ボーンじゃないきちんとしたボーンを選び出すために使う
+	/// </summary>
+	/// <param name="transform">対象のボーン</param>
+	/// <returns>さらに枝分かれする子ボーン</returns>
+	Transform SelectBranchedChildWhereManyChildren(Transform transform)
+	{
+		Transform[] children = new Transform[transform.childCount];
+		if (children.Length <= 0) Debug.LogError(transform.name + "の子がないので落ちるのです！");
+		for (int i = 0; i < transform.childCount; i++)
+			children[i] = transform.GetChild(i);
+		int max = children.Max(x => x.childCount);
+		return children.Where(x => x.childCount == max).First();
+	}
+
+	/// <summary>
+	/// 親子関係を見てボーンを水平にする
+	/// </summary>
+	/// <param name="transform">対象のボーン</param>
+	/// <returns>Z軸のみを回転させるQuaternion</returns>
+	Quaternion ResetHorizontalPose(Transform transform, Transform child_transform)
+	{
+		// ボーンの向きを取得
+		var bone_vector = child_transform.position - transform.position;
+		bone_vector.z = 0f;			// 平面化
+		bone_vector.Normalize();
+
+		// 平面化した正規化ベクトルと単位ベクトルを比較して，角度を取得する
+		Vector3 normalized_vector = bone_vector.x >= 0 ? Vector3.right : Vector3.left;
+		float cos_value = Vector3.Dot(bone_vector, normalized_vector);
+		float theta = Mathf.Acos(cos_value) * Mathf.Rad2Deg;
+
+		theta = bone_vector.x >= 0 ? -theta : theta;	// ボーンの向きによって回転方向が違う
+
+		return Quaternion.Euler(0f, 0f, theta);
+	}
+
+	/// <summary>
+	/// 腕全体を平行にする処理
+	/// </summary>
+	/// <param name="shoulder">肩ボーン</param>
+	void StartResettingHorizontal(Transform shoulder)
+	{
+		var arm   = SelectBranchedChildWhereManyChildren(shoulder);
+		var hinge = SelectBranchedChildWhereManyChildren(arm);
+		var wrist = SelectBranchedChildWhereManyChildren(hinge);
+		shoulder.transform.localRotation = ResetHorizontalPose(shoulder, arm);
+		arm.transform.localRotation		 = ResetHorizontalPose(arm,		 hinge);
+		hinge.transform.localRotation	 = ResetHorizontalPose(hinge,	 wrist);
+	}
+
+	/// <summary>
 	/// 生成済みのボーンをUnity推奨ポーズに設定
 	/// </summary>
 	/// <param name='transform'>ボーンのトランスフォーム</param>
 	void SetRequirePose(Transform transform)
 	{
 		switch (transform.name) {
-		case "左肩":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 9.0f);
-			break;
+		case "左肩": goto case "右肩";
 		case "右肩":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -9.0f);
-			break;
-		case "左ひじ":	//稀に肘が曲がっていることがあるので矯正
-			break;
-		case "右ひじ":	//上に同様に肘を矯正
-			break;
-		case "左腕":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 27.0f);
-			break;
-		case "右腕":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -27.0f);
+			StartResettingHorizontal(transform);
 			break;
 		case "腰": goto case "センター";
 		case "センター":

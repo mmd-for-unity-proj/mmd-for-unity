@@ -77,7 +77,6 @@ namespace MMD
                 AssetDatabase.CreateAsset(config, path);
                 EditorUtility.SetDirty(config);
             }
-			Debug.Log(config);
             return config;
         }
     }
@@ -131,7 +130,7 @@ namespace MMD
                 {
                     shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
                     rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
-                    use_mecanim = false;
+					use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);	// ここfalseになってたけど理由があるのかわからない
                     use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
                     is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
                 }
