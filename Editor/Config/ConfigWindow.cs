@@ -8,7 +8,7 @@ namespace MMD
         private static Config config;
         private static string path;
 
-        [MenuItem("Plugins/MMD Loader/Config")]
+        [MenuItem("MMD for Unity/Config")]
         public static void Init()
         {
             GetWindow<ConfigWindow>("MFU Config");
