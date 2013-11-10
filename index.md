@@ -29,4 +29,4 @@ MikuMikuDance for Unityの大きな特徴は，
 
 
 # もくじ
-* [説明書](tutorial.html)
+* [説明書](howto.html)
