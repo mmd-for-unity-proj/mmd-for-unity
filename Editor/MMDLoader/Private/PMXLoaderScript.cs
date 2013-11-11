@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
+using System.IO;
 using MMD.PMX;
 using MMD.PMD;
 	
@@ -26,24 +26,6 @@ public partial class PMXLoaderScript {
 	public static PMXFormat Import(string file_path) {
 		PMXLoaderScript loader = new PMXLoaderScript();
 		return loader.Import_(file_path);
-	}
-
-	/// <summary>
-	/// PMXファイルのヘッダー取得
-	/// </summary>
-	/// <param name='file_path'>PMDファイルのパス</param>
-	/// <returns>ヘッダー</returns>
-	public static PMDFormat.Header GetPmdHeader(string file_path) {
-		return PMX2PMD(GetHeader(file_path));
-	}
-
-	/// <summary>
-	/// PMXファイルのインポート
-	/// </summary>
-	/// <param name='file_path'>PMDファイルのパス</param>
-	/// <returns>内部形式データ</returns>
-	public static PMDFormat PmdImport(string file_path) {
-		return PMX2PMD(Import(file_path));
 	}
 
 	/// <summary>
