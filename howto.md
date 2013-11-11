@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Tutorial
+title: Howto
 ---
 
 MMD for Unityの使い方
@@ -109,7 +109,9 @@ UnityとMikuMikuDanceでは，大きさの単位が異なるため，
 MikuMikuDanceからUnityへ大きさを揃える必要があります．
 Originalボタンを押すと，1メートルを基準とした大きさに揃えられます．
 1.0ボタンを押すと，MikuMikuDanceを基準とした大きさに揃えられます．
+
 Use PMX Base Importは，PMXファイルを読み込みたいときにチェックします．
+PMXファイルではないファイルを読み込もうとするとエラーが出るためご注意下さい．
 
 ### VMD Loader
 VMD Loaderとは，VMDファイルを読み込むための機能です．
@@ -135,3 +137,5 @@ UnityとMikuMikuDanceでは線形補間の方法が異なります．
 アニメーションの中にキーフレームをいくつか打つ方式を取っています．
 Interpolation Qualityを高くするほど多くのキーフレームを打ちますが，
 それだけデータ量が多くなるので注意してください．
+
+[トップに戻る](index.html)
