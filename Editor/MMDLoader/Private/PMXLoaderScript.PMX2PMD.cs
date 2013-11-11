@@ -10,7 +10,7 @@ public partial class PMXLoaderScript {
 	/// <summary>
 	/// PMDファイルのヘッダー取得
 	/// </summary>
-	/// <param name='file_path'>PMDファイルのパス</param>
+	/// <param name='pmx_header'>PMXヘッダー</param>
 	/// <returns>ヘッダー</returns>
 	public static PMDFormat.Header PMX2PMD(PMXFormat.Header pmx_header) {
 		PMDFormat.Header pmd_header = ConvertHeader(pmx_header);
@@ -20,7 +20,7 @@ public partial class PMXLoaderScript {
 	/// <summary>
 	/// PMDファイルの取得
 	/// </summary>
-	/// <param name='file_path'>PMDファイルのパス</param>
+	/// <param name='pmx'>PMXファイル</param>
 	/// <returns>内部形式データ</returns>
 	public static PMDFormat PMX2PMD(PMXFormat pmx) {
 		PMDFormat result = new PMDFormat();
@@ -408,7 +408,12 @@ public partial class PMXLoaderScript {
 		result.shape_w = pmx_rigidbody.shape_size.x;
 		result.shape_h = pmx_rigidbody.shape_size.y;
 		result.shape_d = pmx_rigidbody.shape_size.z;
-		result.pos_pos = pmx_rigidbody.collider_position - pmx.bone_list.bone[pmx_rigidbody.rel_bone_index].bone_position;
+		result.pos_pos = pmx_rigidbody.collider_position;
+		if (pmx_rigidbody.rel_bone_index < pmx.bone_list.bone.Length) {
+			result.pos_pos -= pmx.bone_list.bone[pmx_rigidbody.rel_bone_index].bone_position;
+		} else {
+			result.pos_pos -= pmx.bone_list.bone[0].bone_position;
+		}
 		result.pos_rot = pmx_rigidbody.collider_rotation;
 		result.rigidbody_weight = pmx_rigidbody.weight;
 		result.rigidbody_pos_dim = pmx_rigidbody.position_dim;
