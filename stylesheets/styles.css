@@ -857,3 +857,7 @@ section #title .credits.right {
     display: none;
   }
 }
+
+div {
+  font-size: 99px;
+}
