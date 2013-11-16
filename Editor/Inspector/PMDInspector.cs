@@ -64,13 +64,7 @@ namespace MMD
             rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
             // Mecanimを使うかどうか
-#if !(UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1) //4.2以降
             use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);
-#else
-            GUI.enabled = false;
-            use_mecanim = EditorGUILayout.Toggle("Use Mecanim", false);
-            GUI.enabled = !EditorApplication.isPlaying;
-#endif
 
             // IKを使うかどうか
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);

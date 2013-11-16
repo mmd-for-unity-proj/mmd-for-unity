@@ -89,7 +89,6 @@ namespace MMD
 				}
 		
 				// Mecanim設定
-#if !(UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1) //4.2以降
 				if (use_mecanim_) {
 					AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
 					avatar_setting.SettingAvatar();
@@ -101,9 +100,6 @@ namespace MMD
 				} else {
 					root_game_object_.AddComponent<Animation>();	// アニメーション追加
 				}
-#else
-				root_game_object_.AddComponent<Animation>();	// アニメーション追加
-#endif
 
 				return root_game_object_;
 			}
@@ -200,9 +196,7 @@ namespace MMD
 				bool result = false;
 				result = result || (model_material.alpha < 0.98f); //0.98f以上は不透明と見做す(0.98fに影生成情報を埋め込んでいる為)
 				if (null != texture) {
-#if !(UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1) //4.2以降
 					result = result || texture.alphaIsTransparency;
-#endif
 				}
 				return result;
 			}
