@@ -71,7 +71,11 @@ public sealed class ExpressionManagerEditor : Editor
 						if (child.localPosition.z != value) {
 							//変更が掛かったなら
 							//Undo登録
+#if !UNITY_4_2 //4.3以降
+							Undo.RecordObject(child, "Expression Change");
+#else
 							Undo.RegisterUndo(child, "Expression Change");
+#endif
 							//Z位置更新
 							Vector3 position = child.localPosition;
 							position.z = value;

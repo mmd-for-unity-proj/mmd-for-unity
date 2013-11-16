@@ -89,7 +89,6 @@ namespace MMD
 				}
 		
 				// Mecanim設定
-#if UNITY_4_2
 				if (use_mecanim_) {
 					AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
 					avatar_setting.SettingAvatar();
@@ -101,9 +100,6 @@ namespace MMD
 				} else {
 					root_game_object_.AddComponent<Animation>();	// アニメーション追加
 				}
-#else //UNITY_4_2
-				root_game_object_.AddComponent<Animation>();	// アニメーション追加
-#endif //UNITY_4_2
 
 				return root_game_object_;
 			}
@@ -200,12 +196,7 @@ namespace MMD
 				bool result = false;
 				result = result || (model_material.alpha < 0.98f); //0.98f以上は不透明と見做す(0.98fに影生成情報を埋め込んでいる為)
 				if (null != texture) {
-#if UNITY_4_2
 					result = result || texture.alphaIsTransparency;
-#else
-					// TODO: 上記のif内の代替コードが必要です
-					//result = result;
-#endif
 				}
 				return result;
 			}
@@ -1327,9 +1318,16 @@ namespace MMD
 					AnimationCurve curve_y = new AnimationCurve(ry_keys);
 					AnimationCurve curve_z = new AnimationCurve(rz_keys);
 					// ここで回転オイラー角をセット（補間はクォータニオン）
+#if !UNITY_4_2 //4.3以降
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.x"),curve_x);
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.y"),curve_y);
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.z"),curve_z);
+#else
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.x",curve_x);
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.y",curve_y);
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.z",curve_z);
+#endif
+
 				}
 				catch (KeyNotFoundException)
 				{
@@ -1406,9 +1404,15 @@ namespace MMD
 						AnimationCurve curve_x = new AnimationCurve(ToKeyframesForLocation(lx_keys));
 						AnimationCurve curve_y = new AnimationCurve(ToKeyframesForLocation(ly_keys));
 						AnimationCurve curve_z = new AnimationCurve(ToKeyframesForLocation(lz_keys));
- 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
+#if !UNITY_4_2 //4.3以降
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.x"),curve_x);
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.y"),curve_y);
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.z"),curve_z);
+#else
+						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.y",curve_y);
 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.z",curve_z);
+#endif
 					}
 				}
 				catch (KeyNotFoundException)
@@ -1446,7 +1450,12 @@ namespace MMD
 
 					// Z軸移動にキーフレームを打つ
 					AnimationCurve curve = new AnimationCurve(keyframe);
+#if !UNITY_4_2 //4.3以降
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve("Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z"),curve);
+#else
 					AnimationUtility.SetEditorCurve(clip,"Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z",curve);
+#endif
+
 				}
 			}
 			

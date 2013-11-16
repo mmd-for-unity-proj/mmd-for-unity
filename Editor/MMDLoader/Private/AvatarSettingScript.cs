@@ -1,6 +1,4 @@
-﻿#if UNITY_4_2
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
@@ -315,5 +313,3 @@ public class AvatarSettingScript
 	Avatar			avatar_ = null;
 	Animator		animator_ = null;
 }
-
-#endif //UNITY_4_2

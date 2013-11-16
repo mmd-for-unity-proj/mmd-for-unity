@@ -59,7 +59,11 @@ public sealed class MMDEngineEditor : Editor
 		if (self.outline_width != outline_width) {
 			//変更が掛かったなら
 			//Undo登録
+#if !UNITY_4_2 //4.3以降
+			Undo.RecordObject(self, "Outline Width Change");
+#else
 			Undo.RegisterUndo(self, "Outline Width Change");
+#endif
 			//更新
 			self.outline_width = outline_width;
 			
@@ -82,7 +86,11 @@ public sealed class MMDEngineEditor : Editor
 		if (self.useRigidbody != use_rigidbody) {
 			//変更が掛かったなら
 			//Undo登録
+#if !UNITY_4_2 //4.3以降
+			Undo.RecordObject(self, "Use Rigidbody Change");
+#else
 			Undo.RegisterUndo(self, "Use Rigidbody Change");
+#endif
 			//更新
 			self.useRigidbody = use_rigidbody;
 			
@@ -115,7 +123,11 @@ public sealed class MMDEngineEditor : Editor
 					if (ik.enabled != enabled) {
 						//変更が掛かったなら
 						//Undo登録
+#if !UNITY_4_2 //4.3以降
+						Undo.RecordObject(ik, "Enabled Change");
+#else
 						Undo.RegisterUndo(ik, "Enabled Change");
+#endif
 						//更新
 						ik.enabled = enabled;
 						//改変したIKのInspector更新
@@ -231,7 +243,11 @@ public sealed class MMDEngineEditor : Editor
 							if (is_change_shader) {
 								//変更が掛かったなら
 								//Undo登録
+#if !UNITY_4_2 //4.3以降
+								Undo.RecordObject(material, "Shader Change");
+#else
 								Undo.RegisterUndo(material, "Shader Change");
+#endif
 
 								SetShader(material, flag);
 								is_update = true;

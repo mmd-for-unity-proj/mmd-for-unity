@@ -79,7 +79,6 @@ namespace MMD
 			}
 	
 			// Mecanim設定
-#if UNITY_4_2
 			if (use_mecanim_) {
 				//アニメーター追加
 				AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
@@ -92,9 +91,6 @@ namespace MMD
 			} else {
 				root_game_object_.AddComponent<Animation>();	// アニメーション追加
 			}
-#else //UNITY_4_2
-			root_game_object_.AddComponent<Animation>();	// アニメーション追加
-#endif //UNITY_4_2
 
 			return root_game_object_;
 		}
@@ -487,12 +483,7 @@ namespace MMD
 			bool result = false;
 			result = result || (material.diffuse_color.a < 1.0f);
 			if (null != texture) {
-#if UNITY_4_2
 				result = result || texture.alphaIsTransparency;
-#else
-				// TODO: 上記if内の代替コード必須です
-				// result = result;
-#endif
 			}
 			return result;
 		}
