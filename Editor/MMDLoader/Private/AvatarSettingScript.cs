@@ -1,4 +1,4 @@
-﻿#if UNITY_4_2
+﻿#if !(UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1) //4.2以降
 
 using UnityEngine;
 using UnityEditor;
@@ -316,4 +316,4 @@ public class AvatarSettingScript
 	Animator		animator_ = null;
 }
 
-#endif //UNITY_4_2
+#endif

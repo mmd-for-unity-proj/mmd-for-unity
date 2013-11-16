@@ -40,14 +40,14 @@ public class PMDLoaderWindow : EditorWindow {
 		rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
 		// Mecanimを使うかどうか
-#if UNITY_4_2
+#if !(UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1) //4.2以降
 		use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);
-#else //UNITY_4_2
+#else
 		bool old_gui_enabled = GUI.enabled;
 		GUI.enabled = false;
 		use_mecanim = EditorGUILayout.Toggle("Use Mecanim", false);
 		GUI.enabled = old_gui_enabled;
-#endif //UNITY_4_2
+#endif
 
 		// IKを使うかどうか
 		use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
