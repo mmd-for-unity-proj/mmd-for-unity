@@ -1318,9 +1318,16 @@ namespace MMD
 					AnimationCurve curve_y = new AnimationCurve(ry_keys);
 					AnimationCurve curve_z = new AnimationCurve(rz_keys);
 					// ここで回転オイラー角をセット（補間はクォータニオン）
+#if !UNITY_4_2 //4.3以降
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.x"),curve_x);
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.y"),curve_y);
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.z"),curve_z);
+#else
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.x",curve_x);
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.y",curve_y);
 					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.z",curve_z);
+#endif
+
 				}
 				catch (KeyNotFoundException)
 				{
@@ -1397,9 +1404,15 @@ namespace MMD
 						AnimationCurve curve_x = new AnimationCurve(ToKeyframesForLocation(lx_keys));
 						AnimationCurve curve_y = new AnimationCurve(ToKeyframesForLocation(ly_keys));
 						AnimationCurve curve_z = new AnimationCurve(ToKeyframesForLocation(lz_keys));
- 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
+#if !UNITY_4_2 //4.3以降
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.x"),curve_x);
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.y"),curve_y);
+						AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.z"),curve_z);
+#else
+						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.y",curve_y);
 						AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.z",curve_z);
+#endif
 					}
 				}
 				catch (KeyNotFoundException)
@@ -1437,7 +1450,12 @@ namespace MMD
 
 					// Z軸移動にキーフレームを打つ
 					AnimationCurve curve = new AnimationCurve(keyframe);
+#if !UNITY_4_2 //4.3以降
+					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve("Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z"),curve);
+#else
 					AnimationUtility.SetEditorCurve(clip,"Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z",curve);
+#endif
+
 				}
 			}
 			
