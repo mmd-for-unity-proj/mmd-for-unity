@@ -157,7 +157,7 @@ public sealed class MMDEngineEditor : Editor
 		if (shader_display_) {
 			//シェーダーリストを表示するなら
 			SkinnedMeshRenderer[] renderers = self.GetComponentsInChildren<SkinnedMeshRenderer>();
-			Material[] materials = renderers.SelectMany(x=>x.sharedMaterials).ToArray();
+			Material[] materials = renderers.SelectMany(x=>x.sharedMaterials).Distinct().ToArray();
 			if (1 < renderers.Length) {
 				//rendererが複数有る(≒PMX)なら
 				//PMXでは名前の先頭にはマテリアルインデックスが有るのでそれを参考にソート
