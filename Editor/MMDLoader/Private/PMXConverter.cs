@@ -526,8 +526,7 @@ namespace MMD
 		bool[] IsTransparentByTextureAlpha()
 		{
 			Texture2D[] textures = GetTextureList();
-			Vector2[][] uvs = CreateMeshCreationInfoPacks().Select(x=>x.plane_indices.Select(y=>format_.vertex_list.vertex[y].uv).ToArray()) //頂点インデックスをUV値に変換
-															.ToArray();
+			Vector2[][] uvs = GetUvList();
 			bool[] result = Enumerable.Range(0, format_.material_list.material.Length)
 										.Select(x=>((null != textures[x])
 													? IsTransparentByTextureAlphaWithUv(textures[x], uvs[x])
@@ -554,7 +553,83 @@ namespace MMD
 		}
 		
 		/// <summary>
-		/// UV値を考慮したテクスチャのアルファ値に依る透過確認
+		/// UVの取得
+		/// </summary>
+		/// <returns>UV配列</returns>
+		/// <remarks>
+		/// UVモーフにて改変される場合は未適応(0.0f)と全適応(1.0f)の2段階のみを扱い、中間適応は考慮しない。
+		/// 複数のUVモーフが同一頂点に掛かる場合に多重適応すると単体では参照出来無い領域迄参照出来る様に為るが、これは考慮しない。
+		/// 同様にグループモーフに依る1.0f超えも考慮しない。
+		/// </remarks>
+		Vector2[][] GetUvList()
+		{
+			uint[][] vertex_list = CreateMeshCreationInfoPacks().Select(x=>x.plane_indices).ToArray();
+			
+			Dictionary<uint, Vector4>[] uv_morphs = format_.morph_list.morph_data
+															.Where(x=>PMXFormat.MorphData.MorphType.Uv==x.morph_type) //UVモーフなら
+															.Select(x=>x.morph_offset.Select(y=>(PMXFormat.UVMorphOffset)y)
+																					.ToDictionary(z=>z.vertex_index, z=>z.uv_offset) //頂点インデックスでディクショナリ化
+																	) //UVモーフオフセット取得
+															.ToArray();
+
+			List<Vector2>[] result = vertex_list.Select(x=>x.Select(y=>format_.vertex_list.vertex[y].uv).ToList()).ToArray();
+			
+			//材質走査
+			bool is_cancel = false;
+			for (int material_index = 0, material_index_max = result.Length; material_index < material_index_max; ++material_index) {
+				//UVモーフ走査
+				for (int uv_morph_index = 0, uv_morph_index_max = uv_morphs.Length; uv_morph_index < uv_morph_index_max; ++uv_morph_index) {
+					var uv_morph = uv_morphs[uv_morph_index];
+					//ブログレスパー更新
+					is_cancel = EditorUtility.DisplayCancelableProgressBar("Create UV Area Infomation"
+																			, "Material:[" + material_index + "|" + material_index_max + "]"
+																				+ format_.material_list.material[material_index].name
+																				+ "\t"
+																				+ "UV Morph:[" + uv_morph_index + "|" + uv_morph_index_max + "]"
+																				+ format_.morph_list.morph_data.Where(x=>PMXFormat.MorphData.MorphType.Uv==x.morph_type).Skip(uv_morph_index).First().morph_name
+																			, ((((float)uv_morph_index / (float)uv_morph_index_max) + (float)material_index) / (float)material_index_max)
+																			);
+					if (is_cancel) {
+						break;
+					}
+
+					//先行UVモーフ対象確認(三角形構成を無視して全頂点をUVモーフ参照)
+					var vertex_dictionary = vertex_list[material_index].Distinct().ToDictionary(x=>x, x=>true); //(UVモーフに設定されている頂点数依りも三角形構成頂点の方が多いと思うので、そちら側をlogNにする為に辞書作成)
+					if (uv_morph.Keys.Any(x=>vertex_dictionary.ContainsKey(x))) {
+						//UVモーフ対象なら
+						//頂点走査(三角形構成頂点走査)
+						for (int vertex_index = 0, vertex_index_max = vertex_list[material_index].Length; vertex_index < vertex_index_max; vertex_index+=3) {
+							//三角形構成頂点インデックス取り出し
+							uint[] tri_vertices = new []{vertex_list[material_index][vertex_index+0]
+														, vertex_list[material_index][vertex_index+1]
+														, vertex_list[material_index][vertex_index+2]
+														};
+							//UVモーフ対象確認
+							if (tri_vertices.Any(x=>uv_morph.ContainsKey(x))) {
+								//UVモーフ対象なら
+								//適応したUV値を作成
+								var tri_uv = tri_vertices.Select(x=>new{original_uv = format_.vertex_list.vertex[x].uv
+																		, add_uv = ((uv_morph.ContainsKey(x))? uv_morph[x]: Vector4.zero)
+																		}
+																)
+														.Select(x=>new Vector2(x.original_uv.x + x.add_uv.x, x.original_uv.y + x.add_uv.y));
+								//追加
+								result[material_index].AddRange(tri_uv);
+							}
+						}
+					}
+				}
+				if (is_cancel) {
+					break;
+				}
+			}
+			EditorUtility.ClearProgressBar();
+
+			return result.Select(x=>x.ToArray()).ToArray();
+		}
+		
+		/// <summary>
+		/// UV値を考慮した、テクスチャのアルファ値に依る透過確認
 		/// </summary>
 		/// <returns>透過か(true:透過, false:不透明)</returns>
 		/// <param name="texture">テクスチャ</param>
@@ -578,7 +653,7 @@ namespace MMD
 		}
 		
 		/// <summary>
-		/// UV値を考慮したテクスチャのアルファ値に依る透過確認
+		/// UV値を考慮した、テクスチャのアルファ値に依る透過確認
 		/// </summary>
 		/// <returns>透過か(true:透過, false:不透明)</returns>
 		/// <param name="texture">テクスチャ</param>
