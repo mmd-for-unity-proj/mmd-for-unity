@@ -207,12 +207,11 @@ public sealed class MMDEngineEditor : Editor
 											, new {flag=ShaderFlag.Hidden, reverse=false}
 											};
 				//マテリアル
-				int material_index = 0;
 				foreach (var material in materials) {
 					EditorGUILayout.BeginHorizontal();
 					{
 						//ラベル
-						EditorGUILayout.LabelField(new GUIContent((material_index++).ToString(), material.name), GUILayout.Width(64));
+						EditorGUILayout.LabelField(new GUIContent(material.name, material.name), GUILayout.Width(64));
 						//シェーダー
 						if (IsMmdShader(material)) {
 							//MMDシェーダーなら
