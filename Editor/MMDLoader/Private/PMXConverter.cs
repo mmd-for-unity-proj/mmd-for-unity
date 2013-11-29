@@ -62,6 +62,9 @@ namespace MMD
 			engine.scale = scale_;
 			engine.outline_width = 1.0f;
 			engine.material_outline_widths = format.material_list.material.Select(x=>x.edge_size).ToArray();
+			engine.enable_render_queue = false; //初期値無効
+			const int c_render_queue_transparent = 3000;
+			engine.render_queue_value = c_render_queue_transparent;
 			
 			MeshCreationInfo[] creation_info = CreateMeshCreationInfo();				// メッシュを作成する為の情報を作成
 			Mesh[] mesh = CreateMesh(creation_info);									// メッシュの生成・設定
@@ -469,11 +472,11 @@ namespace MMD
 			bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
 			
 			return Enumerable.Range(0, format_.material_list.material.Length)
-							.Select(x=>new {material = format_.material_list.material[x]
+							.Select(x=>new {material_index = (uint)x
 											, is_transparent = is_transparent_by_material[x] || is_transparent_by_material_morph[x] || is_transparent_by_texture_alpha[x]
 											}
 									)
-							.Select(x=>ConvertMaterial(x.material, x.is_transparent))
+							.Select(x=>ConvertMaterial(x.material_index, x.is_transparent))
 							.ToArray();
 		}
 		
@@ -717,10 +720,12 @@ namespace MMD
 		/// マテリアルをUnity用に変換する
 		/// </summary>
 		/// <returns>Unity用マテリアル</returns>
-		/// <param name='material'>PMX用マテリアル</param>
+		/// <param name='material_index'>PMX用マテリアルインデックス</param>
 		/// <param name='is_transparent'>透過か</param>
-		Material ConvertMaterial(PMXFormat.Material material, bool is_transparent)
+		Material ConvertMaterial(uint material_index, bool is_transparent)
 		{
+			PMXFormat.Material material = format_.material_list.material[material_index];
+
 			//先にテクスチャ情報を検索
 			Texture2D main_texture = null;
 			if (material.usually_texture_index < format_.texture_list.texture_file.Length) {
@@ -743,7 +748,19 @@ namespace MMD
 			const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
 			result.SetFloat("_OutlineWidth", material.edge_size * scale_ / c_default_scale);
 			result.SetColor("_OutlineColor", material.edge_color);
-
+			//カスタムレンダーキュー
+			{
+				MMDEngine engine = root_game_object_.GetComponent<MMDEngine>();
+				if (engine.enable_render_queue && IsTransparentMaterial(is_transparent)) {
+					//カスタムレンダーキューが有効 かつ マテリアルが透過なら
+					//マテリアル順に並べる
+					result.renderQueue = engine.render_queue_value + (int)material_index;
+				} else {
+					//非透明なら
+					result.renderQueue = -1;
+				}
+			}
+			
 			// スフィアテクスチャ
 			if (material.sphere_texture_index < format_.texture_list.texture_file.Length) {
 				string sphere_texture_file_name = format_.texture_list.texture_file[material.sphere_texture_index];

@@ -37,7 +37,8 @@ public sealed class MMDEngineEditor : Editor
 		is_dirty = OnInspectorGUIforUseRigidbody() || is_dirty;
 		is_dirty = OnInspectorGUIforIkList() || is_dirty;
 		is_dirty = OnInspectorGUIforShaderList() || is_dirty;
-
+		is_dirty = OnInspectorGUIforRenderQueue() || is_dirty;
+		
 		if (is_dirty) {
 			//更新が有ったなら
 			//Inspector更新
@@ -215,7 +216,9 @@ public sealed class MMDEngineEditor : Editor
 											, new {flag=ShaderFlag.Hidden, reverse=false}
 											};
 				//マテリアル
-				foreach (var material in materials) {
+				for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
+					Material material = materials[i];
+
 					EditorGUILayout.BeginHorizontal();
 					{
 						//ラベル
@@ -256,7 +259,8 @@ public sealed class MMDEngineEditor : Editor
 								Undo.RegisterUndo(material, "Shader Change");
 #endif
 
-								SetShader(material, flag);
+								int render_queue = ((self.enable_render_queue)? self.render_queue_value + i: -1);
+								SetShader(material, flag, render_queue);
 								is_update = true;
 							}
 						}
@@ -269,6 +273,92 @@ public sealed class MMDEngineEditor : Editor
 		return is_update;
 	}
 
+	/// <summary>
+	/// カスタムレンダーキューの為のInspector描画
+	/// </summary>
+	/// <returns>更新が有ったか(true:更新有り, false:未更新)</returns>
+	private bool OnInspectorGUIforRenderQueue()
+	{
+		MMDEngine self = (MMDEngine)target;
+		bool is_update = false;
+		
+#if !MFU_DISABLE_LEGACY_DATA_SUPPORT
+		if ((false == self.enable_render_queue) && (0 == self.render_queue_value)) {
+			//カスタムレンダーキュー関連が設定されていないなら(昔の変換データ)
+			//無効状態で初期化
+			self.enable_render_queue = false;
+			const int c_render_queue_transparent = 3000;
+			self.render_queue_value = c_render_queue_transparent;
+		}
+#endif
+
+		bool enable_render_queue = self.enable_render_queue;
+		enable_render_queue = EditorGUILayout.Toggle("Render Queue", enable_render_queue);
+		if (self.enable_render_queue != enable_render_queue) {
+			//変更が掛かったなら
+			is_update = true;
+		}
+		int render_queue_value = -1;
+		if (enable_render_queue) {
+			//有効なら
+			render_queue_value = self.render_queue_value;
+			render_queue_value = EditorGUILayout.IntField("Render Queue Value", render_queue_value);
+			if (self.render_queue_value != render_queue_value) {
+				//変更が掛かったなら
+				is_update = true;
+			}
+		}
+			
+		if (is_update) {
+			//変更が掛かったなら
+			Material[] materials = GetMaterials(self);
+			//Undo登録
+			var record_objects = materials.Select(x=>(UnityEngine.Object)x) //マテリアル全てと
+											.Concat(new UnityEngine.Object[]{self}) //UnityEngine
+											.ToArray();
+#if !UNITY_4_2 //4.3以降
+			Undo.RecordObjects(record_objects, "Render Queue Change");
+#else
+			Undo.RegisterUndo(record_objects, "Render Queue Change");
+#endif
+			//更新
+			self.enable_render_queue = enable_render_queue;
+			if (enable_render_queue) {
+				//有効化
+				self.render_queue_value = render_queue_value;
+				for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
+					var material = materials[i];
+					ShaderFlag flag = AnalyzeShaderFlag(material);
+					if (0 != (flag & ShaderFlag.MmdShader)) {
+						//Mmdシェーダーなら
+						//カスタムレンダーキュー
+						if (0 != (flag & ShaderFlag.Transparent)) {
+							//透過なら
+							//マテリアル順にカスタムレンダーキューを設定
+							material.renderQueue = render_queue_value + i;
+						} else {
+							//不透明なら
+							//カスタムレンダーキューを解除
+							material.renderQueue = -1;
+						}
+					}
+				}
+			} else {
+				//無効化
+				foreach (var material in materials) {
+					ShaderFlag flag = AnalyzeShaderFlag(material);
+					if (0 != (flag & ShaderFlag.MmdShader)) {
+						//Mmdシェーダーなら
+						//カスタムレンダーキューを解除
+						material.renderQueue = -1;
+					}
+				}
+			}
+		}
+		
+		return is_update;
+	}
+	
 	/// <summary>
 	/// MMDシェーダー確認
 	/// </summary>
@@ -357,7 +447,8 @@ public sealed class MMDEngineEditor : Editor
 	/// </summary>
 	/// <param name='material'>マテリアル</param>
 	/// <param name='flag'>シェーダーフラグ</param>
-	static void SetShader(Material material, ShaderFlag flag) {
+	/// <param name='render_queue'>透過の場合に設定するレンダーキュー</param>
+	static void SetShader(Material material, ShaderFlag flag, int render_queue) {
 		if (0 != (flag & ShaderFlag.MmdShader)) {
 			//Mmdシェーダーなら
 			material.shader = CreateShaderFromShaderFlag(flag);
@@ -371,6 +462,16 @@ public sealed class MMDEngineEditor : Editor
 				float original_shader_type = (float)(int)flag;
 				material.SetFloat("_DummyOriginalShaderType", original_shader_type);
 				material.SetColor("_DummyColor", new Color(1.0f, 0.0f, 1.0f, 1.0f));
+			} 
+			//カスタムレンダーキュー
+			if (0 != (flag & ShaderFlag.Transparent)) {
+				//透過なら
+				//マテリアル順にカスタムレンダーキューを設定
+				material.renderQueue = render_queue;
+			} else {
+				//不透明なら
+				//カスタムレンダーキューを解除
+				material.renderQueue = -1;
 			}
 		}
 	}
