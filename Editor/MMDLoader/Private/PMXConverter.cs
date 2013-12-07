@@ -483,7 +483,8 @@ namespace MMD
 		/// <returns>透過かの配列(true:透過, false:不透明)</returns>
 		bool[] IsTransparentByMaterial()
 		{
-			bool[] result = format_.material_list.material.Select(x=>x.diffuse_color.a < 1.0f)
+			//拡散色とエッジ色の透過確認
+			bool[] result = format_.material_list.material.Select(x=>(x.diffuse_color.a < 1.0f) || (x.edge_color.a < 1.0f))
 															.ToArray();
 			return result;
 		}
@@ -499,7 +500,7 @@ namespace MMD
 			var transparent_material_indices = format_.morph_list.morph_data.Where(x=>PMXFormat.MorphData.MorphType.Material==x.morph_type) //材質モーフなら
 																			.SelectMany(x=>x.morph_offset) //材質モーフオフセット取得
 																			.Select(x=>(PMXFormat.MaterialMorphOffset)x) //材質モーフオフセットにキャスト
-																			.Where(x=>(PMXFormat.MaterialMorphOffset.OffsetMethod.Mul==x.offset_method)&&(x.diffuse.a < 1.0f)) //拡散色が透過に為るなら
+																			.Where(x=>(PMXFormat.MaterialMorphOffset.OffsetMethod.Mul==x.offset_method)&&((x.diffuse.a < 1.0f)||(x.edge_color.a < 1.0f))) //拡散色かエッジ色が透過に為るなら
 																			.Select(x=>x.material_index) //マテリアルインデックス取得
 																			.Distinct(); //重複除去
 			foreach (uint material_index in transparent_material_indices) {
