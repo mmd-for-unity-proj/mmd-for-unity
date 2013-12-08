@@ -53,22 +53,44 @@ public sealed class MMDEngineEditor : Editor
 	{
 		MMDEngine self = (MMDEngine)target;
 		bool is_update = false;
+
+#if !MFU_DISABLE_LEGACY_DATA_SUPPORT
+		if (0 == self.material_outline_widths.Length) {
+			//material_outline_widthsが設定されていないなら(昔の変換データ)
+			Material[] materials = GetMaterials(self);
+			if (0 < materials.Length) {
+				//マテリアルが有り、今のエッジ幅が0.0fで無いなら
+				//データ生成を試みる
+				self.material_outline_widths = materials.Select(x=>x.GetFloat("_OutlineWidth")).ToArray();
+			}
+		}
+#endif
 		
 		float outline_width = self.outline_width;
 		outline_width = EditorGUILayout.Slider("Outline Width", outline_width, 0.0f, 2.0f);
 		if (self.outline_width != outline_width) {
 			//変更が掛かったなら
+			Material[] materials = GetMaterials(self);
 			//Undo登録
+			var record_objects = materials.Select(x=>(UnityEngine.Object)x) //マテリアル全てと
+											.Concat(new UnityEngine.Object[]{self}) //UnityEngine
+											.ToArray();
 #if !UNITY_4_2 //4.3以降
-			Undo.RecordObject(self, "Outline Width Change");
+			Undo.RecordObjects(record_objects, "Outline Width Change");
 #else
-			Undo.RegisterUndo(self, "Outline Width Change");
+			Undo.RegisterUndo(record_objects, "Outline Width Change");
 #endif
 			//更新
+			const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
 			self.outline_width = outline_width;
+			foreach (var i in Enumerable.Range(0, materials.Length)
+										.Select(x=>new {material = materials[x], edge_size = self.material_outline_widths[x]})) {
+				i.material.SetFloat("_OutlineWidth", i.edge_size * outline_width * self.scale / c_default_scale);
+			}
 			
 			is_update = true;
 		}
+
 		return is_update;
 	}
 	
@@ -141,7 +163,7 @@ public sealed class MMDEngineEditor : Editor
 		}
 		return is_update;
 	}
-	
+		
 	/// <summary>
 	/// シェーダーリストの為のInspector描画
 	/// </summary>
@@ -156,21 +178,7 @@ public sealed class MMDEngineEditor : Editor
 		//シェーダーリスト内部
 		if (shader_display_) {
 			//シェーダーリストを表示するなら
-			SkinnedMeshRenderer[] renderers = self.GetComponentsInChildren<SkinnedMeshRenderer>();
-			Material[] materials = renderers.SelectMany(x=>x.sharedMaterials).Distinct().ToArray();
-			if (1 < renderers.Length) {
-				//rendererが複数有る(≒PMX)なら
-				//PMXでは名前の先頭にはマテリアルインデックスが有るのでそれを参考にソート
-				//PMDではrendererが1つしか無く、かつソート済みの為不要
-				System.Array.Sort(materials, (x,y)=>{ 
-												string x_name = x.name.Substring(0, x.name.IndexOf('_'));
-												string y_name = y.name.Substring(0, y.name.IndexOf('_'));
-												int x_int, y_int;
-												Int32.TryParse(x_name, out x_int);
-												Int32.TryParse(y_name, out y_int);
-												return x_int - y_int;
-											});
-			}
+			Material[] materials = GetMaterials(self);
 			GUIStyle style = new GUIStyle();
 			style.margin.left = 10;
 			EditorGUILayout.BeginVertical(style);
@@ -408,6 +416,31 @@ public sealed class MMDEngineEditor : Editor
 			result.name = original_shader_name + "+Hidden";
 		}
 		
+		return result;
+	}
+	
+	/// <summary>
+	/// 本来の順序で材質一覧の取得
+	/// </summary>
+	/// <returns>材質一覧</returns>
+	/// <param name='engine'>材質を取得するMMDEngine</param>
+	static Material[] GetMaterials(MMDEngine engine)
+	{
+		SkinnedMeshRenderer[] renderers = engine.GetComponentsInChildren<SkinnedMeshRenderer>();
+		Material[] result = renderers.SelectMany(x=>x.sharedMaterials).Distinct().ToArray();
+		if (1 < renderers.Length) {
+			//rendererが複数有る(≒PMX)なら
+			//PMXでは名前の先頭にはマテリアルインデックスが有るのでそれを参考にソート
+			//PMDではrendererが1つしか無く、かつソート済みの為不要
+			System.Array.Sort(result, (x,y)=>{ 
+				string x_name = x.name.Substring(0, x.name.IndexOf('_'));
+				string y_name = y.name.Substring(0, y.name.IndexOf('_'));
+				int x_int, y_int;
+				Int32.TryParse(x_name, out x_int);
+				Int32.TryParse(y_name, out y_int);
+				return x_int - y_int;
+			});
+		}
 		return result;
 	}
 	

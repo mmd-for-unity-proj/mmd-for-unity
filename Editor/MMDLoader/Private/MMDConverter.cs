@@ -62,7 +62,10 @@ namespace MMD
 				BuildingBindpose(mesh, materials, bones);
 		
 				MMDEngine engine = root_game_object_.AddComponent<MMDEngine>();
+				//スケール・エッジ幅
 				engine.scale = scale_;
+				engine.outline_width = default_outline_width;
+				engine.material_outline_widths = Enumerable.Repeat(1.0f, materials.Length).ToArray();
 		
 				// IKの登録
 				if (use_ik_)
@@ -326,10 +329,11 @@ namespace MMD
 							mats[i].SetFloat("_Opacity", pmdMat.alpha);
 							mats[i].SetColor("_SpecularColor", pmdMat.specular_color);
 							mats[i].SetFloat("_Shininess", pmdMat.specularity);
+							// エッジ
+							const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
+							mats[i].SetFloat("_OutlineWidth", default_outline_width * scale_ / c_default_scale);
+							mats[i].SetColor("_OutlineColor", default_outline_color);
 						
-							//　エッジ
-							mats[i].SetFloat("_OutlineWidth", 0.2f);	// これぐらいがいい気がする
-
 							// ここでスフィアマップ
 							string path = format_.folder + "/" + pmdMat.sphere_map_name;
 							Texture sphere_map;
@@ -1003,7 +1007,10 @@ namespace MMD
 							.Replace("\n",  string.Empty)
 							.Replace("\r",  string.Empty);
 			}
-
+			
+			static float default_outline_width = 0.2f;			//標準エッジ幅
+			static Color default_outline_color = Color.black;	//標準エッジ色
+			
 			GameObject	root_game_object_;
 			PMDFormat	format_;
 			ShaderType	shader_type_;

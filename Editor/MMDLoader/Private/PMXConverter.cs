@@ -45,8 +45,11 @@ namespace MMD
 			scale_ = scale;
 			root_game_object_ = new GameObject(format_.meta_header.name);
 			MMDEngine engine = root_game_object_.AddComponent<MMDEngine>(); //MMDEngine追加
+			//スケール・エッジ幅
 			engine.scale = scale_;
-		
+			engine.outline_width = 1.0f;
+			engine.material_outline_widths = format.material_list.material.Select(x=>x.edge_size).ToArray();
+			
 			MeshCreationInfo[] creation_info = CreateMeshCreationInfo();				// メッシュを作成する為の情報を作成
 			Mesh[] mesh = CreateMesh(creation_info);									// メッシュの生成・設定
 			Material[][] materials = CreateMaterials(creation_info);					// マテリアルの生成・設定
@@ -470,7 +473,8 @@ namespace MMD
 			result.SetColor("_SpecularColor", material.specular_color);
 			result.SetFloat("_Shininess", material.specularity);
 			// エッジ
-			result.SetFloat("_OutlineWidth", material.edge_size);
+			const float c_default_scale = 0.085f; //0.085fの時にMMDと一致する様にしているので、それ以外なら補正
+			result.SetFloat("_OutlineWidth", material.edge_size * scale_ / c_default_scale);
 			result.SetColor("_OutlineColor", material.edge_color);
 
 			// スフィアテクスチャ
