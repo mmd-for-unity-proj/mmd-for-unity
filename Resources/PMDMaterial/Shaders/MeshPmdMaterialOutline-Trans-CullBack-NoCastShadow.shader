@@ -46,6 +46,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-CullBack-NoCastShadow"
 		Cull Back
 		ZWrite On
 		Blend SrcAlpha OneMinusSrcAlpha
+		AlphaTest Greater 0.0
 		CGPROGRAM
 		#pragma surface surf MMD
 		#include "MeshPmdMaterialSurface.cginc"
