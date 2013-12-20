@@ -43,6 +43,7 @@ Shader "MMD/Transparent/PMDMaterial-CullBack"
 		Cull Back
 		ZWrite On
 		Blend SrcAlpha OneMinusSrcAlpha
+		AlphaTest Greater 0.0
 		CGPROGRAM
 		#pragma surface surf MMD
 		#include "MeshPmdMaterialSurface.cginc"
@@ -58,6 +59,14 @@ Shader "MMD/Transparent/PMDMaterial-CullBack"
 			Cull Off
 			Lighting Off
 			//Offset [_ShadowBias], [_ShadowBiasSlope] //使えない様なのでコメントアウト
+			AlphaTest Greater 0.25
+			
+			CGPROGRAM
+			#pragma vertex shadow_vert
+			#pragma fragment shadow_frag
+			#include "UnityCG.cginc"
+			#include "MeshPmdMaterialShadowVertFrag.cginc"
+			ENDCG
 		}
 
 	}
