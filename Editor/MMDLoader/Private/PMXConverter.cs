@@ -6,7 +6,7 @@ using MMD.PMX;
 
 namespace MMD
 {
-	public class PMXConverter
+	public class PMXConverter : System.IDisposable
 	{
 		/// <summary>
 		/// GameObjectを作成する
@@ -17,8 +17,11 @@ namespace MMD
 		/// <param name='use_ik'>IKを使用するか</param>
 		/// <param name='scale'>スケール</param>
 		public static GameObject CreateGameObject(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
-			PMXConverter converter = new PMXConverter();
-			return converter.CreateGameObject_(format, use_rigidbody, use_mecanim, use_ik, scale);
+			GameObject result;
+			using (PMXConverter converter = new PMXConverter()) {
+				result = converter.CreateGameObject_(format, use_rigidbody, use_mecanim, use_ik, scale);
+			}
+			return result;
 		}
 
 		/// <summary>
@@ -29,6 +32,16 @@ namespace MMD
 		/// </remarks>
 		private PMXConverter() {}
 
+		/// <summary>
+		/// Disposeインターフェース
+		/// </summary>
+		public void Dispose()
+		{
+			if (null != alpha_readable_texture_) {
+				alpha_readable_texture_.Dispose();
+			}
+		}
+		
 		/// <summary>
 		/// GameObjectを作成する
 		/// </summary>
@@ -425,6 +438,12 @@ namespace MMD
 		/// <param name='creation_info'>メッシュ作成情報</param>
 		Material[][] CreateMaterials(MeshCreationInfo[] creation_info)
 		{
+			// 適当なフォルダに投げる
+			string path = format_.meta_header.folder + "/Materials/";
+			if (!System.IO.Directory.Exists(path)) { 
+				AssetDatabase.CreateFolder(format_.meta_header.folder, "Materials");
+			}
+			
 			//全マテリアルを作成
 			Material[] materials = EntryAttributesForMaterials();
 			CreateAssetForMaterials(materials);
@@ -444,8 +463,254 @@ namespace MMD
 		/// <returns>マテリアル</returns>
 		Material[] EntryAttributesForMaterials()
 		{
-			return format_.material_list.material.Select(x=>ConvertMaterial(x))
-												.ToArray();
+			//材質モーフが透過を要望するか
+			bool[] is_transparent_by_material = IsTransparentByMaterial(); //材質
+			bool[] is_transparent_by_material_morph = IsTransparentByMaterialMorph(); //材質モーフ
+			bool[] is_transparent_by_texture_alpha = IsTransparentByTextureAlpha(); //テクスチャのアルファ値(UV考慮済み)
+			
+			return Enumerable.Range(0, format_.material_list.material.Length)
+							.Select(x=>new {material = format_.material_list.material[x]
+											, is_transparent = is_transparent_by_material[x] || is_transparent_by_material_morph[x] || is_transparent_by_texture_alpha[x]
+											}
+									)
+							.Select(x=>ConvertMaterial(x.material, x.is_transparent))
+							.ToArray();
+		}
+		
+		/// <summary>
+		/// 材質に依る透過確認
+		/// </summary>
+		/// <returns>透過かの配列(true:透過, false:不透明)</returns>
+		bool[] IsTransparentByMaterial()
+		{
+			//拡散色とエッジ色の透過確認
+			bool[] result = format_.material_list.material.Select(x=>(x.diffuse_color.a < 1.0f) || (x.edge_color.a < 1.0f))
+															.ToArray();
+			return result;
+		}
+		
+		/// <summary>
+		/// 材質モーフに依る透過確認
+		/// </summary>
+		/// <returns>透過かの配列(true:透過, false:不透明)</returns>
+		bool[] IsTransparentByMaterialMorph()
+		{
+			bool[] result = Enumerable.Repeat(false, format_.material_list.material.Length)
+										.ToArray();
+			var transparent_material_indices = format_.morph_list.morph_data.Where(x=>PMXFormat.MorphData.MorphType.Material==x.morph_type) //材質モーフなら
+																			.SelectMany(x=>x.morph_offset) //材質モーフオフセット取得
+																			.Select(x=>(PMXFormat.MaterialMorphOffset)x) //材質モーフオフセットにキャスト
+																			.Where(x=>(PMXFormat.MaterialMorphOffset.OffsetMethod.Mul==x.offset_method)&&((x.diffuse.a < 1.0f)||(x.edge_color.a < 1.0f))) //拡散色かエッジ色が透過に為るなら
+																			.Select(x=>x.material_index) //マテリアルインデックス取得
+																			.Distinct(); //重複除去
+			foreach (uint material_index in transparent_material_indices) {
+				//材質モーフに依って透過が要望されているなら
+				//透過扱いにする
+				if (material_index < (uint)format_.material_list.material.Length) {
+					//単体モーフのマテリアルインデックスなら
+					//対象マテリアルだけ透過扱い
+					result[material_index] = true;
+				} else {
+					//全対象モーフのマテリアルインデックスなら
+					//全て透過扱い
+					result = Enumerable.Repeat(true, result.Length).ToArray();
+					break;
+				}
+			}
+			return result;
+		}
+		
+		/// <summary>
+		/// テクスチャのアルファ値に依る透過確認
+		/// </summary>
+		/// <returns>透過かの配列(true:透過, false:不透明)</returns>
+		bool[] IsTransparentByTextureAlpha()
+		{
+			Texture2D[] textures = GetTextureList();
+			Vector2[][] uvs = GetUvList();
+			bool[] result = Enumerable.Range(0, format_.material_list.material.Length)
+										.Select(x=>((null != textures[x])
+													? IsTransparentByTextureAlphaWithUv(textures[x], uvs[x])
+													: false
+												))
+										.ToArray();
+			return result;
+		}
+
+		/// <summary>
+		/// テクスチャの取得
+		/// </summary>
+		/// <returns>テクスチャ配列</returns>
+		Texture2D[] GetTextureList()
+		{
+			string[] texture_path = format_.material_list.material.Select(x=>x.usually_texture_index) //材質が使用しているテクスチャインデックスを取得
+																	.Select(x=>((x<format_.texture_list.texture_file.Length)? format_.texture_list.texture_file[x]: null)) //有効なテクスチャインデックスならパスの取得
+																	.ToArray();
+			alpha_readable_texture_ = new AlphaReadableTexture(texture_path
+															, format_.meta_header.folder + "/"
+															, format_.meta_header.folder + "/Materials/"
+															);
+			return alpha_readable_texture_.textures;
+		}
+		
+		/// <summary>
+		/// UVの取得
+		/// </summary>
+		/// <returns>UV配列</returns>
+		/// <remarks>
+		/// UVモーフにて改変される場合は未適応(0.0f)と全適応(1.0f)の2段階のみを扱い、中間適応は考慮しない。
+		/// 複数のUVモーフが同一頂点に掛かる場合に多重適応すると単体では参照出来無い領域迄参照出来る様に為るが、これは考慮しない。
+		/// 同様にグループモーフに依る1.0f超えも考慮しない。
+		/// </remarks>
+		Vector2[][] GetUvList()
+		{
+			uint[][] vertex_list = CreateMeshCreationInfoPacks().Select(x=>x.plane_indices).ToArray();
+			
+			Dictionary<uint, Vector4>[] uv_morphs = format_.morph_list.morph_data
+															.Where(x=>PMXFormat.MorphData.MorphType.Uv==x.morph_type) //UVモーフなら
+															.Select(x=>x.morph_offset.Select(y=>(PMXFormat.UVMorphOffset)y)
+																					.ToDictionary(z=>z.vertex_index, z=>z.uv_offset) //頂点インデックスでディクショナリ化
+																	) //UVモーフオフセット取得
+															.ToArray();
+
+			List<Vector2>[] result = vertex_list.Select(x=>x.Select(y=>format_.vertex_list.vertex[y].uv).ToList()).ToArray();
+			
+			//材質走査
+			bool is_cancel = false;
+			for (int material_index = 0, material_index_max = result.Length; material_index < material_index_max; ++material_index) {
+				//UVモーフ走査
+				for (int uv_morph_index = 0, uv_morph_index_max = uv_morphs.Length; uv_morph_index < uv_morph_index_max; ++uv_morph_index) {
+					var uv_morph = uv_morphs[uv_morph_index];
+					//ブログレスパー更新
+					is_cancel = EditorUtility.DisplayCancelableProgressBar("Create UV Area Infomation"
+																			, "Material:[" + material_index + "|" + material_index_max + "]"
+																				+ format_.material_list.material[material_index].name
+																				+ "\t"
+																				+ "UV Morph:[" + uv_morph_index + "|" + uv_morph_index_max + "]"
+																				+ format_.morph_list.morph_data.Where(x=>PMXFormat.MorphData.MorphType.Uv==x.morph_type).Skip(uv_morph_index).First().morph_name
+																			, ((((float)uv_morph_index / (float)uv_morph_index_max) + (float)material_index) / (float)material_index_max)
+																			);
+					if (is_cancel) {
+						break;
+					}
+
+					//先行UVモーフ対象確認(三角形構成を無視して全頂点をUVモーフ参照)
+					var vertex_dictionary = vertex_list[material_index].Distinct().ToDictionary(x=>x, x=>true); //(UVモーフに設定されている頂点数依りも三角形構成頂点の方が多いと思うので、そちら側をlogNにする為に辞書作成)
+					if (uv_morph.Keys.Any(x=>vertex_dictionary.ContainsKey(x))) {
+						//UVモーフ対象なら
+						//頂点走査(三角形構成頂点走査)
+						for (int vertex_index = 0, vertex_index_max = vertex_list[material_index].Length; vertex_index < vertex_index_max; vertex_index+=3) {
+							//三角形構成頂点インデックス取り出し
+							uint[] tri_vertices = new []{vertex_list[material_index][vertex_index+0]
+														, vertex_list[material_index][vertex_index+1]
+														, vertex_list[material_index][vertex_index+2]
+														};
+							//UVモーフ対象確認
+							if (tri_vertices.Any(x=>uv_morph.ContainsKey(x))) {
+								//UVモーフ対象なら
+								//適応したUV値を作成
+								var tri_uv = tri_vertices.Select(x=>new{original_uv = format_.vertex_list.vertex[x].uv
+																		, add_uv = ((uv_morph.ContainsKey(x))? uv_morph[x]: Vector4.zero)
+																		}
+																)
+														.Select(x=>new Vector2(x.original_uv.x + x.add_uv.x, x.original_uv.y + x.add_uv.y));
+								//追加
+								result[material_index].AddRange(tri_uv);
+							}
+						}
+					}
+				}
+				if (is_cancel) {
+					break;
+				}
+			}
+			EditorUtility.ClearProgressBar();
+
+			return result.Select(x=>x.ToArray()).ToArray();
+		}
+		
+		/// <summary>
+		/// UV値を考慮した、テクスチャのアルファ値に依る透過確認
+		/// </summary>
+		/// <returns>透過か(true:透過, false:不透明)</returns>
+		/// <param name="texture">テクスチャ</param>
+		/// <param name="uvs">UV値(3つ単位で三角形を構成する)</param>
+		static bool IsTransparentByTextureAlphaWithUv(Texture2D texture, Vector2[] uvs)
+		{
+			bool result = true;
+			if (TextureFormat.Alpha8 == texture.format) {
+				//ファイルがDDS以外なら(AlphaReadableTextureDirectoryImporterに依ってDDS以外はAlpha8に為る)
+				//alphaIsTransparencyを確認する
+				result = texture.alphaIsTransparency; //アルファ値を持たないなら透過フラグが立っていない
+			}
+			if (result) {
+				//アルファ値を持つなら
+				//詳細確認
+				result = Enumerable.Range(0, uvs.Length / 3) //3つ単位で取り出す為の元インデックス
+										.Select(x=>x*3) //3つ間隔に変換
+										.Any(x=>IsTransparentByTextureAlphaWithUv(texture, uvs[x+0],uvs[x+1],uvs[x+2])); //三角形を透過確認、どれかが透過していたら透過とする
+			}
+			return result;
+		}
+		
+		/// <summary>
+		/// UV値を考慮した、テクスチャのアルファ値に依る透過確認
+		/// </summary>
+		/// <returns>透過か(true:透過, false:不透明)</returns>
+		/// <param name="texture">テクスチャ</param>
+		/// <param name="uv1">三角形頂点のUV値</param>
+		/// <param name="uv2">三角形頂点のUV値</param>
+		/// <param name="uv3">三角形頂点のUV値</param>
+		/// <remarks>
+		/// 理想ならば全テクセルを確認しなければならないが、
+		/// 現在の実装では三角形を構成する各頂点のUV・重心・各辺の中心点の7点のテクセルしか確認していない
+		/// </remarks>
+		static bool IsTransparentByTextureAlphaWithUv(Texture2D texture, Vector2 uv1, Vector2 uv2, Vector2 uv3)
+		{
+			bool result = true; //透過
+			do {
+				//座標系が相違しているので補正
+				uv1.Set(uv1.x, 1.0f - uv1.y - (1.0f / texture.height));
+				uv2.Set(uv2.x, 1.0f - uv2.y - (1.0f / texture.height));
+				uv3.Set(uv3.x, 1.0f - uv3.y - (1.0f / texture.height));
+				
+				const float c_threshold = 253.0f / 255.0f; //253程度迄は不透明として見逃す
+
+				//頂点直下
+				if (texture.GetPixelBilinear(uv1.x, uv1.y).a < c_threshold) {
+					break;
+				}
+				if (texture.GetPixelBilinear(uv2.x, uv2.y).a < c_threshold) {
+					break;
+				}
+				if (texture.GetPixelBilinear(uv3.x, uv3.y).a < c_threshold) {
+					break;
+				}
+
+				//重心
+				Vector2 center = new Vector2((uv1.x + uv2.x + uv3.x) / 3.0f, (uv1.y + uv2.y + uv3.y) / 3.0f);
+				if (texture.GetPixelBilinear(center.x, center.y).a < c_threshold) {
+					break;
+				}
+
+				//辺中央
+				Vector2 uv12 = new Vector2((uv1.x + uv2.x) / 2.0f, (uv1.y + uv2.y) / 2.0f);
+				if (texture.GetPixelBilinear(uv12.x, uv12.y).a < c_threshold) {
+					break;
+				}
+				Vector2 uv23 = new Vector2((uv2.x + uv3.x) / 2.0f, (uv2.y + uv3.y) / 2.0f);
+				if (texture.GetPixelBilinear(uv23.x, uv23.y).a < c_threshold) {
+					break;
+				}
+				Vector2 uv31 = new Vector2((uv3.x + uv1.x) / 2.0f, (uv3.y + uv1.y) / 2.0f);
+				if (texture.GetPixelBilinear(uv31.x, uv31.y).a < c_threshold) {
+					break;
+				}
+
+				//此処迄来たら不透明
+				result = false;
+			} while(false);
+			return result;
 		}
 		
 		/// <summary>
@@ -453,7 +718,8 @@ namespace MMD
 		/// </summary>
 		/// <returns>Unity用マテリアル</returns>
 		/// <param name='material'>PMX用マテリアル</param>
-		Material ConvertMaterial(PMXFormat.Material material)
+		/// <param name='is_transparent'>透過か</param>
+		Material ConvertMaterial(PMXFormat.Material material, bool is_transparent)
 		{
 			//先にテクスチャ情報を検索
 			Texture2D main_texture = null;
@@ -464,7 +730,8 @@ namespace MMD
 			}
 			
 			//マテリアルに設定
-			Material result = new Material(Shader.Find(GetMmdShaderPath(material, main_texture)));
+			string shader_path = GetMmdShaderPath(material, main_texture, is_transparent);
+			Material result = new Material(Shader.Find(shader_path));
 		
 			// シェーダに依って値が有ったり無かったりするが、設定してもエラーに為らない様なので全部設定
 			result.SetColor("_Color", material.diffuse_color);
@@ -535,9 +802,10 @@ namespace MMD
 		/// <returns>MMDシェーダーパス</returns>
 		/// <param name='material'>シェーダーを設定するマテリアル</param>
 		/// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
-		string GetMmdShaderPath(PMXFormat.Material material, Texture2D texture) {
+		/// <param name='is_transparent'>透過か</param>
+		string GetMmdShaderPath(PMXFormat.Material material, Texture2D texture, bool is_transparent) {
 			string result = "MMD/";
-			if (IsTransparentMaterial(material, texture)) {
+			if (IsTransparentMaterial(is_transparent)) {
 				result += "Transparent/";
 			}
 			result += "PMDMaterial";
@@ -562,15 +830,9 @@ namespace MMD
 		/// 透過マテリアル確認
 		/// </summary>
 		/// <returns>true:透過, false:不透明</returns>
-		/// <param name='material'>シェーダーを設定するマテリアル</param>
-		/// <param name='texture'>シェーダーに設定するメインテクスチャ</param>
-		bool IsTransparentMaterial(PMXFormat.Material material, Texture2D texture) {
-			bool result = false;
-			result = result || (material.diffuse_color.a < 1.0f);
-			if (null != texture) {
-				result = result || texture.alphaIsTransparency;
-			}
-			return result;
+		/// <param name='is_transparent'>透過か</param>
+		bool IsTransparentMaterial(bool is_transparent) {
+			return is_transparent;
 		}
 		
 		/// <summary>
@@ -648,12 +910,8 @@ namespace MMD
 		/// </summary>
 		/// <param name='materials'>対象マテリアル</param>
 		void CreateAssetForMaterials(Material[] materials) {
-			// 適当なフォルダに投げる
 			string path = format_.meta_header.folder + "/Materials/";
-			if (!System.IO.Directory.Exists(path)) { 
-				AssetDatabase.CreateFolder(format_.meta_header.folder, "Materials");
-			}
-			
+
 			for (int i = 0, i_max = materials.Length; i < i_max; ++i) {
 				string name = GetFilePathString(format_.material_list.material[i].name);
 				string file_name = path + i.ToString() + "_" + name + ".asset";
@@ -1743,11 +2001,12 @@ namespace MMD
 
 		const uint	c_max_vertex_count_in_mesh = 65535; //meshに含まれる最大頂点数(Unity3D的には65536迄入ると思われるが、ushort.MaxValueは特別な値として使うのでその分を除外)
 
-		GameObject	root_game_object_;
-		PMXFormat	format_;
-		bool		use_rigidbody_;
-		bool		use_mecanim_;
-		bool		use_ik_;
-		float		scale_;
+		GameObject				root_game_object_;
+		PMXFormat				format_;
+		bool					use_rigidbody_;
+		bool					use_mecanim_;
+		bool					use_ik_;
+		float					scale_;
+		AlphaReadableTexture	alpha_readable_texture_ = null;
 	}
 }
