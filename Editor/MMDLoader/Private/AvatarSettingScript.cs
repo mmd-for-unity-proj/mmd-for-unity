@@ -287,15 +287,32 @@ public class AvatarSettingScript
 	/// <returns>スケルトンボーン</returns>
 	SkeletonBone[] CreateSkeletonBone()
 	{
-		return bones_.Select(x=>{
-								SkeletonBone skeleton_bone = new SkeletonBone();
-								skeleton_bone.name = x.name;
-								Transform transform = x.transform;
-								skeleton_bone.position = transform.localPosition;
-								skeleton_bone.rotation = transform.localRotation;
-								skeleton_bone.scale = transform.localScale;
-								return skeleton_bone;
-							}).ToArray();
+		IEnumerable<GameObject> bones_enumerator = bones_;
+
+		//Hipsボーンの親ボーン迄SkeletonBoneに入れる必要が有るので、確認と追加
+		string hips_bone_name = ((HasBone("腰"))? "腰": "センター");
+		Transform hips_parent_bone = bones_.Where(x=>x.name == hips_bone_name).Select(x=>x.transform.parent).FirstOrDefault();
+		if (null != hips_parent_bone) {
+			//Hipsボーンの親ボーンが有るなら
+			//Hipsボーンの親ボーンがbones_に含まれているか確認する
+			if (!HasBone(hips_parent_bone.name)) {
+				//Hipsボーンの親ボーンがbones_に無いなら
+				//追加(Hipsボーン依りも前に追加しないといけないので注意)
+				bones_enumerator = Enumerable.Repeat(hips_parent_bone.gameObject, 1)
+											.Concat(bones_enumerator);
+			}
+		}
+
+		var result = bones_enumerator.Select(x=>{
+												SkeletonBone skeleton_bone = new SkeletonBone();
+												skeleton_bone.name = x.name;
+												Transform transform = x.transform;
+												skeleton_bone.position = transform.localPosition;
+												skeleton_bone.rotation = transform.localRotation;
+												skeleton_bone.scale = transform.localScale;
+												return skeleton_bone;
+											});
+		return result.ToArray();
 	}
 
 	/// <summary>
