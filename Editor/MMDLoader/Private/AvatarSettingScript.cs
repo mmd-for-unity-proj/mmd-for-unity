@@ -178,8 +178,7 @@ public class AvatarSettingScript
 	/// <returns>true:ボーンが存在する, false:ボーンが存在しない</returns>
 	/// <param name='name'>ボーン名</param>
 	bool HasBone(string name) {
-		int count = bones_.Where(x=>x.name == name).Count();
-		return 0 < count;
+		return bones_.Any(x=>x.name == name);
 	}
 
 	/// <summary>
