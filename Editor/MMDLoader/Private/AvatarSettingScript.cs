@@ -84,19 +84,20 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
-	/// 対象のボーンの中からより深く枝分かれする子ボーンを選び出す
-	/// 剛体用ボーンじゃないきちんとしたボーンを選び出すために使う
+	/// 特定の名前を持つボーンを先代から選び出す
 	/// </summary>
-	/// <param name="transform">対象のボーン</param>
-	/// <returns>さらに枝分かれする子ボーン</returns>
-	Transform SelectBranchedChildWhereManyChildren(Transform transform)
+	/// <param name="transform">基点のボーン</param>
+	/// <param name="name">対象のボーン名</param>
+	/// <returns>対象の先代ボーン</returns>
+	/// <remarks>
+	/// 基点ボーンが探索名なら基点ボーンを返す。
+	/// </remarks>
+	static Transform FindTransformUpwards(Transform transform, string name)
 	{
-		Transform[] children = new Transform[transform.childCount];
-		if (children.Length <= 0) Debug.LogError(transform.name + "の子がないので落ちるのです！");
-		for (int i = 0; i < transform.childCount; i++)
-			children[i] = transform.GetChild(i);
-		int max = children.Max(x => x.childCount);
-		return children.Where(x => x.childCount == max).First();
+		while ((null != transform) && (transform.name != name)) {
+			transform = transform.parent;
+		}
+		return transform;
 	}
 
 	/// <summary>
@@ -104,7 +105,7 @@ public class AvatarSettingScript
 	/// </summary>
 	/// <param name="transform">対象のボーン</param>
 	/// <returns>Z軸のみを回転させるQuaternion</returns>
-	Quaternion ResetHorizontalPose(Transform transform, Transform child_transform)
+	static Quaternion ResetHorizontalPose(Transform transform, Transform child_transform)
 	{
 		// ボーンの向きを取得
 		var bone_vector = child_transform.position - transform.position;
@@ -122,14 +123,17 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
-	/// 腕全体を平行にする処理
+	/// 腕全体を水平にする処理
 	/// </summary>
-	/// <param name="shoulder">肩ボーン</param>
-	void StartResettingHorizontal(Transform shoulder)
+	/// <param name="wrist">手首ボーン</param>
+	/// <param name="hinge_name">ひじボーン名</param>
+	/// <param name="arm_name">腕ボーン名</param>
+	/// <param name="shoulder_name">肩ボーン名</param>
+	static void StartResettingHorizontal(Transform wrist, string hinge_name, string arm_name, string shoulder_name)
 	{
-		var arm   = SelectBranchedChildWhereManyChildren(shoulder);
-		var hinge = SelectBranchedChildWhereManyChildren(arm);
-		var wrist = SelectBranchedChildWhereManyChildren(hinge);
+		var hinge		= FindTransformUpwards(wrist,	hinge_name);
+		var arm			= FindTransformUpwards(hinge,	arm_name);
+		var shoulder	= FindTransformUpwards(arm,		shoulder_name);
 		shoulder.transform.localRotation = ResetHorizontalPose(shoulder, arm);
 		arm.transform.localRotation		 = ResetHorizontalPose(arm,		 hinge);
 		hinge.transform.localRotation	 = ResetHorizontalPose(hinge,	 wrist);
@@ -142,9 +146,11 @@ public class AvatarSettingScript
 	void SetRequirePose(Transform transform)
 	{
 		switch (transform.name) {
-		case "左肩": goto case "右肩";
-		case "右肩":	//Tポーズにする為に腕を持ち上げる
-			StartResettingHorizontal(transform);
+		case "左手首":	//Tポーズにする為に腕を持ち上げる
+			StartResettingHorizontal(transform, "左ひじ", "左腕", "左肩");
+			break;
+		case "右手首":	//Tポーズにする為に腕を持ち上げる
+			StartResettingHorizontal(transform, "右ひじ", "右腕", "右肩");
 			break;
 		case "腰": goto case "センター";
 		case "センター":
