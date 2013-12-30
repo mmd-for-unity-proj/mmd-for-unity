@@ -37,7 +37,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-NoCastShadow"
 		// Settings
 		Tags
 		{
-			"Queue" = "Transparent+1"
+			"Queue" = "Transparent"
 			"RenderType" = "Transparent"
 		}
 		

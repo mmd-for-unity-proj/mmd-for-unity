@@ -13,6 +13,8 @@ public class MMDEngine : MonoBehaviour {
 #if UNITY_EDITOR
 	public float outline_width;				//エッジ幅係数(エディタ用)
 	public float[] material_outline_widths; //材質のエッジ幅(エディタ用)
+	public bool enable_render_queue;		//カスタムレンダーキューの使用
+	public int render_queue_value;			//カスタムレンダーキュー値
 #endif
 	
 	// 訳があってこうなってる
