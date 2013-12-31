@@ -89,7 +89,7 @@ namespace MMD
 			// Mecanim設定
 			if (use_mecanim_) {
 				AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
-				avatar_setting.SettingAvatar();
+				avatar_setting.SettingHumanAvatar();
 				
 				string path = format_.folder + "/";
 				string name = GetFilePathString(format_.name);

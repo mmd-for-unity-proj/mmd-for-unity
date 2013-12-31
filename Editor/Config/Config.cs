@@ -113,7 +113,7 @@ namespace MMD
     public class DefaultPMDImportConfig : ConfigBase
     {
         public PMDConverter.ShaderType shader_type = PMDConverter.ShaderType.MMDShader;
-        public bool use_mecanim = false;
+        public PMXConverter.AnimationType animation_type = PMXConverter.AnimationType.LegacyAnimation;
         public bool rigidFlag = true;
         public bool use_ik = true;
         public float scale = 0.085f;
@@ -130,7 +130,7 @@ namespace MMD
                 {
                     shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
                     rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
-					use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);	// ここfalseになってたけど理由があるのかわからない
+                    animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
                     use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
                     is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
                 }

@@ -12,7 +12,7 @@ namespace MMD
         // PMD Load option
         public PMDConverter.ShaderType shader_type;
         public bool rigidFlag;
-        public bool use_mecanim;
+        public PMXConverter.AnimationType animation_type;
         public bool use_ik;
         public float scale;
         public bool is_pmx_base_import;
@@ -30,7 +30,7 @@ namespace MMD
 			var config = MMD.Config.LoadAndCreate();
             shader_type = config.pmd_config.shader_type;
             rigidFlag = config.pmd_config.rigidFlag;
-            use_mecanim = config.pmd_config.use_mecanim;
+            animation_type = config.pmd_config.animation_type;
             use_ik = config.pmd_config.use_ik;
             scale = config.pmd_config.scale;
             is_pmx_base_import = config.pmd_config.is_pmx_base_import;
@@ -64,7 +64,7 @@ namespace MMD
             rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
 
             // Mecanimを使うかどうか
-            use_mecanim = EditorGUILayout.Toggle("Use Mecanim", use_mecanim);
+            animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
 
             // IKを使うかどうか
             use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
@@ -100,7 +100,7 @@ namespace MMD
 						var obj = (PMDScriptableObject)target;
                         model_agent = new ModelAgent(obj.assetPath);
                     }
-                    model_agent.CreatePrefab(shader_type, rigidFlag, use_mecanim, use_ik, scale, is_pmx_base_import);
+                    model_agent.CreatePrefab(shader_type, rigidFlag, animation_type, use_ik, scale, is_pmx_base_import);
                     message = "Loading done.";
                 }
             }

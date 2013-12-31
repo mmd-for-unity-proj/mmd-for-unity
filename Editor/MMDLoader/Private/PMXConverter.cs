@@ -9,17 +9,26 @@ namespace MMD
 	public class PMXConverter : System.IDisposable
 	{
 		/// <summary>
+		/// アニメーションタイプ
+		/// </summary>
+		public enum AnimationType {
+			GenericMecanim,		//汎用アバターでのMecanim
+			HumanMecanim,		//人型アバターでのMecanim
+			LegacyAnimation,	//旧式アニメーション
+		}
+		
+		/// <summary>
 		/// GameObjectを作成する
 		/// </summary>
 		/// <param name='format'>内部形式データ</param>
 		/// <param name='use_rigidbody'>剛体を使用するか</param>
-		/// <param name='use_mecanim'>Mecanimを使用するか</param>
+		/// <param name='animation_type'>アニメーションタイプ</param>
 		/// <param name='use_ik'>IKを使用するか</param>
 		/// <param name='scale'>スケール</param>
-		public static GameObject CreateGameObject(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
+		public static GameObject CreateGameObject(PMXFormat format, bool use_rigidbody, AnimationType animation_type, bool use_ik, float scale) {
 			GameObject result;
 			using (PMXConverter converter = new PMXConverter()) {
-				result = converter.CreateGameObject_(format, use_rigidbody, use_mecanim, use_ik, scale);
+				result = converter.CreateGameObject_(format, use_rigidbody, animation_type, use_ik, scale);
 			}
 			return result;
 		}
@@ -47,13 +56,11 @@ namespace MMD
 		/// </summary>
 		/// <param name='format'>内部形式データ</param>
 		/// <param name='use_rigidbody'>剛体を使用するか</param>
-		/// <param name='use_mecanim'>Mecanimを使用するか</param>
+		/// <param name='animation_type'>アニメーションタイプ</param>
 		/// <param name='use_ik'>IKを使用するか</param>
 		/// <param name='scale'>スケール</param>
-		private GameObject CreateGameObject_(PMXFormat format, bool use_rigidbody, bool use_mecanim, bool use_ik, float scale) {
+		private GameObject CreateGameObject_(PMXFormat format, bool use_rigidbody, AnimationType animation_type, bool use_ik, float scale) {
 			format_ = format;
-			use_rigidbody_ = use_rigidbody;
-			use_mecanim_ = use_mecanim;
 			use_ik_ = use_ik;
 			scale_ = scale;
 			root_game_object_ = new GameObject(format_.meta_header.name);
@@ -83,7 +90,7 @@ namespace MMD
 			}
 	
 			// 剛体関連
-			if (use_rigidbody_) {
+			if (use_rigidbody) {
 				GameObject[] rigids = CreateRigids();
 				AssignRigidbodyToBone(bones, rigids);
 				SetRigidsSettings(bones, rigids);
@@ -98,10 +105,19 @@ namespace MMD
 			}
 	
 			// Mecanim設定
-			if (use_mecanim_) {
+			if (AnimationType.LegacyAnimation != animation_type) {
 				//アニメーター追加
 				AvatarSettingScript avatar_setting = new AvatarSettingScript(root_game_object_, bones);
-				avatar_setting.SettingAvatar();
+				switch (animation_type) {
+				case AnimationType.GenericMecanim: //汎用アバターでのMecanim
+					avatar_setting.SettingGenericAvatar();
+					break;
+				case AnimationType.HumanMecanim: //人型アバターでのMecanim
+					avatar_setting.SettingHumanAvatar();
+					break;
+				default:
+					throw new System.ArgumentException();
+				}
 				
 				string path = format_.meta_header.folder + "/";
 				string name = GetFilePathString(format_.meta_header.name);
@@ -2020,8 +2036,6 @@ namespace MMD
 
 		GameObject				root_game_object_;
 		PMXFormat				format_;
-		bool					use_rigidbody_;
-		bool					use_mecanim_;
 		bool					use_ik_;
 		float					scale_;
 		AlphaReadableTexture	alpha_readable_texture_ = null;
