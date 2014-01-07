@@ -1,13 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using UnityEditor;
-using MMD.PMD;
 
 public class PMDLoaderWindow : EditorWindow {
 	Object pmdFile = null;
 	bool rigidFlag = true;
 	bool use_mecanim = false;
-	PMDConverter.ShaderType shader_type = PMDConverter.ShaderType.MMDShader;
+	MMD.PMDConverter.ShaderType shader_type = MMD.PMDConverter.ShaderType.MMDShader;
 
 	bool use_ik = true;
 	float scale = 0.085f;
