@@ -18,15 +18,37 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
-	/// アバダーを設定する
+	/// 汎用アバダーを設定する
 	/// </summary>
 	/// <returns>アニメーター</returns>
-	/// <param name='root_game_object'>ルートゲームオブジェクト</param>
-	/// <param name='bones'>ボーンのゲームオブジェクト</param>
+	public Animator SettingGenericAvatar() {
+		//アバタールートトランスフォームの取得
+		Transform avatar_root_transform = root_game_object_.transform.FindChild("Model");
+		if (null == avatar_root_transform) {
+			//ルートゲームオブジェクト直下にモデルルートオブジェクトが無い(PMDConverter)なら
+			//ルートゲームオブジェクトをアバタールートオブジェクトとする
+			avatar_root_transform = root_game_object_.transform;
+		}
+		
+		//ジェネリックアバター作成
+		string root_name = ((HasBone("全ての親"))? "全ての親": "");
+		avatar_ = AvatarBuilder.BuildGenericAvatar(avatar_root_transform.gameObject, root_name);
+		
+		//アバターをアニメーターに設定
+		animator_ = root_game_object_.AddComponent<Animator>();
+		animator_.avatar = avatar_;
+		
+		return animator_;
+	}
+
+	/// <summary>
+	/// 人型アバダーを設定する
+	/// </summary>
+	/// <returns>アニメーター</returns>
 	/// <remarks>
 	/// モデルに依ってボーン構成に差が有るが、MMD標準モデルとの一致を優先する
 	/// </remarks>
-	public Animator SettingAvatar() {
+	public Animator SettingHumanAvatar() {
 		//生成済みのボーンをUnity推奨ポーズに設定
 		SetRequirePose();
 		

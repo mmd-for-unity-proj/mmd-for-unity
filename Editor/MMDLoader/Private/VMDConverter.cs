@@ -53,6 +53,8 @@ namespace MMD
 
 			CreateKeysForSkin(format, clip);	// 表情の追加
 			
+			SetAnimationType(clip, assign_pmd); //アニメーションタイプの設定
+			
 			return clip;
 		}
 
@@ -535,6 +537,25 @@ namespace MMD
 			}
 		}
 
+		/// <summary>
+		/// アニメーションタイプの設定
+		/// </summary>
+		/// <param name="clip">設定するアニメーションクリップ.</param>
+		/// <param name="engine">設定の為に参照するAnimatorを持つゲームオブジェクト</param>
+		static void SetAnimationType(AnimationClip clip, GameObject game_object)
+		{
+			ModelImporterAnimationType animation_type;
+			Animator animator = game_object.GetComponent<Animator>();
+			if (null == animator) {
+				animation_type = ModelImporterAnimationType.Legacy;
+			} else if ((null == animator.avatar) && animator.avatar.isHuman) {
+				animation_type = ModelImporterAnimationType.Human;
+			} else {
+				animation_type = ModelImporterAnimationType.Generic;
+			}
+			AnimationUtility.SetAnimationType(clip, animation_type);
+		}
+		
 		private float scale_ = 1.0f;
 	}
 }
