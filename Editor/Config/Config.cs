@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
@@ -13,21 +13,25 @@ namespace MMD
     [Serializable]
     public class Config : ScriptableObject
     {
-        public InspectorConfig inspector_config;
-        public DefaultPMDImportConfig pmd_config;
-        public DefaultVMDImportConfig vmd_config;
+        static Config config_ = null;
+        public InspectorConfig inspector_config = null;
+        public PMDImportConfig pmd_config = null;
+        public VMDImportConfig vmd_config = null;
 
-        private List<ConfigBase> update_list;
+        private List<ConfigBase> update_list = null;
         public void OnEnable()
         {
-            // Inspectorで編集をさせない
-            hideFlags = HideFlags.NotEditable;
+            if (inspector_config == null)
+            {
+                inspector_config = new InspectorConfig();
+            }
             if (pmd_config == null)
             {
-                // ここで初期化処理を書く
-                pmd_config = new DefaultPMDImportConfig();
-                vmd_config = new DefaultVMDImportConfig();
-                inspector_config = new InspectorConfig();
+                pmd_config = new PMDImportConfig();
+            }
+            if (vmd_config == null)
+            {
+                vmd_config = new VMDImportConfig();
             }
             if (update_list == null)
             {
@@ -36,6 +40,8 @@ namespace MMD
                 update_list.Add(pmd_config);
                 update_list.Add(vmd_config);
             }
+
+            hideFlags = HideFlags.None; //以前の書き換え不可assetが残っているかもしれないので明示的に書き換え可能を設定
         }
 
         /// <summary>
@@ -48,6 +54,11 @@ namespace MMD
             {
                 item.OnGUI();
             });
+
+            //変更確認
+            if (GUI.changed) {
+                EditorUtility.SetDirty(config_);
+            }
         }
 
         /// <summary>
@@ -67,17 +78,20 @@ namespace MMD
         /// <returns>読み込んで生成したConfigオブジェクト</returns>
         public static Config LoadAndCreate()
         {
-            var path = Config.GetConfigPath();
-            var config = (Config)AssetDatabase.LoadAssetAtPath(path, typeof(Config));
-
-            //// なかったら作成する
-            if (config == null)
+            if (config_ == null)
             {
-                config = CreateInstance<Config>();
-                AssetDatabase.CreateAsset(config, path);
-                EditorUtility.SetDirty(config);
+                var path = Config.GetConfigPath();
+                config_ = (Config)AssetDatabase.LoadAssetAtPath(path, typeof(Config));
+                
+                //// なかったら作成する
+                if (config_ == null)
+                {
+                    config_ = CreateInstance<Config>();
+                    AssetDatabase.CreateAsset(config_, path);
+                    EditorUtility.SetDirty(config_);
+                }
             }
-            return config;
+            return config_;
         }
     }
 
@@ -87,79 +101,94 @@ namespace MMD
     [Serializable]
     public class InspectorConfig : ConfigBase
     {
-        public bool use_pmd_preload = false;
-        public bool use_vmd_preload = false;
+        public bool use_pmd_preload = true;
+        public bool use_vmd_preload = true;
 
-        public InspectorConfig()
+        public override string GetTitle()
         {
-            this.title = "Inspector Config";
+            return "Inspector Config";
         }
 
-        public override void OnGUI()
+        public override void OnGUIFunction()
         {
-            base.OnGUI(() =>
-                {
-                    use_pmd_preload = EditorGUILayout.Toggle("Use PMD Preload", use_pmd_preload);
-                    use_vmd_preload = EditorGUILayout.Toggle("Use VMD Preload", use_vmd_preload);
-                }
-            );
+            use_pmd_preload = EditorGUILayout.Toggle("Use PMD Preload", use_pmd_preload);
+            use_vmd_preload = EditorGUILayout.Toggle("Use VMD Preload", use_vmd_preload);
+        }
+
+        public InspectorConfig Clone()
+        {
+            return (InspectorConfig)MemberwiseClone();
         }
     }
 
     /// <summary>
-    /// PMDインポートのデフォルトコンフィグ
+    /// PMDインポートのコンフィグ
     /// </summary>
     [Serializable]
-    public class DefaultPMDImportConfig : ConfigBase
+    public class PMDImportConfig : ConfigBase
     {
         public PMDConverter.ShaderType shader_type = PMDConverter.ShaderType.MMDShader;
         public PMXConverter.AnimationType animation_type = PMXConverter.AnimationType.LegacyAnimation;
         public bool rigidFlag = true;
         public bool use_ik = true;
         public float scale = 0.085f;
-        public bool is_pmx_base_import = false;
+        public bool is_pmx_base_import = true;
 
-        public DefaultPMDImportConfig()
+        public override string GetTitle()
         {
-            this.title = "Default PMD Import Config";
+            return "Default PMD Import Config";
         }
 
-        public override void OnGUI()
+        public override void OnGUIFunction()
         {
-            base.OnGUI(() =>
-                {
-                    shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
-                    rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
-                    animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
-                    use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
-                    is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
+            shader_type = (PMDConverter.ShaderType)EditorGUILayout.EnumPopup("Shader Type", shader_type);
+            rigidFlag = EditorGUILayout.Toggle("Rigidbody", rigidFlag);
+            animation_type = (PMXConverter.AnimationType)EditorGUILayout.EnumPopup("Animation Type", animation_type);
+            use_ik = EditorGUILayout.Toggle("Use IK", use_ik);
+            scale = EditorGUILayout.Slider("Scale", scale, 0.001f, 1.0f);
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.PrefixLabel(" ");
+                if (GUILayout.Button("Original", EditorStyles.miniButtonLeft)) {
+                    scale = 0.085f;
                 }
-            );
+                if (GUILayout.Button("1.0", EditorStyles.miniButtonRight)) {
+                    scale = 1.0f;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            is_pmx_base_import = EditorGUILayout.Toggle("Use PMX Base Import", is_pmx_base_import);
+        }
+
+        public PMDImportConfig Clone()
+        {
+            return (PMDImportConfig)MemberwiseClone();
         }
     }
 
     /// <summary>
-    /// VMDインポートのデフォルトコンフィグ
+    /// VMDインポートのコンフィグ
     /// </summary>
     [Serializable]
-    public class DefaultVMDImportConfig : ConfigBase
+    public class VMDImportConfig : ConfigBase
     {
-        public bool createAnimationFile;
-        public int interpolationQuality;
+        public bool createAnimationFile = false;
+        public int interpolationQuality = 1;
 
-        public DefaultVMDImportConfig()
+        public override string GetTitle()
         {
-            this.title = "Default VMD Import Config";
+            return "Default VMD Import Config";
         }
 
-        public override void OnGUI()
+        public override void OnGUIFunction()
         {
-            base.OnGUI(() =>
-                {
-                    createAnimationFile = EditorGUILayout.Toggle("Create Asset", createAnimationFile);
-                    interpolationQuality = EditorGUILayout.IntSlider("Interpolation Quality", interpolationQuality, 1, 10);
-                }
-            );
+            createAnimationFile = EditorGUILayout.Toggle("Create Asset", createAnimationFile);
+            interpolationQuality = EditorGUILayout.IntSlider("Interpolation Quality", interpolationQuality, 1, 10);
+        }
+
+        public VMDImportConfig Clone()
+        {
+            return (VMDImportConfig)MemberwiseClone();
         }
     }
 
@@ -169,11 +198,6 @@ namespace MMD
     public class ConfigBase
     {
         /// <summary>
-        /// このコンフィグのタイトルを指定します
-        /// </summary>
-        protected string title = "";
-
-        /// <summary>
         /// 開け閉めの状態
         /// </summary>
         private bool fold = true;
@@ -181,19 +205,28 @@ namespace MMD
         /// <summary>
         /// GUI処理を行います
         /// </summary>
-        /// <param name="OnGUIFunction">引数・戻り値なしのラムダ式</param>
-        public void OnGUI(Action OnGUIFunction)
+        public void OnGUI()
         {
+            var title = GetTitle();
             fold = EditorGUILayout.Foldout(fold, title);
-            if (fold)
+            if (fold) {
                 OnGUIFunction();
+            }
             EditorGUILayout.Space();
+        }
+
+        /// <summary>
+        /// このコンフィグのタイトルを取得します
+        /// </summary>
+        public virtual string GetTitle()
+        {
+            return "";
         }
 
         /// <summary>
         /// GUI処理を行います
         /// </summary>
-        public virtual void OnGUI()
+        public virtual void OnGUIFunction()
         {
         }
     }

@@ -12,32 +12,43 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-#if !(UNITY_3_5 || UNITY_3_4 || UNITY_3_3)
-
 namespace MMD
 {
-    public class InspectorBase : Editor
-    {
+	[InitializeOnLoad]
+	public class InspectorBase : Editor
+	{
+		static InspectorBase()
+		{
+			EntryEditorApplicationUpdate();
+		}
+
 		[DidReloadScripts]
 		static void OnDidReloadScripts()
 		{
-			EditorApplication.update += () =>
-			{
-				if (Selection.objects.Length != 0)
-				{
-					string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-					string extension = Path.GetExtension(path).ToLower();
+			EntryEditorApplicationUpdate();
+		}
 
-					if (extension == ".pmd" || extension == ".pmx")
-					{
-						SetupScriptableObject<PMDScriptableObject>(path);
-					}
-					else if (extension == ".vmd")
-					{
-						SetupScriptableObject<VMDScriptableObject>(path);
-					}
+		static void EntryEditorApplicationUpdate()
+		{
+			EditorApplication.update += Update;
+		}
+
+		static void Update()
+		{
+			if (Selection.objects.Length != 0)
+			{
+				string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+				string extension = Path.GetExtension(path).ToLower();
+
+				if (extension == ".pmd" || extension == ".pmx")
+				{
+					SetupScriptableObject<PMDScriptableObject>(path);
 				}
-			};
+				else if (extension == ".vmd")
+				{
+					SetupScriptableObject<VMDScriptableObject>(path);
+				}
+			}
 		}
 
 		static void SetupScriptableObject<T>(string path) where T : ScriptableObjectBase
@@ -49,8 +60,7 @@ namespace MMD
 			Selection.activeObject = scriptableObject;
 			EditorUtility.UnloadUnusedAssets();
 		}
-    }
+	}
 }
 
-#endif
 #endif
