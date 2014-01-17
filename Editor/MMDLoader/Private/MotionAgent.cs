@@ -2,7 +2,6 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
-using MMD.VMD;
 
 namespace MMD {
 	
@@ -83,8 +82,8 @@ namespace MMD {
 			}
 			return result;
 		}}
-		string 				file_path_;
-		VMDFormat.Header	header_;
-		VMDFormat			format_;
+		string					file_path_;
+		VMD.VMDFormat.Header	header_;
+		VMD.VMDFormat			format_;
 	}
 }

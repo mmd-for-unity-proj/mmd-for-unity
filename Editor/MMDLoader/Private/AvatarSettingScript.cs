@@ -1,6 +1,4 @@
-﻿#if UNITY_4_2
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +18,37 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
-	/// アバダーを設定する
+	/// 汎用アバダーを設定する
 	/// </summary>
 	/// <returns>アニメーター</returns>
-	/// <param name='root_game_object'>ルートゲームオブジェクト</param>
-	/// <param name='bones'>ボーンのゲームオブジェクト</param>
+	public Animator SettingGenericAvatar() {
+		//アバタールートトランスフォームの取得
+		Transform avatar_root_transform = root_game_object_.transform.FindChild("Model");
+		if (null == avatar_root_transform) {
+			//ルートゲームオブジェクト直下にモデルルートオブジェクトが無い(PMDConverter)なら
+			//ルートゲームオブジェクトをアバタールートオブジェクトとする
+			avatar_root_transform = root_game_object_.transform;
+		}
+		
+		//ジェネリックアバター作成
+		string root_name = ((HasBone("全ての親"))? "全ての親": "");
+		avatar_ = AvatarBuilder.BuildGenericAvatar(avatar_root_transform.gameObject, root_name);
+		
+		//アバターをアニメーターに設定
+		animator_ = root_game_object_.AddComponent<Animator>();
+		animator_.avatar = avatar_;
+		
+		return animator_;
+	}
+
+	/// <summary>
+	/// 人型アバダーを設定する
+	/// </summary>
+	/// <returns>アニメーター</returns>
 	/// <remarks>
 	/// モデルに依ってボーン構成に差が有るが、MMD標準モデルとの一致を優先する
 	/// </remarks>
-	public Animator SettingAvatar() {
+	public Animator SettingHumanAvatar() {
 		//生成済みのボーンをUnity推奨ポーズに設定
 		SetRequirePose();
 		
@@ -86,23 +106,73 @@ public class AvatarSettingScript
 	}
 
 	/// <summary>
+	/// 特定の名前を持つボーンを先代から選び出す
+	/// </summary>
+	/// <param name="transform">基点のボーン</param>
+	/// <param name="name">対象のボーン名</param>
+	/// <returns>対象の先代ボーン</returns>
+	/// <remarks>
+	/// 基点ボーンが探索名なら基点ボーンを返す。
+	/// </remarks>
+	static Transform FindTransformUpwards(Transform transform, string name)
+	{
+		while ((null != transform) && (transform.name != name)) {
+			transform = transform.parent;
+		}
+		return transform;
+	}
+
+	/// <summary>
+	/// 親子関係を見てボーンを水平にする
+	/// </summary>
+	/// <param name="transform">対象のボーン</param>
+	/// <returns>Z軸のみを回転させるQuaternion</returns>
+	static Quaternion ResetHorizontalPose(Transform transform, Transform child_transform)
+	{
+		// ボーンの向きを取得
+		var bone_vector = child_transform.position - transform.position;
+		bone_vector.z = 0f;			// 平面化
+		bone_vector.Normalize();
+
+		// 平面化した正規化ベクトルと単位ベクトルを比較して，角度を取得する
+		Vector3 normalized_vector = bone_vector.x >= 0 ? Vector3.right : Vector3.left;
+		float cos_value = Vector3.Dot(bone_vector, normalized_vector);
+		float theta = Mathf.Acos(cos_value) * Mathf.Rad2Deg;
+
+		theta = bone_vector.x >= 0 ? -theta : theta;	// ボーンの向きによって回転方向が違う
+
+		return Quaternion.Euler(0f, 0f, theta);
+	}
+
+	/// <summary>
+	/// 腕全体を水平にする処理
+	/// </summary>
+	/// <param name="wrist">手首ボーン</param>
+	/// <param name="hinge_name">ひじボーン名</param>
+	/// <param name="arm_name">腕ボーン名</param>
+	/// <param name="shoulder_name">肩ボーン名</param>
+	static void StartResettingHorizontal(Transform wrist, string hinge_name, string arm_name, string shoulder_name)
+	{
+		var hinge		= FindTransformUpwards(wrist,	hinge_name);
+		var arm			= FindTransformUpwards(hinge,	arm_name);
+		var shoulder	= FindTransformUpwards(arm,		shoulder_name);
+		shoulder.transform.localRotation = ResetHorizontalPose(shoulder, arm);
+		arm.transform.localRotation		 = ResetHorizontalPose(arm,		 hinge);
+		hinge.transform.localRotation	 = ResetHorizontalPose(hinge,	 wrist);
+	}
+
+	/// <summary>
 	/// 生成済みのボーンをUnity推奨ポーズに設定
 	/// </summary>
 	/// <param name='transform'>ボーンのトランスフォーム</param>
 	void SetRequirePose(Transform transform)
 	{
 		switch (transform.name) {
-		case "左肩":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 9.0f);
+		case "左手首":	//Tポーズにする為に腕を持ち上げる
+			StartResettingHorizontal(transform, "左ひじ", "左腕", "左肩");
 			break;
-		case "右肩":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -9.0f);
-			break;
-		case "左腕":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 27.0f);
-			break;
-		case "右腕":	//Tポーズにする為に腕を持ち上げる
-			transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -27.0f);
+		case "右手首":	//Tポーズにする為に腕を持ち上げる
+			StartResettingHorizontal(transform, "右ひじ", "右腕", "右肩");
 			break;
 		case "腰": goto case "センター";
 		case "センター":
@@ -130,8 +200,7 @@ public class AvatarSettingScript
 	/// <returns>true:ボーンが存在する, false:ボーンが存在しない</returns>
 	/// <param name='name'>ボーン名</param>
 	bool HasBone(string name) {
-		int count = bones_.Where(x=>x.name == name).Count();
-		return 0 < count;
+		return bones_.Any(x=>x.name == name);
 	}
 
 	/// <summary>
@@ -245,15 +314,32 @@ public class AvatarSettingScript
 	/// <returns>スケルトンボーン</returns>
 	SkeletonBone[] CreateSkeletonBone()
 	{
-		return bones_.Select(x=>{
-								SkeletonBone skeleton_bone = new SkeletonBone();
-								skeleton_bone.name = x.name;
-								Transform transform = x.transform;
-								skeleton_bone.position = transform.localPosition;
-								skeleton_bone.rotation = transform.localRotation;
-								skeleton_bone.scale = transform.localScale;
-								return skeleton_bone;
-							}).ToArray();
+		IEnumerable<GameObject> bones_enumerator = bones_;
+
+		//Hipsボーンの親ボーン迄SkeletonBoneに入れる必要が有るので、確認と追加
+		string hips_bone_name = ((HasBone("腰"))? "腰": "センター");
+		Transform hips_parent_bone = bones_.Where(x=>x.name == hips_bone_name).Select(x=>x.transform.parent).FirstOrDefault();
+		if (null != hips_parent_bone) {
+			//Hipsボーンの親ボーンが有るなら
+			//Hipsボーンの親ボーンがbones_に含まれているか確認する
+			if (!HasBone(hips_parent_bone.name)) {
+				//Hipsボーンの親ボーンがbones_に無いなら
+				//追加(Hipsボーン依りも前に追加しないといけないので注意)
+				bones_enumerator = Enumerable.Repeat(hips_parent_bone.gameObject, 1)
+											.Concat(bones_enumerator);
+			}
+		}
+
+		var result = bones_enumerator.Select(x=>{
+												SkeletonBone skeleton_bone = new SkeletonBone();
+												skeleton_bone.name = x.name;
+												Transform transform = x.transform;
+												skeleton_bone.position = transform.localPosition;
+												skeleton_bone.rotation = transform.localRotation;
+												skeleton_bone.scale = transform.localScale;
+												return skeleton_bone;
+											});
+		return result.ToArray();
 	}
 
 	/// <summary>
@@ -271,5 +357,3 @@ public class AvatarSettingScript
 	Avatar			avatar_ = null;
 	Animator		animator_ = null;
 }
-
-#endif //UNITY_4_2

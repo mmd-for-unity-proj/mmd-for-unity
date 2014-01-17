@@ -6,12 +6,17 @@ using System.Linq;
 public class MMDEngine : MonoBehaviour {
 
 	public float scale = 1.0f;		//読み込みスケール
-	public float outline_width = 0.1f;
 	public bool useRigidbody = false;
 	public int[] groupTarget;		// 非衝突剛体リスト
 	public GameObject[] rigids;		// 剛体リスト
 	public GameObject[] joints;     // ConfigurableJointの入っているボーンのリスト
-
+#if UNITY_EDITOR
+	public float outline_width;				//エッジ幅係数(エディタ用)
+	public float[] material_outline_widths; //材質のエッジ幅(エディタ用)
+	public bool enable_render_queue;		//カスタムレンダーキューの使用
+	public int render_queue_value;			//カスタムレンダーキュー値
+#endif
+	
 	// 訳があってこうなってる
 	public int[] ignore1;
 	public int[] ignore2;
@@ -39,12 +44,6 @@ public class MMDEngine : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		SkinnedMeshRenderer[] renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-		foreach (var m in renderers.SelectMany(x=>x.sharedMaterials))
-		{
-			m.SetFloat("_OutlineWidth", this.outline_width);
-		}
-
 		if (useRigidbody)
 		{
 			ignoreList = new List<int[]>();

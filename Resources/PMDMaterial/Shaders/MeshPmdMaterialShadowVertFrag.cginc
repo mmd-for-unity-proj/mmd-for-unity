@@ -15,10 +15,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-float4 _Color;
 float _Opacity;
-float4 _OutlineColor;
-float _OutlineWidth;
+sampler2D _MainTex;
+float4 _MainTex_ST;
 
 struct v2f
 {
@@ -26,18 +25,16 @@ struct v2f
 	float2 uv  : TEXCOORD0;
 };
 
-v2f vert( appdata_base v )
+v2f shadow_vert( appdata_img v )
 {
 	v2f o;
-	float4 pos = mul(UNITY_MATRIX_MVP, v.vertex);
-	float4 normal = mul(UNITY_MATRIX_MVP, float4(v.normal, 0.0));
-	float width = _OutlineWidth / 1024.0; //目コピ調整値(算術根拠無し)
-	float depth_offset = pos.z / 4194304.0; //僅かに奥に移動(floatの仮数部は23bitなので(1<<21)程度で割った値は丸めに入らないが非常に小さな値の筈)
-	o.pos = pos + normal * float4(width, width, 0.0, 0.0) + float4(0.0, 0.0, depth_offset, 0.0);
-
+	o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 	return o;
 }
-half4 frag( v2f i ) : COLOR
+
+half4 shadow_frag( v2f i ) : COLOR
 {
-	return half4( _OutlineColor.rgb, _OutlineColor.a * _Opacity );
+	float4 tex_color = tex2D(_MainTex, i.uv);
+	return half4(0, 0, 0, tex_color.a * _Opacity);
 }

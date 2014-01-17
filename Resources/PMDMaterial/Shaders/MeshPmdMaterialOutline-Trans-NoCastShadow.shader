@@ -37,7 +37,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-NoCastShadow"
 		// Settings
 		Tags
 		{
-			"Queue" = "Transparent+1"
+			"Queue" = "Transparent"
 			"RenderType" = "Transparent"
 		}
 		
@@ -45,6 +45,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-NoCastShadow"
 		Cull Front
 		ZWrite On
 		Blend SrcAlpha OneMinusSrcAlpha
+		AlphaTest Greater 0.0
 		CGPROGRAM
 		#pragma surface surf MMD
 		#include "MeshPmdMaterialSurface.cginc"
@@ -54,6 +55,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-NoCastShadow"
 		Cull Back
 		ZWrite On
 		Blend SrcAlpha OneMinusSrcAlpha
+		AlphaTest Greater 0.0
 		CGPROGRAM
 		#pragma surface surf MMD
 		#include "MeshPmdMaterialSurface.cginc"
