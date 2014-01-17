@@ -26,7 +26,9 @@ MikuMikuDance for Unityの大きな特徴は，
 シームレスにMikuMikuDanceのデータをUnityへ取り込めることです．
 シンプルで手順の少ないUIは，マニュアルがなくとも勘で操作できそうなほど簡単にまとめています．
 
-
+# 動作環境
+- Unity 4.2以降
+- Windows7推奨，Mac OSの場合はBootcamp推奨
 
 # もくじ
 * [説明書](howto.html)
