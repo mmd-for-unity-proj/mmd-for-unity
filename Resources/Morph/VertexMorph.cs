@@ -4,8 +4,6 @@ using System.Linq;
 
 public class VertexMorph : MorphBase
 {
-	public MorphManager.PanelType	panel;
-	public int[]					indices;
 	public Vector3[]				values;
 	
 	private float			prev_weight_ = 0.0f;

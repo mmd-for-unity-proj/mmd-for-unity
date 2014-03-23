@@ -9,8 +9,6 @@ public class MaterialMorph : MorphBase
 		Add,
 	}
 
-	public MorphManager.PanelType		panel;
-	public int[]						indices;
 	public MaterialMorphParameter[]		values;
 	public OperationType[]				operation;
 	

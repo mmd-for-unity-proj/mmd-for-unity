@@ -4,8 +4,6 @@ using System.Linq;
 
 public class BoneMorph : MorphBase
 {
-	public MorphManager.PanelType	panel;
-	public int[]					indices;
 	public BoneMorphParameter[]		values;
 	
 	private float					prev_weight_ = 0.0f;

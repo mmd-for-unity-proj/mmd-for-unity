@@ -4,8 +4,6 @@ using System.Linq;
 
 public class GroupMorph : MorphBase
 {
-	public MorphManager.PanelType	panel;
-	public int[]					indices;
 	public float[]					values;
 	
 	private float			prev_weight_ = 0.0f;

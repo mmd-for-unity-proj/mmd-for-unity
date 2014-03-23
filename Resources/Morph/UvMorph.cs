@@ -4,8 +4,6 @@ using System.Linq;
 
 public class UvMorph : MorphBase
 {
-	public MorphManager.PanelType	panel;
-	public int[]					indices;
 	public Vector2[]				values;
 	
 	private float			prev_weight_ = 0.0f;

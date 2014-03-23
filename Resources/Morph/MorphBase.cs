@@ -4,7 +4,10 @@ using System.Linq;
 
 public class MorphBase : MonoBehaviour
 {
+    public int[] indices;
+
 	public float group_weight = 0.0f;
+    public MorphManager.PanelType panel;
 	
 	/// <summary>
 	/// ウェイト計算
