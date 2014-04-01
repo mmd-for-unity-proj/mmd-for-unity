@@ -10,4 +10,11 @@ public class VMDExporter
     {
         this.format = format;
     }
+
+    public byte[] ExportMorph()
+    {
+        byte[] header = format.header.ToBytes();
+
+        return null;
+    }
 }

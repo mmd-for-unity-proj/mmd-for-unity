@@ -740,6 +740,16 @@ namespace MMD
 			{
 				public string vmd_header; // 30byte, "Vocaloid Motion Data 0002"
 				public string vmd_model_name; // 20byte
+
+                public byte[] ToBytes()
+                {
+                    byte[] header = Encoding.ASCII.GetBytes(vmd_header);
+                    byte[] model_name = Encoding.GetEncoding("Shift_JIS").GetBytes(vmd_model_name);
+                    byte[] retarr = new byte[50];
+                    Array.Copy(header, 0, retarr, 0, 30);
+                    Array.Copy(header, 0, retarr, 30, 20);
+                    return retarr;
+                }
 			}
 			
 			public class MotionList
