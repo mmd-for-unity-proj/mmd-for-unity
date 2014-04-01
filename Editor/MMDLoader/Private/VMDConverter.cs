@@ -294,7 +294,7 @@ namespace MMD
 				for (int i = 0; i < mlist.Count; i++)
 				{
 					const float tick_time = 1.0f / 30.0f;
-					float tick = mlist[i].flame_no * tick_time;
+					float tick = mlist[i].frame_no * tick_time;
 					
 					Quaternion rotation=mlist[i].rotation;
 					QuaternionKeyframe r_cur_key=new QuaternionKeyframe(tick,rotation);
@@ -374,7 +374,7 @@ namespace MMD
 				{
 					const float tick_time = 1.0f / 30.0f;
 					
-					float tick = mlist[i].flame_no * tick_time;
+					float tick = mlist[i].frame_no * tick_time;
 					
 					FloatKeyframe lx_cur_key=new FloatKeyframe(tick,mlist[i].location.x * scale_ + default_position.x);
 					FloatKeyframe ly_cur_key=new FloatKeyframe(tick,mlist[i].location.y * scale_ + default_position.y);
@@ -428,7 +428,7 @@ namespace MMD
 				// キーフレームの登録を行う
 				for (int i = 0; i < skin.Value.Count; i++) 
 				{
-					keyframe[i] = new Keyframe(s[i].flame_no * tick_time, s[i].weight);
+					keyframe[i] = new Keyframe(s[i].frame_no * tick_time, s[i].weight);
 					//線形補間する
 					keyframe[i].tangentMode=TangentModeBothLinear;
 						if(i>0)

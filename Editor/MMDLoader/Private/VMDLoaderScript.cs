@@ -113,7 +113,7 @@ public class VMDLoaderScript {
 		for (int i = 0; i < result.motion_count; i++) {
 			buf[i] = ReadMotion();
 		}
-		Array.Sort(buf, (x,y)=>((int)x.flame_no-(int)y.flame_no));
+		Array.Sort(buf, (x,y)=>((int)x.frame_no-(int)y.frame_no));
 		
 		// モーションの数だけnewされないよね？
 		for (int i = 0; i < result.motion_count; i++) {
@@ -132,7 +132,7 @@ public class VMDLoaderScript {
 	private VMDFormat.Motion ReadMotion() {
 		VMDFormat.Motion result = new VMDFormat.Motion();
 		result.bone_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
-		result.flame_no = binary_reader_.ReadUInt32();
+		result.frame_no = binary_reader_.ReadUInt32();
 		result.location = ReadSinglesToVector3(binary_reader_);
 		result.rotation = ReadSinglesToQuaternion(binary_reader_);
 		result.interpolation = binary_reader_.ReadBytes(64);
@@ -152,7 +152,7 @@ public class VMDLoaderScript {
 		for (int i = 0; i < result.skin_count; i++) {
 			buf[i] = ReadSkinData();
 		}
-		Array.Sort(buf, (x,y)=>((int)x.flame_no-(int)y.flame_no));
+		Array.Sort(buf, (x,y)=>((int)x.frame_no-(int)y.frame_no));
 		
 		// 全てのモーションを探索し、利用されているボーンを特定する
 		for (int i = 0; i < result.skin_count; i++) {
@@ -173,7 +173,7 @@ public class VMDLoaderScript {
 	private VMDFormat.SkinData ReadSkinData() {
 		VMDFormat.SkinData result = new VMDFormat.SkinData();
 		result.skin_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
-		result.flame_no = binary_reader_.ReadUInt32();
+		result.frame_no = binary_reader_.ReadUInt32();
 		result.weight = binary_reader_.ReadSingle();
 		return result;
 	}
@@ -185,13 +185,13 @@ public class VMDLoaderScript {
 		for (int i = 0; i < result.camera_count; i++) {
 			result.camera[i] = ReadCameraData();
 		}
-		Array.Sort(result.camera, (x,y)=>((int)x.flame_no-(int)y.flame_no));
+		Array.Sort(result.camera, (x,y)=>((int)x.frame_no-(int)y.frame_no));
 		return result;
 	}
 	
 	private VMDFormat.CameraData ReadCameraData() {
 		VMDFormat.CameraData result = new VMDFormat.CameraData();
-		result.flame_no = binary_reader_.ReadUInt32();
+		result.frame_no = binary_reader_.ReadUInt32();
 		result.length = binary_reader_.ReadSingle();
 		result.location = ReadSinglesToVector3(binary_reader_);
 		result.rotation = ReadSinglesToVector3(binary_reader_);
@@ -209,13 +209,13 @@ public class VMDLoaderScript {
 			result.light[i] = ReadLightData();
 		}
 		
-		Array.Sort(result.light, (x,y)=>((int)x.flame_no-(int)y.flame_no));
+		Array.Sort(result.light, (x,y)=>((int)x.frame_no-(int)y.frame_no));
 		return result;
 	}
 	
 	private VMDFormat.LightData ReadLightData() {
 		VMDFormat.LightData result = new VMDFormat.LightData();
-		result.flame_no = binary_reader_.ReadUInt32();
+		result.frame_no = binary_reader_.ReadUInt32();
 		result.rgb = ReadSinglesToColor(binary_reader_, 1);
 		result.location = ReadSinglesToVector3(binary_reader_);
 		return result;
@@ -229,13 +229,13 @@ public class VMDLoaderScript {
 			result.self_shadow[i] = ReadSelfShadowData();
 		}
 		
-		Array.Sort(result.self_shadow, (x,y)=>((int)x.flame_no-(int)y.flame_no));
+		Array.Sort(result.self_shadow, (x,y)=>((int)x.frame_no-(int)y.frame_no));
 		return result;
 	}
 	
 	private VMDFormat.SelfShadowData ReadSelfShadowData() {
 		VMDFormat.SelfShadowData result = new VMDFormat.SelfShadowData();
-		result.flame_no = binary_reader_.ReadUInt32();
+		result.frame_no = binary_reader_.ReadUInt32();
 		result.mode = binary_reader_.ReadByte();
 		result.distance = binary_reader_.ReadSingle();
 		return result;
