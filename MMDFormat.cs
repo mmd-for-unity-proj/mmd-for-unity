@@ -854,6 +854,11 @@ namespace MMD
 			{
 				public uint camera_count;
 				public CameraData[] camera;
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			public class CameraData : IBinary
@@ -875,12 +880,22 @@ namespace MMD
 				{
 					this.interpolation[i*6+j] = val;
 				}
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			public class LightList : IBinary
 			{
 				public uint light_count;
 				public LightData[] light;
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			public class LightData : IBinary
@@ -888,12 +903,22 @@ namespace MMD
 				public uint frame_no;
 				public Color rgb;	// αなし, 256
 				public Vector3 location;
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			public class SelfShadowList : IBinary
 			{
 				public uint self_shadow_count;
 				public SelfShadowData[] self_shadow;
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			public class SelfShadowData : IBinary
@@ -901,6 +926,11 @@ namespace MMD
 				public uint frame_no;
 				public byte mode; //00-02
 				public float distance;	// 0.1 - (dist * 0.00001)
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 		}
 	}
