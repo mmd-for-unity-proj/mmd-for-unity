@@ -765,7 +765,8 @@ namespace MMD
                 public byte[] ToBytes()
                 {
                     byte[] count = BitConverter.GetBytes(motion_count);
-                    byte[] retarr = new byte[motion_count * 111];
+                    byte[] retarr = new byte[motion_count * 111 + 4];
+                    Array.Copy(count, 0, retarr, 0, 4);
 
                     int cnt = 0;
                     foreach (var mlist in motion)
@@ -773,7 +774,7 @@ namespace MMD
                         foreach (var m in mlist.Value)
                         {
                             byte[] bmotion = m.ToBytes();
-                            Array.Copy(bmotion, 0, retarr, cnt * 111, 111);
+                            Array.Copy(bmotion, 0, retarr, cnt * 111 + 4, 111);
                             cnt++;
                         }
                     }
@@ -821,6 +822,19 @@ namespace MMD
 				public string skin_name;	// 15byte
 				public uint frame_no;
 				public float weight;
+
+                public byte[] ToBytes()
+                {
+                    byte[] skin_name = Encoding.GetEncoding("Shift_JIS").GetBytes(this.skin_name);
+                    byte[] frame = BitConverter.GetBytes(frame_no);
+                    byte[] weight = BitConverter.GetBytes(this.weight);
+                    byte[] retarr = new byte[23];
+
+                    Array.Copy(skin_name, 0, retarr, 0, 15);
+                    Array.Copy(frame, 0, retarr, 15, 4);
+                    Array.Copy(weight, 0, retarr, 19, 4);
+                    return retarr;
+                }
 			}
 			
 			public class CameraList
