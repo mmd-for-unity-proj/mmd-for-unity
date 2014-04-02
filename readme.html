@@ -1,0 +1,129 @@
+<html>
+<head>
+<title>MikuMikuDance for Unity - readme</title>
+<style type="text/css">
+<!-- 
+	body { line-height: 1.2; font-family: serif; }
+	.chapter { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+	.mini-chapter { font-size: 17px; font-weight: bold;}
+	.content { padding-left: 2em; width: 800px; }
+-->
+</style>
+</head>
+<body>
+
+<div align="center" id="top">
+	<font size="7">MikuMikuDance for Unity</font>
+	
+	<br><br>
+	
+	<img alt="logo" src="logo.png" width="300"> 
+</div>
+
+<br><hr><br>
+
+<div class="chapter">目次</div><br>
+<div class="content">
+	<a href="#whatsmfu">MikuMikuDance for Unity?</a><br>
+	<a href="#usage">使い方</a><br>
+	<a href="#package">MikuMikuDance for Unityの中身</a><br>
+	<a href="#mmdmodels">モデルの利用に関して</a><br>
+	<a href="#license">ライセンス</a><br>
+	<a href="#disclaimer">免責</a><br>	
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="whatsmfu">MikuMikuDance for Unity?</div>
+<div class="content">
+	MikuMikuDance for Unityとは、ゲームエンジンのUnity上でMikuMikuDanceのモデルデータを動かしたり、
+	あるいはMikuMikuDanceでの制作をサポートするプロジェクトの名前です。
+	MikuMikuDance for UnityはUnityでMMDを動かす会によって運営され、開発が行われています。
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="usage">使い方</div>
+<div class="content">
+	MikuMikuDance for Unityの使い方に関する動画です。<br>
+	<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/sm16633743" scrolling="no" style="border:solid 1px #CCC;" frameborder="0"><a href="http://www.nicovideo.jp/watch/sm16633743"></iframe>
+	<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/sm16845088" scrolling="no" style="border:solid 1px #CCC;" frameborder="0"><a href="http://www.nicovideo.jp/watch/sm16845088"></iframe>
+	<br><br>
+	有志の方により、使い方やゲームの作り方も含めてブログ等でまとめられています。
+	作るときの参考にしてください。<br>
+	<a href="http://www.google.com/?q=MMD%20for%20Unity%20%8Eg%82%A2%95%FB" target="_blank">
+		検索「MMD for Unity 使い方」
+	</a>（外部リンク）
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="package">MikuMikuDance for Unityの中身</div>
+<div class="content">
+	MikuMikuDance for Unityに含まれるパッケージは以下の通りです。
+	<ul>
+		<li>MMD Loader</li>
+		<li>XFile Importer</li>
+		<li>Resources</li>
+	</ul>
+	<div class="mini-chapter">MMD Loader</div>
+	<div class="content">
+		MMD Loaderには2種類のスクリプトがあります。
+		MikuMikuDanceで扱われるモデルデータを読み込むPMD Loaderとモーションデータを読み込むVMD Loaderです。
+		読み込んだデータはプレハブ化され、Unityで扱える形式に変換されます。
+	</div>
+	<div class="mini-chapter">XFile Importer</div>
+	<div class="content">
+		Google Sketchupで変換されたXファイル形式のモデルデータを読み込むスクリプトです。
+		変換方法については以下の動画を参考にしてください。
+		<br><br>
+		<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/sm8320470" scrolling="no" style="border:solid 1px #CCC;" frameborder="0"><a href="http://www.nicovideo.jp/watch/sm8320470">【ニコニコ動画】Google3DからアクセをMMDに持ってきた</a></iframe>
+		<br><br>
+		（プラグインに関しては動画コメント下部のオススメのプラグインを使用してください。それ以外のプラグインは今のところ対応していません）
+	</div>
+	<div class="mini-chapter">Resources</div>
+	<div class="content">
+		動的に追加するために必要なアセットを入れてあります。
+	</div>
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="mmdmodels">モデルの利用に関して</div>
+<div class="content">
+	MikuMikuDance for Unityはあにまさ氏の許可のもと、
+	MikuMikuDanceに付属しているモデルデータを無制限での利用が認められています。
+	モデル及びモーションデータの利用に関するガイドラインはMikuMikuDanceに準拠しています。
+	パッケージ内に含まれないモデル及びモーションなどのデータの利用に関しては作成者との協議の上、利用してください。
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="license">ライセンス</div>
+<div class="content">
+	改変・再配布は自由です。<br>
+	利用した場合の報告は特に必要ありません。<br>
+	修正BSDライセンスに準拠していますが、ライセンス全文に関してはlicense.txtを参照してください。
+</div>
+
+<br><hr><br>
+
+<div class="chapter" id="disclaimer">免責</div>
+<div class="content">
+	MikuMikuDance for Unityはゲーム制作及びMikuMikuDanceによる動画制作を支援するために開発されたライブラリですが、
+	利用者の利用方法において被った損害についてはUnityでMMDを動かす会及び竹渕瑛一（GRGSIBERIA）はその責任を負いません。
+	MikuMikuDance for Unityは利用者ご自身の判断と責任において利用していただくものとします。<br>
+	また、利用者がモデル及びモーションなどの利用方法において被った損害についても同様と致します。
+</div>
+
+<br><hr><br>
+
+<div align="center">
+	<font size="2" color="#999999">
+		(C) UnityでMMDを動かす会<br>
+		<a href="#top">- TOPへ -</a>
+	</font>
+</div>
+
+</body>
+</html>
