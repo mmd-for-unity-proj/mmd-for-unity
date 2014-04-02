@@ -767,11 +767,14 @@ namespace MMD
                     byte[] count = BitConverter.GetBytes(motion_count);
                     byte[] retarr = new byte[motion_count * 111];
 
+                    int cnt = 0;
                     foreach (var mlist in motion)
                     {
                         foreach (var m in mlist.Value)
                         {
-                            
+                            byte[] bmotion = m.ToBytes();
+                            Array.Copy(bmotion, 0, retarr, cnt * 111, 111);
+                            cnt++;
                         }
                     }
 
