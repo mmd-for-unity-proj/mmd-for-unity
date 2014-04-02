@@ -31,5 +31,6 @@ MikuMikuDance for Unityの大きな特徴は，
 - Windows7推奨，Mac OSの場合はBootcamp推奨
 
 # もくじ
+* [ReadMe](readme.html)
 * [説明書](howto.html)
 * [チュートリアル](tutorial.html)
