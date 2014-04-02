@@ -11,6 +11,11 @@ using System.Text;
 
 namespace MMD
 {
+    public interface IBinary
+    {
+        byte[] ToBytes();
+    }
+
 	namespace PMX
 	{
 		// PMXフォーマットクラス
@@ -736,7 +741,7 @@ namespace MMD
 			public CameraList camera_list;
 			public SelfShadowList self_shadow_list;
 			
-			public class Header
+			public class Header : IBinary
 			{
 				public string vmd_header; // 30byte, "Vocaloid Motion Data 0002"
 				public string vmd_model_name; // 20byte
@@ -752,10 +757,12 @@ namespace MMD
                 }
 			}
 			
-			public class MotionList
+			public class MotionList : IBinary
 			{
 				public uint motion_count;
 				public Dictionary<string, List<Motion>> motion;
+
+
 			}
 			
 			public class Motion
