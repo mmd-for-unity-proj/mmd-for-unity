@@ -981,11 +981,12 @@ namespace MMD
                     byte[] frame = BitConverter.GetBytes(frame_no);
                     byte[] mode = { this.mode };
                     byte[] distance = BitConverter.GetBytes(this.distance);
-                    byte[] retarr = new byte[9];
-                    Array.Copy(frame, 0, retarr, 0, 4);
-                    Array.Copy(mode, 0, retarr, 4, 1);
-                    Array.Copy(distance, 0, retarr, 5, 4);
-                    return retarr;
+                    List<byte> retarr = new List<byte>();
+                    retarr.AddRange(frame);
+                    retarr.AddRange(mode);
+                    retarr.AddRange(distance);
+                    if (retarr.Count != 9) throw new IndexOutOfRangeException("セルフシャドウデータが9バイトちょうどじゃない");
+                    return retarr.ToArray();
                 }
 			}
 		}
