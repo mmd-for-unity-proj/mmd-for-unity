@@ -763,7 +763,7 @@ namespace MMD
                     return retarr;
                 }
 
-                public static byte[] ListToBytes<M>(M[] array, uint array_count, int size)
+                public static byte[] ArrayToBytes<M>(M[] array, uint array_count, int size)
                     where M : IBinary
                 {
                     byte[] count = BitConverter.GetBytes(array_count);
@@ -874,7 +874,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    return ToByteUtil.ListToBytes(camera, camera_count, 61);
+                    return ToByteUtil.ArrayToBytes(camera, camera_count, 61);
                 }
 			}
 			
@@ -911,7 +911,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    throw new NotImplementedException();
+                    return ToByteUtil.ArrayToBytes(light, light_count, 28);
                 }
 			}
 			
@@ -934,7 +934,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    throw new NotImplementedException();
+                    return ToByteUtil.ArrayToBytes(self_shadow, self_shadow_count, 9);
                 }
 			}
 			
