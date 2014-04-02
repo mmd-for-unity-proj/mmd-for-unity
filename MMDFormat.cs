@@ -792,10 +792,16 @@ namespace MMD
                     return ret.ToArray();
                 }
 
-                public static byte[] RGBToBytes(ref Color c)
+                public static byte[] FloatRGBToBytes(ref Color c)
                 {
-                    byte[] retarr = { (byte)(c.r * 256), (byte)(c.g * 256), (byte)(c.b * 256) };
-                    return retarr;
+                    byte[] r = BitConverter.GetBytes(c.r);
+                    byte[] g = BitConverter.GetBytes(c.g);
+                    byte[] b = BitConverter.GetBytes(c.b);
+                    List<byte> ret = new List<byte>();
+                    ret.AddRange(r);
+                    ret.AddRange(g);
+                    ret.AddRange(b);
+                    return ret.ToArray();
                 }
             }
 			
@@ -941,7 +947,15 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    throw new NotImplementedException();
+                    byte[] frame = BitConverter.GetBytes(frame_no);
+                    byte[] rgb = ToByteUtil.FloatRGBToBytes(ref this.rgb);
+                    byte[] location = ToByteUtil.Vector3ToBytes(ref this.location);
+                    List<byte> retarr = new List<byte>();
+                    retarr.AddRange(frame);
+                    retarr.AddRange(rgb);
+                    retarr.AddRange(location);
+                    if (retarr.Count != 28) throw new IndexOutOfRangeException("照明データが28バイトちょうどじゃない");
+                    return retarr.ToArray();
                 }
 			}
 			
