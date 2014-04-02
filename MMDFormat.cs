@@ -762,10 +762,24 @@ namespace MMD
 				public uint motion_count;
 				public Dictionary<string, List<Motion>> motion;
 
+                public byte[] ToBytes()
+                {
+                    byte[] count = BitConverter.GetBytes(motion_count);
+                    byte[] retarr = new byte[motion_count * 111];
 
+                    foreach (var mlist in motion)
+                    {
+                        foreach (var m in mlist.Value)
+                        {
+                            
+                        }
+                    }
+
+                    return retarr;
+                }
 			}
 			
-			public class Motion
+			public class Motion : IBinary
 			{
 				public string bone_name;	// 15byte
 				public uint frame_no;
@@ -783,6 +797,11 @@ namespace MMD
 				{
 					this.interpolation[i*16+j*4+k] = val;
 				}
+
+                public byte[] ToBytes()
+                {
+                    throw new NotImplementedException();
+                }
 			}
 			
 			/// <summary>
