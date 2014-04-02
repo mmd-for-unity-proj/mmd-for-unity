@@ -740,6 +740,29 @@ namespace MMD
 			public LightList light_list;
 			public CameraList camera_list;
 			public SelfShadowList self_shadow_list;
+
+            private class ToByteUtil
+            {
+                public static byte[] ListToBytes<M>(Dictionary<string, List<M>> list, uint list_count, int size)
+                    where M : IBinary
+                {
+                    byte[] count = BitConverter.GetBytes(list_count);
+                    byte[] retarr = new byte[list_count * size + 4];
+                    Array.Copy(count, 0, retarr, 0, 4);
+
+                    int cnt = 0;
+                    foreach (var mlist in list)
+                    {
+                        foreach (var m in mlist.Value)
+                        {
+                            byte[] bin = m.ToBytes();
+                            Array.Copy(bin, 0, retarr, cnt * size + 4, size);
+                            cnt++;
+                        }
+                    }
+                    return retarr;
+                }
+            }
 			
 			public class Header : IBinary
 			{
@@ -764,22 +787,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    byte[] count = BitConverter.GetBytes(motion_count);
-                    byte[] retarr = new byte[motion_count * 111 + 4];
-                    Array.Copy(count, 0, retarr, 0, 4);
-
-                    int cnt = 0;
-                    foreach (var mlist in motion)
-                    {
-                        foreach (var m in mlist.Value)
-                        {
-                            byte[] bmotion = m.ToBytes();
-                            Array.Copy(bmotion, 0, retarr, cnt * 111 + 4, 111);
-                            cnt++;
-                        }
-                    }
-
-                    return retarr;
+                    return ToByteUtil.ListToBytes(motion, motion_count, 111);
                 }
 			}
 			
@@ -815,9 +823,14 @@ namespace MMD
 			{
 				public uint skin_count;
 				public Dictionary<string, List<SkinData>> skin;
+
+                public byte[] ToBytes()
+                {
+                    return ToByteUtil.ListToBytes(skin, skin_count, 23);
+                }
 			}
 			
-			public class SkinData
+			public class SkinData : IBinary
 			{
 				public string skin_name;	// 15byte
 				public uint frame_no;
@@ -837,13 +850,13 @@ namespace MMD
                 }
 			}
 			
-			public class CameraList
+			public class CameraList : IBinary
 			{
 				public uint camera_count;
 				public CameraData[] camera;
 			}
 			
-			public class CameraData
+			public class CameraData : IBinary
 			{
 				public uint frame_no;
 				public float length;
@@ -864,26 +877,26 @@ namespace MMD
 				}
 			}
 			
-			public class LightList
+			public class LightList : IBinary
 			{
 				public uint light_count;
 				public LightData[] light;
 			}
 			
-			public class LightData
+			public class LightData : IBinary
 			{
 				public uint frame_no;
 				public Color rgb;	// αなし, 256
 				public Vector3 location;
 			}
 			
-			public class SelfShadowList
+			public class SelfShadowList : IBinary
 			{
 				public uint self_shadow_count;
 				public SelfShadowData[] self_shadow;
 			}
 			
-			public class SelfShadowData
+			public class SelfShadowData : IBinary
 			{
 				public uint frame_no;
 				public byte mode; //00-02
