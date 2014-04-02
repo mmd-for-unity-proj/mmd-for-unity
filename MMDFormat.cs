@@ -779,6 +779,24 @@ namespace MMD
                     }
                     return retarr;
                 }
+
+                public static byte[] Vector3ToBytes(ref Vector3 v)
+                {
+                    byte[] x = BitConverter.GetBytes(v.x);
+                    byte[] y = BitConverter.GetBytes(v.y);
+                    byte[] z = BitConverter.GetBytes(v.z);
+                    List<byte> ret = new List<byte>();
+                    ret.AddRange(x);
+                    ret.AddRange(y);
+                    ret.AddRange(z);
+                    return ret.ToArray();
+                }
+
+                public static byte[] ColorToBytes(ref Color c)
+                {
+                    byte[] r = BitConverter.GetBytes(c.r);
+                    byte[] g = BitConverter.GetBytes(c.g);
+                }
             }
 			
 			public class Header : IBinary
