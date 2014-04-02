@@ -762,6 +762,23 @@ namespace MMD
                     }
                     return retarr;
                 }
+
+                public static byte[] ListToBytes<M>(M[] array, uint array_count, int size)
+                    where M : IBinary
+                {
+                    byte[] count = BitConverter.GetBytes(array_count);
+                    byte[] retarr = new byte[array_count * size + 4];
+                    Array.Copy(count, 0, retarr, 0, 4);
+
+                    int cnt = 0;
+                    foreach (var a in array)
+                    {
+                        byte[] bin = a.ToBytes();
+                        Array.Copy(bin, 0, retarr, cnt * size + 4, size);
+                        cnt++;
+                    }
+                    return retarr;
+                }
             }
 			
 			public class Header : IBinary
@@ -857,7 +874,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    throw new NotImplementedException();
+                    return ToByteUtil.ListToBytes(camera, camera_count, 61);
                 }
 			}
 			
