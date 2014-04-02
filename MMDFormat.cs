@@ -946,7 +946,14 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    throw new NotImplementedException();
+                    byte[] frame = BitConverter.GetBytes(frame_no);
+                    byte[] mode = { this.mode };
+                    byte[] distance = BitConverter.GetBytes(this.distance);
+                    byte[] retarr = new byte[9];
+                    Array.Copy(frame, 0, retarr, 0, 4);
+                    Array.Copy(mode, 0, retarr, 4, 1);
+                    Array.Copy(distance, 0, retarr, 5, 4);
+                    return retarr;
                 }
 			}
 		}
