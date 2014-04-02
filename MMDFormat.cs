@@ -792,10 +792,10 @@ namespace MMD
                     return ret.ToArray();
                 }
 
-                public static byte[] ColorToBytes(ref Color c)
+                public static byte[] RGBToBytes(ref Color c)
                 {
-                    byte[] r = BitConverter.GetBytes(c.r);
-                    byte[] g = BitConverter.GetBytes(c.g);
+                    byte[] retarr = { (byte)(c.r * 256), (byte)(c.g * 256), (byte)(c.b * 256) };
+                    return retarr;
                 }
             }
 			
