@@ -8,6 +8,8 @@ class VMDFormatter
     GameObject mmd_object;
     VMDFormat format;
 
+    public VMDFormat Format { get { return format; } }
+
     public VMDFormatter(GameObject target)
     {
         mmd_object = target;
@@ -21,12 +23,13 @@ class VMDFormatter
 
     public VMDFormat InsertMorph(uint insert_frame_no)
     {
-        // Expression以下の
+        // Expression以下のGameObjectを取り出し
         var expression = mmd_object.transform.FindChild("Expression");
         var expressions = new List<Transform>();
         for (int i = 0; i < expression.childCount; i++)
             expressions.Add(expression.GetChild(i));
 
+        // GameObjectごとにVMDFormatを構成
         foreach (var exp in expressions)
         {
             if (exp.name == "base") continue;
