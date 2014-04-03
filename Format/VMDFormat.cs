@@ -111,8 +111,8 @@ namespace MMD
                     byte[] header = Encoding.ASCII.GetBytes(vmd_header);
                     byte[] model_name = Encoding.GetEncoding("Shift_JIS").GetBytes(vmd_model_name);
                     byte[] retarr = new byte[50];
-                    Array.Copy(header, 0, retarr, 0, 30);
-                    Array.Copy(model_name, 0, retarr, 30, 20);
+                    ToByteUtil.SafeCopy(header, retarr, 0, 30);
+                    ToByteUtil.SafeCopy(model_name, retarr, 30, 20);
                     return retarr;
                 }
             }
@@ -195,9 +195,9 @@ namespace MMD
                     byte[] weight = BitConverter.GetBytes(this.weight);
                     byte[] retarr = new byte[23];
 
-                    Array.Copy(skin_name, 0, retarr, 0, 15);
-                    Array.Copy(frame, 0, retarr, 15, 4);
-                    Array.Copy(weight, 0, retarr, 19, 4);
+                    ToByteUtil.SafeCopy(skin_name, retarr, 0, 15);
+                    ToByteUtil.SafeCopy(frame, retarr, 15, 4);
+                    ToByteUtil.SafeCopy(weight, retarr, 19, 4);
                     return retarr;
                 }
             }
