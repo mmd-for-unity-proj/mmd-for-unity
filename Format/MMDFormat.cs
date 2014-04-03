@@ -15,4 +15,9 @@ namespace MMD
     {
         byte[] ToBytes();
     }
+
+    public interface IInsertableList
+    {
+        void Insert(IBinary insert_object);
+    }
 }
