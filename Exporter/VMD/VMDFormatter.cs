@@ -19,15 +19,24 @@ class VMDFormatter
         format.self_shadow_list = new VMDFormat.SelfShadowList();
     }
 
-    public VMDFormat InsertMorph(int insert_frame_no)
+    public VMDFormat InsertMorph(uint insert_frame_no)
     {
+        // Expression以下の
         var expression = mmd_object.transform.FindChild("Expression");
         var expressions = new List<Transform>();
         for (int i = 0; i < expression.childCount; i++)
             expressions.Add(expression.GetChild(i));
 
-        
+        foreach (var exp in expressions)
+        {
+            if (exp.name == "base") continue;
+            var skin = new VMDFormat.SkinData();
+            skin.frame_no = insert_frame_no;
+            skin.skin_name = exp.name;
+            skin.weight = exp.localPosition.z;
 
+            format.skin_list.Insert(skin);
+        }
         return format;
     }
 }
