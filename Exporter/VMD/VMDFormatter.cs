@@ -14,6 +14,9 @@ class VMDFormatter
     {
         mmd_object = target;
         format = new VMDFormat();
+        format.header = new VMDFormat.Header();
+        format.header.vmd_model_name = target.name;
+        format.header.vmd_header = "Vocaloid Motion Data 0002";
         format.motion_list = new VMDFormat.MotionList();
         format.skin_list = new VMDFormat.SkinList();
         format.camera_list = new VMDFormat.CameraList();
