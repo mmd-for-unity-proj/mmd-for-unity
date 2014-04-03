@@ -107,7 +107,7 @@ namespace MMD
                 }
             }
 
-            public class MotionList : IBinary
+            public class MotionList : IBinary, IInsertableList
             {
                 public uint motion_count;
                 public Dictionary<string, List<Motion>> motion;
@@ -115,6 +115,12 @@ namespace MMD
                 public byte[] ToBytes()
                 {
                     return ToByteUtil.ListToBytes(motion, motion_count, 111);
+                }
+
+                public void Insert(Motion motion)
+                {
+                    this.motion[motion.bone_name].Add(motion);
+                    motion_count++;
                 }
             }
 
@@ -146,7 +152,7 @@ namespace MMD
             /// <summary>
             /// 表情リスト
             /// </summary>
-            public class SkinList
+            public class SkinList : IBinary, IInsertableList
             {
                 public uint skin_count;
                 public Dictionary<string, List<SkinData>> skin;
