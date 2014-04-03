@@ -107,7 +107,7 @@ namespace MMD
                 }
             }
 
-            public class MotionList : IBinary, IInsertableList
+            public class MotionList : IBinary
             {
                 public uint motion_count;
                 public Dictionary<string, List<Motion>> motion;
@@ -152,7 +152,7 @@ namespace MMD
             /// <summary>
             /// 表情リスト
             /// </summary>
-            public class SkinList : IBinary, IInsertableList
+            public class SkinList : IBinary
             {
                 public uint skin_count;
                 public Dictionary<string, List<SkinData>> skin;
