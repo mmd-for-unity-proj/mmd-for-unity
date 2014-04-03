@@ -89,6 +89,16 @@ namespace MMD
                     ret.AddRange(b);
                     return ret.ToArray();
                 }
+
+                public static void SafeCopy(byte[] source, byte[] dest, int start, int length)
+                {
+                    List<byte> retlist = new List<byte>();
+                    retlist.AddRange(source);
+                    byte[] retarr = retlist.ToArray();
+                    Array.Resize(ref retarr, length);
+
+                    Array.Copy(retarr, 0, dest, start, length);
+                }
             }
 
             public class Header : IBinary
@@ -155,7 +165,7 @@ namespace MMD
             public class SkinList : IBinary
             {
                 public uint skin_count;
-                public Dictionary<string, List<SkinData>> skin;
+                public Dictionary<string, List<SkinData>> skin = new Dictionary<string,List<SkinData>>();
 
                 public byte[] ToBytes()
                 {
@@ -164,6 +174,9 @@ namespace MMD
 
                 public void Insert(SkinData skin_obj)
                 {
+                    if (!skin.ContainsKey(skin_obj.skin_name))
+                        skin[skin_obj.skin_name] = new List<SkinData>();
+
                     skin[skin_obj.skin_name].Add(skin_obj);
                     skin_count++;
                 }
