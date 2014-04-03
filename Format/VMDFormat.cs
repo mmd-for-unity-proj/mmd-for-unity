@@ -102,7 +102,7 @@ namespace MMD
                     byte[] model_name = Encoding.GetEncoding("Shift_JIS").GetBytes(vmd_model_name);
                     byte[] retarr = new byte[50];
                     Array.Copy(header, 0, retarr, 0, 30);
-                    Array.Copy(header, 0, retarr, 30, 20);
+                    Array.Copy(model_name, 0, retarr, 30, 20);
                     return retarr;
                 }
             }
