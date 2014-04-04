@@ -92,12 +92,17 @@ namespace MMD
 
                 public static void SafeCopy(byte[] source, byte[] dest, int start, int length)
                 {
-                    List<byte> retlist = new List<byte>();
-                    retlist.AddRange(source);
-                    byte[] retarr = retlist.ToArray();
-                    Array.Resize(ref retarr, length);
+                    // Countがlengthになるまで数値を丸める
+                    List<byte> retlist = new List<byte>(source);
+                    if (retlist.Count < length)
+                        while (retlist.Count != length) retlist.Add(0);
+                    else if (retlist.Count > length)
+                        while (retlist.Count != length) retlist.RemoveAt(retlist.Count - 1);
 
-                    Array.Copy(retarr, 0, dest, start, length);
+                    for (int i = 0; i < length; i++)
+                    {
+                        dest[start + i] = retlist[i];
+                    }
                 }
             }
 
