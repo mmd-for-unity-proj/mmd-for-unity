@@ -104,6 +104,13 @@ namespace MMD
                         dest[start + i] = retlist[i];
                     }
                 }
+
+                public static byte[] EncodeUTFToSJIS(string str)
+                {
+                    Encoding src = Encoding.UTF8;
+                    Encoding dest = Encoding.GetEncoding(932);
+                    return Encoding.Convert(src, dest, src.GetBytes(str));
+                }
             }
 
             public class Header : IBinary
@@ -114,7 +121,7 @@ namespace MMD
                 public byte[] ToBytes()
                 {
                     byte[] header = Encoding.ASCII.GetBytes(vmd_header);
-                    byte[] model_name = Encoding.GetEncoding("Shift_JIS").GetBytes(vmd_model_name);
+                    byte[] model_name = ToByteUtil.EncodeUTFToSJIS(vmd_model_name);
                     byte[] retarr = new byte[50];
                     ToByteUtil.SafeCopy(header, retarr, 0, 30);
                     ToByteUtil.SafeCopy(model_name, retarr, 30, 20);
@@ -195,7 +202,7 @@ namespace MMD
 
                 public byte[] ToBytes()
                 {
-                    byte[] skin_name = Encoding.GetEncoding("Shift_JIS").GetBytes(this.skin_name);
+                    byte[] skin_name = ToByteUtil.EncodeUTFToSJIS(this.skin_name);
                     byte[] frame = BitConverter.GetBytes(frame_no);
                     byte[] weight = BitConverter.GetBytes(this.weight);
                     byte[] retarr = new byte[23];
