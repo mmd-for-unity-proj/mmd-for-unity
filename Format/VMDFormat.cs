@@ -34,7 +34,7 @@ namespace MMD
                 {
                     byte[] count = BitConverter.GetBytes(list_count);
                     byte[] retarr = new byte[list_count * size + 4];
-                    Array.Copy(count, 0, retarr, 0, 4);
+                    SafeCopy(count, retarr, 0, 4);
 
                     int cnt = 0;
                     foreach (var mlist in list)
@@ -42,7 +42,7 @@ namespace MMD
                         foreach (var m in mlist.Value)
                         {
                             byte[] bin = m.ToBytes();
-                            Array.Copy(bin, 0, retarr, cnt * size + 4, size);
+                            SafeCopy(bin, retarr, cnt * size + 4, size);
                             cnt++;
                         }
                     }
@@ -54,13 +54,13 @@ namespace MMD
                 {
                     byte[] count = BitConverter.GetBytes(array_count);
                     byte[] retarr = new byte[array_count * size + 4];
-                    Array.Copy(count, 0, retarr, 0, 4);
+                    SafeCopy(count, retarr, 0, 4);
 
                     int cnt = 0;
                     foreach (var a in array)
                     {
                         byte[] bin = a.ToBytes();
-                        Array.Copy(bin, 0, retarr, cnt * size + 4, size);
+                        SafeCopy(bin, retarr, cnt * size + 4, size);
                         cnt++;
                     }
                     return retarr;
