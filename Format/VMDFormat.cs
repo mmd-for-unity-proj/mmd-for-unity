@@ -93,23 +93,31 @@ namespace MMD
                 public static void SafeCopy(byte[] source, byte[] dest, int start, int length)
                 {
                     // Countがlengthになるまで数値を丸める
-                    List<byte> retlist = new List<byte>(source);
-                    if (retlist.Count < length)
-                        while (retlist.Count != length) retlist.Add(0);
-                    else if (retlist.Count > length)
-                        while (retlist.Count != length) retlist.RemoveAt(retlist.Count - 1);
+                    //List<byte> retlist = new List<byte>(source);
+                    //if (retlist.Count < length)
+                    //    while (retlist.Count != length) retlist.Add(0);
+                    //else if (retlist.Count > length)
+                    //    while (retlist.Count != length) retlist.RemoveAt(retlist.Count - 1);
 
-                    for (int i = 0; i < length; i++)
-                    {
-                        dest[start + i] = retlist[i];
-                    }
+                    //for (int i = 0; i < length; i++)
+                    //{
+                    //    dest[start + i] = retlist[i];
+                    //}
+                    Array.Resize(ref source, length);
+                    Array.Copy(source, 0, dest, start, length);
                 }
 
                 public static byte[] EncodeUTFToSJIS(string str)
                 {
-                    Encoding src = Encoding.UTF8;
-                    Encoding dest = Encoding.GetEncoding(932);
-                    return Encoding.Convert(src, dest, src.GetBytes(str));
+                    try
+                    {
+                        return USEncoder.ToEncoding.ToSJIS(str);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log(e.Message);
+                        return new byte[15];
+                    }
                 }
             }
 
