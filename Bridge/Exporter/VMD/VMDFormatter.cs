@@ -35,7 +35,7 @@ class VMDFormatter
         // GameObjectごとにVMDFormatを構成
         foreach (var exp in expressions)
         {
-            if (exp.name == "base") continue;
+            if (exp.name == "base" || exp.localPosition.z == 0f) continue;
             var skin = new VMDFormat.SkinData();
             skin.frame_no = insert_frame_no;
             skin.skin_name = exp.name;
