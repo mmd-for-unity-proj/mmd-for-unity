@@ -22,20 +22,29 @@ namespace MMD
             {
                 buf[i] = bytes[i];
             }
+            string result;
 
 #if UNITY_EDITOR
 #if UNITY_STANDALONE_OSX
             // こっちはエディタを使う場合
             buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
 #else
+            // Windows等の環境？
             // GetEncoding(0) = ANSI文字エンコード = SJISらしい
             buf = Encoding.Convert(Encoding.GetEncoding(0), Encoding.UTF8, buf);
-#endif // UNITY_STANDALONE_OSX
+#endif
 #else
+            // 動的にファイルを読み込みたい場合の話
             string str_buf = USEncoder.ToEncoding.ToUnicode(buf);
-		    buf = Encoding.Convert(Encoding.Unicode, Encoding.UTF8, buf);
 #endif // UNITY_EDITOR
-            string result = Encoding.UTF8.GetString(buf);
+
+#if UNITY_EDITOR
+            result = Encoding.UTF8.GetString(buf);
+#else
+            // UTF-16でもいいんじゃないだろうか？
+            result = str_buf;
+#endif
+
             if (null != line_feed_code)
             {
                 //改行コード統一(もしくは除去)
