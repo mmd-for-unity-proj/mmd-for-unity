@@ -10,6 +10,9 @@ using MMD;
 
 public class VMDLoaderScript {
 
+    string file_path_;
+    VMDFormat format_;
+
 	/// <summary>
 	/// VMDファイルのヘッダー取得
 	/// </summary>
@@ -27,12 +30,12 @@ public class VMDLoaderScript {
 	/// <returns>内部形式データ</returns>
 	public static VMDFormat Import(string file_path) {
 		VMDLoaderScript loader = new VMDLoaderScript();
-		return loader.Import_(file_path);
+		return loader.ImportFromFile(file_path);
 	}
 
     public static VMDFormat Import(byte[] byte_data) {
         VMDLoaderScript loader = new VMDLoaderScript();
-        return loader.Import_(byte_data);
+        return loader.ImportFromBytes(byte_data);
     }
 
 	/// <summary>
@@ -53,7 +56,7 @@ public class VMDLoaderScript {
 		return result;
 	}
 
-    private VMDFormat Import_(byte[] byte_data)
+    private VMDFormat ImportFromBytes(byte[] byte_data)
     {
         using (MemoryStream stream = new MemoryStream(byte_data))
         {
@@ -62,7 +65,7 @@ public class VMDLoaderScript {
         return format_;
     }
 
-	private VMDFormat Import_(string file_path) {
+	private VMDFormat ImportFromFile(string file_path) {
         using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
         {
             file_path_ = file_path;
@@ -86,6 +89,5 @@ public class VMDLoaderScript {
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
 	}
 		
-	string			file_path_;
-	VMDFormat		format_;
+	
 }
