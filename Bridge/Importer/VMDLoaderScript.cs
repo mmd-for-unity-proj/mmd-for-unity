@@ -69,8 +69,8 @@ public class VMDLoaderScript {
         using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
         {
             file_path_ = file_path;
-            EntryPathes();
             SetupBinaryReader(stream);
+            EntryPathes();
         }
 		return format_;
 	}

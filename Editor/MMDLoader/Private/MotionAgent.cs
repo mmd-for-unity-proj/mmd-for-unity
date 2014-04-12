@@ -30,6 +30,7 @@ namespace MMD {
 			//VMDファイルのインポート
 			if (null == format_) {
 				//まだ読み込んでいないなら読むこむ
+                Debug.Log(file_path_);
 				format_ = VMDLoaderScript.Import(file_path_); //VMD読み込み
 				header_ = format_.header;
 			}
