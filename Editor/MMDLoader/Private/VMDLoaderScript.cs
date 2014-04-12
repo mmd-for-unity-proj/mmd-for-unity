@@ -90,7 +90,7 @@ public class VMDLoaderScript {
 		int read_count = 0;
 		try {
 			format_.header = new VMDFormat.Header(binary_reader_); read_count++;
-			format_.motion_list = ReadMotionList(); read_count++;
+			format_.motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
 			format_.skin_list = ReadSkinList(); read_count++;
 			format_.camera_list = ReadCameraList(); read_count++;
 			format_.light_list = ReadLightList(); read_count++;
@@ -119,41 +119,6 @@ public class VMDLoaderScript {
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
 	}
 
-	private VMDFormat.MotionList ReadMotionList() {
-		VMDFormat.MotionList result = new VMDFormat.MotionList();
-		result.motion_count = binary_reader_.ReadUInt32();
-		result.motion = new Dictionary<string, List<VMDFormat.Motion>>();
-		
-		// 一度バッファに貯めてソートする
-		VMDFormat.Motion[] buf = new VMDFormat.Motion[result.motion_count];
-		for (int i = 0; i < result.motion_count; i++) {
-			buf[i] = ReadMotion();
-		}
-		Array.Sort(buf, (x,y)=>((int)x.frame_no-(int)y.frame_no));
-		
-		// モーションの数だけnewされないよね？
-		for (int i = 0; i < result.motion_count; i++) {
-			try { result.motion.Add(buf[i].bone_name, new List<VMDFormat.Motion>()); }
-			catch {}
-		}
-		
-		// dictionaryにどんどん登録
-		for (int i = 0; i < result.motion_count; i++) {
-			result.motion[buf[i].bone_name].Add(buf[i]);
-		}
-		
-		return result;
-	}
-	
-	private VMDFormat.Motion ReadMotion() {
-		VMDFormat.Motion result = new VMDFormat.Motion();
-        result.bone_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(15), "");
-		result.frame_no = binary_reader_.ReadUInt32();
-        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
-        result.rotation = ToFormatUtil.ReadSinglesToQuaternion(binary_reader_);
-		result.interpolation = binary_reader_.ReadBytes(64);
-		return result;
-	}
 	
 	/// <summary>
 	/// 表情リスト

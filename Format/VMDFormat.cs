@@ -56,6 +56,31 @@ namespace MMD
                 public Dictionary<string, List<Motion>> motion = new Dictionary<string, List<Motion>>();
 
                 public MotionList() { }
+                public MotionList(BinaryReader bin)
+                {
+                    motion_count = bin.ReadUInt32();
+
+                    // 一度バッファに貯めてソートする
+                    VMDFormat.Motion[] buf = new VMDFormat.Motion[motion_count];
+                    for (int i = 0; i < motion_count; i++)
+                    {
+                        buf[i] = new Motion(bin);
+                    }
+                    Array.Sort(buf, (x, y) => ((int)x.frame_no - (int)y.frame_no));
+
+                    // モーションの数だけnewされないよね？
+                    for (int i = 0; i < motion_count; i++)
+                    {
+                        try { motion.Add(buf[i].bone_name, new List<VMDFormat.Motion>()); }
+                        catch { }
+                    }
+
+                    // dictionaryにどんどん登録
+                    for (int i = 0; i < motion_count; i++)
+                    {
+                        motion[buf[i].bone_name].Add(buf[i]);
+                    }
+                }
 
                 public byte[] ToBytes()
                 {
@@ -78,6 +103,14 @@ namespace MMD
                 public byte[] interpolation;	// [4][4][4], 64byte
 
                 public Motion() { }
+                public Motion(BinaryReader bin)
+                {
+                    bone_name = ToFormatUtil.ConvertByteToString(bin.ReadBytes(15), "");
+                    frame_no = bin.ReadUInt32();
+                    location = ToFormatUtil.ReadSinglesToVector3(bin);
+                    rotation = ToFormatUtil.ReadSinglesToQuaternion(bin);
+                    interpolation = bin.ReadBytes(64);
+                }
 
                 // なんか不便になりそうな気がして
                 public byte GetInterpolation(int i, int j, int k)
