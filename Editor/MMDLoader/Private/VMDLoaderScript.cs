@@ -88,6 +88,4 @@ public class VMDLoaderScript {
 		format_.name = Path.GetFileNameWithoutExtension(file_path_); // .vmdを抜かす
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
 	}
-		
-	
 }
