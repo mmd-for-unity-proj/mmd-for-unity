@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Text;
 using MMD.VMD;
+using MMD;
 
 public class VMDLoaderScript {
 
@@ -120,8 +121,8 @@ public class VMDLoaderScript {
 
 	public VMDFormat.Header ReadHeader() {
 		VMDFormat.Header result = new VMDFormat.Header();
-		result.vmd_header = ConvertByteToString(binary_reader_.ReadBytes(30), "");
-		result.vmd_model_name = ConvertByteToString(binary_reader_.ReadBytes(20), "");
+		result.vmd_header = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(30), "");
+        result.vmd_model_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(20), "");
 		return result;
 	}
 	
@@ -153,10 +154,10 @@ public class VMDLoaderScript {
 	
 	private VMDFormat.Motion ReadMotion() {
 		VMDFormat.Motion result = new VMDFormat.Motion();
-		result.bone_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
+        result.bone_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(15), "");
 		result.frame_no = binary_reader_.ReadUInt32();
-		result.location = ReadSinglesToVector3(binary_reader_);
-		result.rotation = ReadSinglesToQuaternion(binary_reader_);
+        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
+        result.rotation = ToFormatUtil.ReadSinglesToQuaternion(binary_reader_);
 		result.interpolation = binary_reader_.ReadBytes(64);
 		return result;
 	}
@@ -194,7 +195,7 @@ public class VMDLoaderScript {
 	
 	private VMDFormat.SkinData ReadSkinData() {
 		VMDFormat.SkinData result = new VMDFormat.SkinData();
-		result.skin_name = ConvertByteToString(binary_reader_.ReadBytes(15), "");
+        result.skin_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(15), "");
 		result.frame_no = binary_reader_.ReadUInt32();
 		result.weight = binary_reader_.ReadSingle();
 		return result;
@@ -215,8 +216,8 @@ public class VMDLoaderScript {
 		VMDFormat.CameraData result = new VMDFormat.CameraData();
 		result.frame_no = binary_reader_.ReadUInt32();
 		result.length = binary_reader_.ReadSingle();
-		result.location = ReadSinglesToVector3(binary_reader_);
-		result.rotation = ReadSinglesToVector3(binary_reader_);
+        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
+        result.rotation = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
 		result.interpolation = binary_reader_.ReadBytes(24);
 		result.viewing_angle = binary_reader_.ReadUInt32();
 		result.perspective = binary_reader_.ReadByte();
@@ -238,8 +239,8 @@ public class VMDLoaderScript {
 	private VMDFormat.LightData ReadLightData() {
 		VMDFormat.LightData result = new VMDFormat.LightData();
 		result.frame_no = binary_reader_.ReadUInt32();
-		result.rgb = ReadSinglesToColor(binary_reader_, 1);
-		result.location = ReadSinglesToVector3(binary_reader_);
+        result.rgb = ToFormatUtil.ReadSinglesToColor(binary_reader_, 1);
+        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
 		return result;
 	}
 	
@@ -263,8 +264,6 @@ public class VMDLoaderScript {
 		return result;
 	}
 		
-	
-	
 	string			file_path_;
 	BinaryReader	binary_reader_;
 	VMDFormat		format_;
