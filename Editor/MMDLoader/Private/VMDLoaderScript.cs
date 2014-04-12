@@ -66,6 +66,7 @@ public class VMDLoaderScript {
         using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
         {
             file_path_ = file_path;
+            EntryPathes();
             SetupBinaryReader(stream);
         }
 		return format_;
@@ -82,7 +83,6 @@ public class VMDLoaderScript {
 
 	private VMDFormat Read() {
 		format_ = new VMDFormat();
-		EntryPathes();
 		
 		// 読み込み失敗した場合はだいたいデータがない
 		// 失敗しても読み込み続けることがあるので例外でキャッチして残りはnullにしておく
