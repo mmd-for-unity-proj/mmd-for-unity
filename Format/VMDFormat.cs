@@ -32,6 +32,12 @@ namespace MMD
                 public string vmd_header; // 30byte, "Vocaloid Motion Data 0002"
                 public string vmd_model_name; // 20byte
 
+                public Header(BinaryReader bin)
+                {
+	                vmd_header = ToFormatUtil.ConvertByteToString(bin.ReadBytes(30), "");
+                    vmd_model_name = ToFormatUtil.ConvertByteToString(bin.ReadBytes(20), "");
+                }
+
                 public byte[] ToBytes()
                 {
                     byte[] header = Encoding.ASCII.GetBytes(vmd_header);

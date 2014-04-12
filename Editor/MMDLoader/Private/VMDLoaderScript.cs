@@ -89,7 +89,7 @@ public class VMDLoaderScript {
 		// 失敗しても読み込み続けることがあるので例外でキャッチして残りはnullにしておく
 		int read_count = 0;
 		try {
-			format_.header = ReadHeader(); read_count++;
+			format_.header = new VMDFormat.Header(binary_reader_); read_count++;
 			format_.motion_list = ReadMotionList(); read_count++;
 			format_.skin_list = ReadSkinList(); read_count++;
 			format_.camera_list = ReadCameraList(); read_count++;
@@ -119,13 +119,6 @@ public class VMDLoaderScript {
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
 	}
 
-	public VMDFormat.Header ReadHeader() {
-		VMDFormat.Header result = new VMDFormat.Header();
-		result.vmd_header = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(30), "");
-        result.vmd_model_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(20), "");
-		return result;
-	}
-	
 	private VMDFormat.MotionList ReadMotionList() {
 		VMDFormat.MotionList result = new VMDFormat.MotionList();
 		result.motion_count = binary_reader_.ReadUInt32();
