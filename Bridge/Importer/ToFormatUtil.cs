@@ -11,7 +11,7 @@ namespace MMD
     public class ToFormatUtil
     {
         // ShiftJISからUTF-8に変換してstringで返す
-        private static string ConvertByteToString(byte[] bytes, string line_feed_code = null)
+        public static string ConvertByteToString(byte[] bytes, string line_feed_code = null)
         {
             // パディングの消去, 文字を詰める
             if (bytes[0] == 0) return "";
@@ -53,7 +53,7 @@ namespace MMD
             return result;
         }
 
-        private static Vector3 ReadSinglesToVector3(BinaryReader bin)
+        public static Vector3 ReadSinglesToVector3(BinaryReader bin)
         {
             const int count = 3;
             float[] result = new float[count];
@@ -65,7 +65,7 @@ namespace MMD
             return new Vector3(result[0], result[1], result[2]);
         }
 
-        private static Color ReadSinglesToColor(BinaryReader bin)
+        public static Color ReadSinglesToColor(BinaryReader bin)
         {
             const int count = 4;
             float[] result = new float[count];
@@ -76,7 +76,7 @@ namespace MMD
             return new Color(result[0], result[1], result[2], result[3]);
         }
 
-        private static Color ReadSinglesToColor(BinaryReader bin, float fix_alpha)
+        public static Color ReadSinglesToColor(BinaryReader bin, float fix_alpha)
         {
             const int count = 3;
             float[] result = new float[count];
@@ -87,7 +87,7 @@ namespace MMD
             return new Color(result[0], result[1], result[2], fix_alpha);
         }
 
-        private static Quaternion ReadSinglesToQuaternion(BinaryReader bin)
+        public static Quaternion ReadSinglesToQuaternion(BinaryReader bin)
         {
             const int count = 4;
             float[] result = new float[count];
