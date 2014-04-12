@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using UnityEditor;
+//using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -92,7 +92,7 @@ public class VMDLoaderScript {
 			format_.header = new VMDFormat.Header(binary_reader_); read_count++;
 			format_.motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
 			format_.skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
-			format_.camera_list = ReadCameraList(); read_count++;
+			format_.camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
 			format_.light_list = ReadLightList(); read_count++;
 			format_.self_shadow_list = ReadSelfShadowList(); read_count++;
 		} catch (EndOfStreamException e) {
@@ -117,29 +117,6 @@ public class VMDLoaderScript {
 		format_.path = file_path_;
 		format_.name = Path.GetFileNameWithoutExtension(file_path_); // .vmdを抜かす
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
-	}
-	
-	private VMDFormat.CameraList ReadCameraList() {
-		VMDFormat.CameraList result = new VMDFormat.CameraList();
-		result.camera_count = binary_reader_.ReadUInt32();
-		result.camera = new VMDFormat.CameraData[result.camera_count];
-		for (int i = 0; i < result.camera_count; i++) {
-			result.camera[i] = ReadCameraData();
-		}
-		Array.Sort(result.camera, (x,y)=>((int)x.frame_no-(int)y.frame_no));
-		return result;
-	}
-	
-	private VMDFormat.CameraData ReadCameraData() {
-		VMDFormat.CameraData result = new VMDFormat.CameraData();
-		result.frame_no = binary_reader_.ReadUInt32();
-		result.length = binary_reader_.ReadSingle();
-        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
-        result.rotation = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
-		result.interpolation = binary_reader_.ReadBytes(24);
-		result.viewing_angle = binary_reader_.ReadUInt32();
-		result.perspective = binary_reader_.ReadByte();
-		return result;
 	}
 	
 	private VMDFormat.LightList ReadLightList() {

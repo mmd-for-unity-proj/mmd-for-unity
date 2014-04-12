@@ -216,6 +216,16 @@ namespace MMD
                 public CameraData[] camera;
 
                 public CameraList() { }
+                public CameraList(BinaryReader bin)
+                {
+                    camera_count = bin.ReadUInt32();
+                    camera = new VMDFormat.CameraData[camera_count];
+                    for (int i = 0; i < camera_count; i++)
+                    {
+                        camera[i] = new CameraData(bin);
+                    }
+                    Array.Sort(camera, (x, y) => ((int)x.frame_no - (int)y.frame_no));
+                }
 
                 public byte[] ToBytes()
                 {
@@ -234,6 +244,16 @@ namespace MMD
                 public byte perspective;	// 0:on 1:off
 
                 public CameraData() { }
+                public CameraData(BinaryReader bin)
+                {
+                    frame_no = bin.ReadUInt32();
+                    length = bin.ReadSingle();
+                    location = ToFormatUtil.ReadSinglesToVector3(bin);
+                    rotation = ToFormatUtil.ReadSinglesToVector3(bin);
+                    interpolation = bin.ReadBytes(24);
+                    viewing_angle = bin.ReadUInt32();
+                    perspective = bin.ReadByte();
+                }
 
                 public byte GetInterpolation(int i, int j)
                 {
