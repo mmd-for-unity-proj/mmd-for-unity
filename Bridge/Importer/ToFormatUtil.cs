@@ -30,7 +30,7 @@ namespace MMD
             buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
 #else
             // Windows等の環境？
-            // GetEncoding(0) = ANSI文字エンコード = SJISらしい
+            // GetEncoding(0) = OSの国ごとのデフォルトエンコーディングらしい
             buf = Encoding.Convert(Encoding.GetEncoding(0), Encoding.UTF8, buf);
 #endif
 #else
