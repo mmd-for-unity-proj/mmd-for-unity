@@ -53,7 +53,9 @@ namespace MMD
             public class MotionList : IBinary
             {
                 public uint motion_count;
-                public Dictionary<string, List<Motion>> motion;
+                public Dictionary<string, List<Motion>> motion = new Dictionary<string, List<Motion>>();
+
+                public MotionList() { }
 
                 public byte[] ToBytes()
                 {
@@ -74,6 +76,8 @@ namespace MMD
                 public Vector3 location;
                 public Quaternion rotation;
                 public byte[] interpolation;	// [4][4][4], 64byte
+
+                public Motion() { }
 
                 // なんか不便になりそうな気がして
                 public byte GetInterpolation(int i, int j, int k)
@@ -100,6 +104,8 @@ namespace MMD
                 public uint skin_count;
                 public Dictionary<string, List<SkinData>> skin = new Dictionary<string,List<SkinData>>();
 
+                public SkinList() { }
+
                 public byte[] ToBytes()
                 {
                     return ToByteUtil.ListToBytes(skin, skin_count, 23);
@@ -121,6 +127,8 @@ namespace MMD
                 public uint frame_no;
                 public float weight;
 
+                public SkinData() { }
+
                 public byte[] ToBytes()
                 {
                     byte[] skin_name = ToByteUtil.EncodeUTFToSJIS(this.skin_name);
@@ -140,6 +148,8 @@ namespace MMD
                 public uint camera_count;
                 public CameraData[] camera;
 
+                public CameraList() { }
+
                 public byte[] ToBytes()
                 {
                     return ToByteUtil.ArrayToBytes(camera, camera_count, 61);
@@ -155,6 +165,8 @@ namespace MMD
                 public byte[] interpolation;	// [6][4], 24byte(未検証)
                 public uint viewing_angle;
                 public byte perspective;	// 0:on 1:off
+
+                public CameraData() { }
 
                 public byte GetInterpolation(int i, int j)
                 {
@@ -177,6 +189,8 @@ namespace MMD
                 public uint light_count;
                 public LightData[] light;
 
+                public LightList() { }
+
                 public byte[] ToBytes()
                 {
                     return ToByteUtil.ArrayToBytes(light, light_count, 28);
@@ -188,6 +202,8 @@ namespace MMD
                 public uint frame_no;
                 public Color rgb;	// αなし, 256
                 public Vector3 location;
+
+                public LightData() { }
 
                 public byte[] ToBytes()
                 {
@@ -208,6 +224,8 @@ namespace MMD
                 public uint self_shadow_count;
                 public SelfShadowData[] self_shadow;
 
+                public SelfShadowList() { }
+
                 public byte[] ToBytes()
                 {
                     return ToByteUtil.ArrayToBytes(self_shadow, self_shadow_count, 9);
@@ -219,6 +237,8 @@ namespace MMD
                 public uint frame_no;
                 public byte mode; //00-02
                 public float distance;	// 0.1 - (dist * 0.00001)
+
+                public SelfShadowData() { }
 
                 public byte[] ToBytes()
                 {
