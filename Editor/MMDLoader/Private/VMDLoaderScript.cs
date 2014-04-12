@@ -48,8 +48,7 @@ public class VMDLoaderScript {
 		using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
 		using (BinaryReader bin = new BinaryReader(stream)) {
 			file_path_ = null;
-			binary_reader_ = bin;
-			result = new VMDFormat.Header(binary_reader_);
+			result = new VMDFormat.Header(bin);
 		}
 		return result;
 	}
@@ -77,8 +76,7 @@ public class VMDLoaderScript {
     {
         using (BinaryReader bin = new BinaryReader(stream))
         {
-            binary_reader_ = bin;
-            format_ = new VMDFormat(binary_reader_);
+            format_ = new VMDFormat(bin);
         }
     }
 
@@ -89,6 +87,5 @@ public class VMDLoaderScript {
 	}
 		
 	string			file_path_;
-	BinaryReader	binary_reader_;
 	VMDFormat		format_;
 }
