@@ -49,7 +49,7 @@ public class VMDLoaderScript {
 		using (BinaryReader bin = new BinaryReader(stream)) {
 			file_path_ = null;
 			binary_reader_ = bin;
-			result = ReadHeader();
+			result = new VMDFormat.Header(binary_reader_);
 		}
 		return result;
 	}
