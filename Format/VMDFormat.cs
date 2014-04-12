@@ -138,6 +138,34 @@ namespace MMD
                 public Dictionary<string, List<SkinData>> skin = new Dictionary<string,List<SkinData>>();
 
                 public SkinList() { }
+                public SkinList(BinaryReader bin)
+                {
+                    skin_count = bin.ReadUInt32();
+
+                    // 一度バッファに貯めてソートする
+                    VMDFormat.SkinData[] buf = new VMDFormat.SkinData[skin_count];
+                    for (int i = 0; i < skin_count; i++)
+                    {
+                        buf[i] = new SkinData(bin);
+                    }
+                    Array.Sort(buf, (x, y) => ((int)x.frame_no - (int)y.frame_no));
+
+                    // 全てのモーションを探索し、利用されているボーンを特定する
+                    for (int i = 0; i < skin_count; i++)
+                    {
+                        try { skin.Add(buf[i].skin_name, new List<VMDFormat.SkinData>()); }
+                        catch
+                        {
+                            //重複している場合はこの処理に入る
+                        }
+                    }
+
+                    // 辞書に登録する作業
+                    for (int i = 0; i < skin_count; i++)
+                    {
+                        skin[buf[i].skin_name].Add(buf[i]);
+                    }
+                }
 
                 public byte[] ToBytes()
                 {
@@ -161,6 +189,12 @@ namespace MMD
                 public float weight;
 
                 public SkinData() { }
+                public SkinData(BinaryReader bin)
+                {
+                    skin_name = ToFormatUtil.ConvertByteToString(bin.ReadBytes(15), "");
+                    frame_no = bin.ReadUInt32();
+                    weight = bin.ReadSingle();
+                }
 
                 public byte[] ToBytes()
                 {

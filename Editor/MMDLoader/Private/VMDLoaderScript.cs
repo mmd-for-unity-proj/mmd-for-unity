@@ -91,7 +91,7 @@ public class VMDLoaderScript {
 		try {
 			format_.header = new VMDFormat.Header(binary_reader_); read_count++;
 			format_.motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
-			format_.skin_list = ReadSkinList(); read_count++;
+			format_.skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
 			format_.camera_list = ReadCameraList(); read_count++;
 			format_.light_list = ReadLightList(); read_count++;
 			format_.self_shadow_list = ReadSelfShadowList(); read_count++;
@@ -117,46 +117,6 @@ public class VMDLoaderScript {
 		format_.path = file_path_;
 		format_.name = Path.GetFileNameWithoutExtension(file_path_); // .vmdを抜かす
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
-	}
-
-	
-	/// <summary>
-	/// 表情リスト
-	/// </summary>
-	private VMDFormat.SkinList ReadSkinList() {
-		VMDFormat.SkinList result = new VMDFormat.SkinList();
-		result.skin_count = binary_reader_.ReadUInt32();
-		result.skin = new Dictionary<string, List<VMDFormat.SkinData>>();
-		
-		// 一度バッファに貯めてソートする
-		VMDFormat.SkinData[] buf = new VMDFormat.SkinData[result.skin_count];
-		for (int i = 0; i < result.skin_count; i++) {
-			buf[i] = ReadSkinData();
-		}
-		Array.Sort(buf, (x,y)=>((int)x.frame_no-(int)y.frame_no));
-		
-		// 全てのモーションを探索し、利用されているボーンを特定する
-		for (int i = 0; i < result.skin_count; i++) {
-			try { result.skin.Add(buf[i].skin_name, new List<VMDFormat.SkinData>()); }
-			catch {
-				//重複している場合はこの処理に入る
-			}
-		}
-		
-		// 辞書に登録する作業
-		for (int i = 0; i < result.skin_count; i++) {
-			result.skin[buf[i].skin_name].Add(buf[i]);
-		}
-
-		return result;
-	}
-	
-	private VMDFormat.SkinData ReadSkinData() {
-		VMDFormat.SkinData result = new VMDFormat.SkinData();
-        result.skin_name = ToFormatUtil.ConvertByteToString(binary_reader_.ReadBytes(15), "");
-		result.frame_no = binary_reader_.ReadUInt32();
-		result.weight = binary_reader_.ReadSingle();
-		return result;
 	}
 	
 	private VMDFormat.CameraList ReadCameraList() {
