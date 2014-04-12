@@ -277,6 +277,17 @@ namespace MMD
                 public LightData[] light;
 
                 public LightList() { }
+                public LightList(BinaryReader bin)
+                {
+                    light_count = bin.ReadUInt32();
+                    light = new VMDFormat.LightData[light_count];
+                    for (int i = 0; i < light_count; i++)
+                    {
+                        light[i] = new LightData(bin);
+                    }
+
+                    Array.Sort(light, (x, y) => ((int)x.frame_no - (int)y.frame_no));
+                }
 
                 public byte[] ToBytes()
                 {
@@ -291,6 +302,12 @@ namespace MMD
                 public Vector3 location;
 
                 public LightData() { }
+                public LightData(BinaryReader binary_reader_)
+                {
+                    frame_no = binary_reader_.ReadUInt32();
+                    rgb = ToFormatUtil.ReadSinglesToColor(binary_reader_, 1);
+                    location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
+                }
 
                 public byte[] ToBytes()
                 {

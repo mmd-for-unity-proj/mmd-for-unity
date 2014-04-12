@@ -93,7 +93,7 @@ public class VMDLoaderScript {
 			format_.motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
 			format_.skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
 			format_.camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
-			format_.light_list = ReadLightList(); read_count++;
+			format_.light_list = new VMDFormat.LightList(binary_reader_); read_count++;
 			format_.self_shadow_list = ReadSelfShadowList(); read_count++;
 		} catch (EndOfStreamException e) {
 			Debug.Log(e.Message);
@@ -117,26 +117,6 @@ public class VMDLoaderScript {
 		format_.path = file_path_;
 		format_.name = Path.GetFileNameWithoutExtension(file_path_); // .vmdを抜かす
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
-	}
-	
-	private VMDFormat.LightList ReadLightList() {
-		VMDFormat.LightList result = new VMDFormat.LightList();
-		result.light_count = binary_reader_.ReadUInt32();
-		result.light = new VMDFormat.LightData[result.light_count];
-		for (int i = 0; i < result.light_count; i++) {
-			result.light[i] = ReadLightData();
-		}
-		
-		Array.Sort(result.light, (x,y)=>((int)x.frame_no-(int)y.frame_no));
-		return result;
-	}
-	
-	private VMDFormat.LightData ReadLightData() {
-		VMDFormat.LightData result = new VMDFormat.LightData();
-		result.frame_no = binary_reader_.ReadUInt32();
-        result.rgb = ToFormatUtil.ReadSinglesToColor(binary_reader_, 1);
-        result.location = ToFormatUtil.ReadSinglesToVector3(binary_reader_);
-		return result;
 	}
 	
 	private VMDFormat.SelfShadowList ReadSelfShadowList() {
