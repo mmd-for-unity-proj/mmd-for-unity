@@ -29,6 +29,11 @@ public class VMDLoaderScript {
 		return loader.Import_(file_path);
 	}
 
+    public static VMDFormat Import(byte[] byte_data) {
+        VMDLoaderScript loader = new VMDLoaderScript();
+        return loader.Import_(byte_data);
+    }
+
 	/// <summary>
 	/// デフォルトコンストラクタ
 	/// </summary>
@@ -48,15 +53,32 @@ public class VMDLoaderScript {
 		return result;
 	}
 
+    private VMDFormat Import_(byte[] byte_data)
+    {
+        using (MemoryStream stream = new MemoryStream(byte_data))
+        {
+            SetupBinaryReader(stream);
+        }
+        return format_;
+    }
+
 	private VMDFormat Import_(string file_path) {
-		using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
-		using (BinaryReader bin = new BinaryReader(stream)) {
-			file_path_ = file_path;
-			binary_reader_ = bin;
-			Read();
-		}
+        using (FileStream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read))
+        {
+            file_path_ = file_path;
+            SetupBinaryReader(stream);
+        }
 		return format_;
 	}
+
+    private void SetupBinaryReader(Stream stream)
+    {
+        using (BinaryReader bin = new BinaryReader(stream))
+        {
+            binary_reader_ = bin;
+            Read();
+        }
+    }
 
 	private VMDFormat Read() {
 		format_ = new VMDFormat();
