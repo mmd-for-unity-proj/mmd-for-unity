@@ -78,40 +78,9 @@ public class VMDLoaderScript {
         using (BinaryReader bin = new BinaryReader(stream))
         {
             binary_reader_ = bin;
-            Read();
+            format_ = new VMDFormat(binary_reader_);
         }
     }
-
-	private VMDFormat Read() {
-		format_ = new VMDFormat();
-		
-		// 読み込み失敗した場合はだいたいデータがない
-		// 失敗しても読み込み続けることがあるので例外でキャッチして残りはnullにしておく
-		int read_count = 0;
-		try {
-			format_.header = new VMDFormat.Header(binary_reader_); read_count++;
-			format_.motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
-			format_.skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
-			format_.camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
-			format_.light_list = new VMDFormat.LightList(binary_reader_); read_count++;
-			format_.self_shadow_list = new VMDFormat.SelfShadowList(binary_reader_); read_count++;
-		} catch (EndOfStreamException e) {
-			Debug.Log(e.Message);
-			if (read_count <= 0)
-				format_.header = null;
-			if (read_count <= 1 || format_.motion_list.motion_count <= 0)
-				format_.motion_list = null;
-			if (read_count <= 2 || format_.skin_list.skin_count <= 0)
-				format_.skin_list = null;
-			if (read_count <= 3 || format_.camera_list.camera_count <= 0)
-				format_.camera_list = null;
-			if (read_count <= 4 || format_.light_list.light_count <= 0)
-				format_.light_list = null;
-			if (read_count <= 5 || format_.self_shadow_list.self_shadow_count <= 0) 
-				format_.self_shadow_list = null;
-		}
-		return format_;
-	}
 
 	private void EntryPathes() {
 		format_.path = file_path_;

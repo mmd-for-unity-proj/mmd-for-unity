@@ -27,6 +27,39 @@ namespace MMD
             public CameraList camera_list;
             public SelfShadowList self_shadow_list;
 
+            public VMDFormat() { }
+            public VMDFormat(BinaryReader binary_reader_)
+            {
+                // 読み込み失敗した場合はだいたいデータがない
+                // 失敗しても読み込み続けることがあるので例外でキャッチして残りはnullにしておく
+                int read_count = 0;
+                try
+                {
+                    header = new VMDFormat.Header(binary_reader_); read_count++;
+                    motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
+                    skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
+                    camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
+                    light_list = new VMDFormat.LightList(binary_reader_); read_count++;
+                    self_shadow_list = new VMDFormat.SelfShadowList(binary_reader_); read_count++;
+                }
+                catch (EndOfStreamException e)
+                {
+                    Debug.Log(e.Message);
+                    if (read_count <= 0)
+                        header = null;
+                    if (read_count <= 1 || motion_list.motion_count <= 0)
+                        motion_list = null;
+                    if (read_count <= 2 || skin_list.skin_count <= 0)
+                        skin_list = null;
+                    if (read_count <= 3 || camera_list.camera_count <= 0)
+                        camera_list = null;
+                    if (read_count <= 4 || light_list.light_count <= 0)
+                        light_list = null;
+                    if (read_count <= 5 || self_shadow_list.self_shadow_count <= 0)
+                        self_shadow_list = null;
+                }
+            }
+
             public class Header : IBinary
             {
                 public string vmd_header; // 30byte, "Vocaloid Motion Data 0002"
