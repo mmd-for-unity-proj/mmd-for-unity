@@ -94,7 +94,7 @@ public class VMDLoaderScript {
 			format_.skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
 			format_.camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
 			format_.light_list = new VMDFormat.LightList(binary_reader_); read_count++;
-			format_.self_shadow_list = ReadSelfShadowList(); read_count++;
+			format_.self_shadow_list = new VMDFormat.SelfShadowList(binary_reader_); read_count++;
 		} catch (EndOfStreamException e) {
 			Debug.Log(e.Message);
 			if (read_count <= 0)
@@ -117,26 +117,6 @@ public class VMDLoaderScript {
 		format_.path = file_path_;
 		format_.name = Path.GetFileNameWithoutExtension(file_path_); // .vmdを抜かす
 		format_.folder = Path.GetDirectoryName(file_path_); // VMDが格納されているフォルダ
-	}
-	
-	private VMDFormat.SelfShadowList ReadSelfShadowList() {
-		VMDFormat.SelfShadowList result = new VMDFormat.SelfShadowList();
-		result.self_shadow_count = binary_reader_.ReadUInt32();
-		result.self_shadow = new VMDFormat.SelfShadowData[result.self_shadow_count];
-		for (int i = 0; i < result.self_shadow_count; i++) {
-			result.self_shadow[i] = ReadSelfShadowData();
-		}
-		
-		Array.Sort(result.self_shadow, (x,y)=>((int)x.frame_no-(int)y.frame_no));
-		return result;
-	}
-	
-	private VMDFormat.SelfShadowData ReadSelfShadowData() {
-		VMDFormat.SelfShadowData result = new VMDFormat.SelfShadowData();
-		result.frame_no = binary_reader_.ReadUInt32();
-		result.mode = binary_reader_.ReadByte();
-		result.distance = binary_reader_.ReadSingle();
-		return result;
 	}
 		
 	string			file_path_;

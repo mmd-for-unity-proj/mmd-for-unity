@@ -329,6 +329,17 @@ namespace MMD
                 public SelfShadowData[] self_shadow;
 
                 public SelfShadowList() { }
+                public SelfShadowList(BinaryReader bin)
+                {
+                    self_shadow_count = bin.ReadUInt32();
+                    self_shadow = new VMDFormat.SelfShadowData[self_shadow_count];
+                    for (int i = 0; i < self_shadow_count; i++)
+                    {
+                        self_shadow[i] = new SelfShadowData(bin);
+                    }
+
+                    Array.Sort(self_shadow, (x, y) => ((int)x.frame_no - (int)y.frame_no));
+                }
 
                 public byte[] ToBytes()
                 {
@@ -343,6 +354,12 @@ namespace MMD
                 public float distance;	// 0.1 - (dist * 0.00001)
 
                 public SelfShadowData() { }
+                public SelfShadowData(BinaryReader bin)
+                {
+                    frame_no = bin.ReadUInt32();
+                    mode = bin.ReadByte();
+                    distance = bin.ReadSingle();
+                }
 
                 public byte[] ToBytes()
                 {
