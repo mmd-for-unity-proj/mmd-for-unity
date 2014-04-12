@@ -28,19 +28,19 @@ namespace MMD
             public SelfShadowList self_shadow_list;
 
             public VMDFormat() { }
-            public VMDFormat(BinaryReader binary_reader_)
+            public VMDFormat(BinaryReader bin)
             {
                 // 読み込み失敗した場合はだいたいデータがない
                 // 失敗しても読み込み続けることがあるので例外でキャッチして残りはnullにしておく
                 int read_count = 0;
                 try
                 {
-                    header = new VMDFormat.Header(binary_reader_); read_count++;
-                    motion_list = new VMDFormat.MotionList(binary_reader_); read_count++;
-                    skin_list = new VMDFormat.SkinList(binary_reader_); read_count++;
-                    camera_list = new VMDFormat.CameraList(binary_reader_); read_count++;
-                    light_list = new VMDFormat.LightList(binary_reader_); read_count++;
-                    self_shadow_list = new VMDFormat.SelfShadowList(binary_reader_); read_count++;
+                    header = new VMDFormat.Header(bin); read_count++;
+                    motion_list = new VMDFormat.MotionList(bin); read_count++;
+                    skin_list = new VMDFormat.SkinList(bin); read_count++;
+                    camera_list = new VMDFormat.CameraList(bin); read_count++;
+                    light_list = new VMDFormat.LightList(bin); read_count++;
+                    self_shadow_list = new VMDFormat.SelfShadowList(bin); read_count++;
                 }
                 catch (EndOfStreamException e)
                 {
