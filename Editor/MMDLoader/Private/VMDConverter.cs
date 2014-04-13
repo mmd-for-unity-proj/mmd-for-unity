@@ -145,9 +145,8 @@ namespace MMD
             public float time { get; set; }
             public Type value { get; set; }
 
-            protected static void AddKeyframe(byte[] interpolation, int type,
-                CustomKeyframe<Type> prev_keyframe, CustomKeyframe<Type> cur_keyframe, int interpolationQuality,
-                ref CustomKeyframe<Type>[] keyframes, ref int index)
+            protected static void AddKeyframe<T>(byte[] interpolation, int type, T prev_keyframe, T cur_keyframe, int interpolationQuality, ref T[] keyframes, ref int index)
+                where T : CustomKeyframe<Type>
             {
                 if (prev_keyframe == null || IsLinear(interpolation, type))
                 {
@@ -155,21 +154,25 @@ namespace MMD
                 }
                 else
                 {
-                    Vector2 bezierHandleA = GetBezierHandle(interpolation, type, 0);
-                    Vector2 bezierHandleB = GetBezierHandle(interpolation, type, 1);
-                    int sampleCount = interpolationQuality;
-                    for (int j = 0; j < sampleCount; j++)
-                    {
-                        float t = (j + 1) / (float)sampleCount;
-                        Vector2 sample = SampleBezier(bezierHandleA, bezierHandleB, t);
-                        keyframes[index++] = prev_keyframe.Lerp(cur_keyframe, sample);
-                    }
+                    SamplingBezierKeyframes(interpolation, type, interpolationQuality, ref keyframes, ref index, prev_keyframe, cur_keyframe);
+                }
+            }
+
+            private static void SamplingBezierKeyframes<T>(byte[] interpolation, int type, int interpolationQuality, ref T[] keyframes, ref int index, T prev_keyframe, T cur_keyframe)
+                where T : CustomKeyframe<Type>
+            {
+                Vector2 bezierHandleA = GetBezierHandle(interpolation, type, 0);
+                Vector2 bezierHandleB = GetBezierHandle(interpolation, type, 1);
+                int sampleCount = interpolationQuality;
+                for (int j = 0; j < sampleCount; j++)
+                {
+                    AddingSampledBezierKeyframe(j, sampleCount, bezierHandleA, bezierHandleB, ref keyframes, ref index, prev_keyframe, cur_keyframe);
                 }
             }
 
             public abstract CustomKeyframe<Type> Lerp(CustomKeyframe<Type> to, Vector2 t);
 
-            public static void AddingSampledKeyframe<T>(int j, int sampleCount, Vector2 bezierHandleA, Vector2 bezierHandleB, ref T[] keyframes, ref int index, T prev_keyframe, T cur_keyframe)
+            private static void AddingSampledBezierKeyframe<T>(int j, int sampleCount, Vector2 bezierHandleA, Vector2 bezierHandleB, ref T[] keyframes, ref int index, T prev_keyframe, T cur_keyframe)
                 where T : CustomKeyframe<Type>
             {
                 float t = (j + 1) / (float)sampleCount;
@@ -186,15 +189,6 @@ namespace MMD
             {
             }
 
-            // 線形補間
-            public static FloatKeyframe Lerp(FloatKeyframe from, FloatKeyframe to, Vector2 t)
-            {
-                return new FloatKeyframe(
-                    Mathf.Lerp(from.time, to.time, t.x),
-                    Mathf.Lerp(from.value, to.value, t.y)
-                );
-            }
-
             public override CustomKeyframe<float> Lerp(CustomKeyframe<float> to, Vector2 t)
             {
                 return new FloatKeyframe(
@@ -207,20 +201,7 @@ namespace MMD
                 FloatKeyframe prev_keyframe, FloatKeyframe cur_keyframe, int interpolationQuality,
                 ref FloatKeyframe[] keyframes, ref int index)
             {
-                if (prev_keyframe == null || IsLinear(interpolation, type))
-                {
-                    keyframes[index++] = cur_keyframe;
-                }
-                else
-                {
-                    Vector2 bezierHandleA = GetBezierHandle(interpolation, type, 0);
-                    Vector2 bezierHandleB = GetBezierHandle(interpolation, type, 1);
-                    int sampleCount = interpolationQuality;
-                    for (int j = 0; j < sampleCount; j++)
-                    {
-                        AddingSampledKeyframe(j, sampleCount, bezierHandleA, bezierHandleB, ref keyframes, ref index, prev_keyframe, cur_keyframe);
-                    }
-                }
+                AddKeyframe<FloatKeyframe>(interpolation, type, prev_keyframe, cur_keyframe, interpolationQuality, ref keyframes, ref index);
             }
         }
 
@@ -230,14 +211,6 @@ namespace MMD
             public QuaternionKeyframe(float time, Quaternion value)
                 : base(time, value)
             {
-            }
-            // 線形補間
-            public static QuaternionKeyframe Lerp(QuaternionKeyframe from, QuaternionKeyframe to, Vector2 t)
-            {
-                return new QuaternionKeyframe(
-                    Mathf.Lerp(from.time, to.time, t.x),
-                    Quaternion.Slerp(from.value, to.value, t.y)
-                );
             }
 
             public override CustomKeyframe<Quaternion> Lerp(CustomKeyframe<Quaternion> to, Vector2 t)
@@ -252,20 +225,7 @@ namespace MMD
                 QuaternionKeyframe prev_keyframe, QuaternionKeyframe cur_keyframe, int interpolationQuality,
                 ref QuaternionKeyframe[] keyframes, ref int index)
             {
-                if (prev_keyframe == null || IsLinear(interpolation, type))
-                {
-                    keyframes[index++] = cur_keyframe;
-                }
-                else
-                {
-                    Vector2 bezierHandleA = GetBezierHandle(interpolation, type, 0);
-                    Vector2 bezierHandleB = GetBezierHandle(interpolation, type, 1);
-                    int sampleCount = interpolationQuality;
-                    for (int j = 0; j < sampleCount; j++)
-                    {
-                        AddingSampledKeyframe(j, sampleCount, bezierHandleA, bezierHandleB, ref keyframes, ref index, prev_keyframe, cur_keyframe);
-                    }
-                }
+                AddKeyframe<QuaternionKeyframe>(interpolation, type, prev_keyframe, cur_keyframe, interpolationQuality, ref keyframes, ref index);
             }
 
         }
