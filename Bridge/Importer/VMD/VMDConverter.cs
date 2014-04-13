@@ -10,6 +10,8 @@ namespace MMD
 {
     public class VMDConverter
     {
+        private float scale_ = 1.0f;
+
         /// <summary>
         /// AnimationClipを作成する
         /// </summary>
@@ -64,7 +66,7 @@ namespace MMD
         }
 
         // 補間曲線が線形補間と等価か
-        public static bool IsLinear(byte[] interpolation, int type)
+        static bool IsLinear(byte[] interpolation, int type)
         {
             byte ax = interpolation[0 * 8 + type];
             byte ay = interpolation[0 * 8 + 4 + type];
@@ -464,7 +466,5 @@ namespace MMD
             AnimationUtility.SetAnimationType(clip, animation_type);
 #endif
         }
-
-        private float scale_ = 1.0f;
     }
 }
