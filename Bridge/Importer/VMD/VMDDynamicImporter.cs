@@ -10,10 +10,12 @@ namespace MMD
     {
         public class VMDDynamicImporter
         {
-            public static void Import(GameObject pmd_object, byte[] data)
+            public static void Import(GameObject pmd_object, byte[] data, string clip_name)
             {
                 var format = VMDFormatFactory.Import(data);
-                VMDConverter.CreateAnimationClip(format, pmd_object, 1);
+                var clip = VMDConverter.CreateAnimationClip(format, pmd_object, 1);
+                var animation = pmd_object.GetComponent<Animation>();
+                animation.AddClip(clip, clip_name);
             }
         }
     }
