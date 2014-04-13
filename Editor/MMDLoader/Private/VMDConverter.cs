@@ -168,6 +168,14 @@ namespace MMD
             }
 
             public abstract CustomKeyframe<Type> Lerp(CustomKeyframe<Type> to, Vector2 t);
+
+            public static void AddingSampledKeyframe<T>(int j, int sampleCount, Vector2 bezierHandleA, Vector2 bezierHandleB, ref T[] keyframes, ref int index, T prev_keyframe, T cur_keyframe)
+                where T : CustomKeyframe<Type>
+            {
+                float t = (j + 1) / (float)sampleCount;
+                Vector2 sample = SampleBezier(bezierHandleA, bezierHandleB, t);
+                keyframes[index++] = (T)prev_keyframe.Lerp(cur_keyframe, sample);
+            }
         }
 
         // float型のvalueを持つキーフレーム
@@ -210,9 +218,7 @@ namespace MMD
                     int sampleCount = interpolationQuality;
                     for (int j = 0; j < sampleCount; j++)
                     {
-                        float t = (j + 1) / (float)sampleCount;
-                        Vector2 sample = SampleBezier(bezierHandleA, bezierHandleB, t);
-                        keyframes[index++] = FloatKeyframe.Lerp(prev_keyframe, cur_keyframe, sample);
+                        AddingSampledKeyframe(j, sampleCount, bezierHandleA, bezierHandleB, ref keyframes, ref index, prev_keyframe, cur_keyframe);
                     }
                 }
             }
@@ -257,9 +263,7 @@ namespace MMD
                     int sampleCount = interpolationQuality;
                     for (int j = 0; j < sampleCount; j++)
                     {
-                        float t = (j + 1) / (float)sampleCount;
-                        Vector2 sample = SampleBezier(bezierHandleA, bezierHandleB, t);
-                        keyframes[index++] = QuaternionKeyframe.Lerp(prev_keyframe, cur_keyframe, sample);
+                        AddingSampledKeyframe(j, sampleCount, bezierHandleA, bezierHandleB, ref keyframes, ref index, prev_keyframe, cur_keyframe);
                     }
                 }
             }
