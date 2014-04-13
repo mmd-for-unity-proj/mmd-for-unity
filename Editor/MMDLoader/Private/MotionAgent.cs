@@ -16,7 +16,7 @@ namespace MMD {
 				throw new System.ArgumentException();
 			}
 			file_path_ = file_path;
-			header_ = VMDLoaderScript.GetHeader(file_path_); //VMD読み込み
+			header_ = VMDFormatFactory.GetHeader(file_path_); //VMD読み込み
 			format_ = null;
 		}
 		
@@ -31,7 +31,7 @@ namespace MMD {
 			if (null == format_) {
 				//まだ読み込んでいないなら読むこむ
                 Debug.Log(file_path_);
-				format_ = VMDLoaderScript.Import(file_path_); //VMD読み込み
+				format_ = VMDFormatFactory.Import(file_path_); //VMD読み込み
 				header_ = format_.header;
 			}
 
