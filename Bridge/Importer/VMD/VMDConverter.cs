@@ -174,6 +174,24 @@ namespace MMD
             AddDummyKeyframe(ref rz_keys);
         }
 
+        void SetEditorCurve(AnimationClip clip, string bone_path, System.Type type, string property_name, AnimationCurve curve_x, AnimationCurve curve_y, AnimationCurve curve_z)
+        {
+#if UNITY_EDITOR
+#if !UNITY_4_2
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".x"), curve_x);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".y"), curve_y);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".z"), curve_z);
+#else
+            AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".x",curve_x);
+			AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".y",curve_y);
+			AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".z",curve_z);
+#endif
+#else
+            clip.SetCurve(bone_path, typeof(Transform), property_name + ".x", curve_x);
+            clip.SetCurve(bone_path, typeof(Transform), property_name + ".y", curve_y);
+            clip.SetCurve(bone_path, typeof(Transform), property_name + ".z", curve_z);
+#endif
+        }
 
         // あるボーンに含まれるキーフレを抽出
         // これは回転のみ
@@ -205,26 +223,18 @@ namespace MMD
                 AnimationCurve curve_x = new AnimationCurve(rx_keys);
                 AnimationCurve curve_y = new AnimationCurve(ry_keys);
                 AnimationCurve curve_z = new AnimationCurve(rz_keys);
-#if UNITY_EDITOR
+                const string property_name = "localEulerAngles";
+                
                 // ここで回転オイラー角をセット（補間はクォータニオン）
-#if !UNITY_4_2 //4.3以降
-                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.x"), curve_x);
-                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.y"), curve_y);
-                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.z"), curve_z);
-#else
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.x",curve_x);
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.y",curve_y);
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.z",curve_z);
-#endif
-#else
-                // 動的に生成したい場合
-#endif
+                SetEditorCurve(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
             }
+                
             catch (KeyNotFoundException)
             {
                 //Debug.LogError("互換性のないボーンが読み込まれました:" + bone_path);
             }
         }
+
         //UnityのKeyframeに変換する（移動用）
         Keyframe[] ToKeyframesForLocation(FloatKeyframe[] custom_keys)
         {
@@ -244,6 +254,7 @@ namespace MMD
             AddDummyKeyframe(ref keys);
             return keys;
         }
+
         // 移動のみの抽出
         void CreateKeysForLocation(VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality, GameObject current_obj = null)
         {
@@ -295,19 +306,8 @@ namespace MMD
                     AnimationCurve curve_x = new AnimationCurve(ToKeyframesForLocation(lx_keys));
                     AnimationCurve curve_y = new AnimationCurve(ToKeyframesForLocation(ly_keys));
                     AnimationCurve curve_z = new AnimationCurve(ToKeyframesForLocation(lz_keys));
-#if UNITY_EDITOR
-#if !UNITY_4_2 //4.3以降
-                    AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "m_LocalPosition.x"), curve_x);
-                    AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "m_LocalPosition.y"), curve_y);
-                    AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "m_LocalPosition.z"), curve_z);
-#else
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.y",curve_y);
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.z",curve_z);
-#endif
-#else
-                    // 動的に生成したい場合
-#endif
+                    const string property_name = "m_LocalPosition";
+                    SetEditorCurve(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
                 }
             }
             catch (KeyNotFoundException)
@@ -345,14 +345,17 @@ namespace MMD
 
                 // Z軸移動にキーフレームを打つ
                 AnimationCurve curve = new AnimationCurve(keyframe);
+                const string property_name = "m_LocalPosition";
+                string skin_path = "Expression/" + skin.Key;
 #if UNITY_EDITOR
 #if !UNITY_4_2 //4.3以降
-                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("Expression/" + skin.Key, typeof(Transform), "m_LocalPosition.z"), curve);
+                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(skin_path, typeof(Transform), property_name + ".z"), curve);
 #else
-				AnimationUtility.SetEditorCurve(clip,"Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z",curve);
+				AnimationUtility.SetEditorCurve(clip,skin_path,typeof(Transform),property_name + ".z",curve);
 #endif
 #else
                 // 動的に生成したい場合
+                clip.SetCurve(skin_path, typeof(Transform), property_name + ".z", curve);
 #endif
 
             }
