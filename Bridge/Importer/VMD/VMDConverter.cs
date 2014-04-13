@@ -187,7 +187,7 @@ namespace MMD
 #endif
         }
 
-        void SetEditorCurve(AnimationClip clip, string bone_path, System.Type type, string property_name, AnimationCurve curve_x, AnimationCurve curve_y, AnimationCurve curve_z)
+        void SetEditorCurves(AnimationClip clip, string bone_path, System.Type type, string property_name, AnimationCurve curve_x, AnimationCurve curve_y, AnimationCurve curve_z)
         {
             SetEditorCurveSingle(clip, bone_path, type, property_name, ".x", curve_x);
             SetEditorCurveSingle(clip, bone_path, type, property_name, ".y", curve_y);
@@ -227,7 +227,7 @@ namespace MMD
                 const string property_name = "localEulerAngles";
                 
                 // ここで回転オイラー角をセット（補間はクォータニオン）
-                SetEditorCurve(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
+                SetEditorCurves(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
             }
                 
             catch (KeyNotFoundException)
@@ -308,7 +308,7 @@ namespace MMD
                     AnimationCurve curve_y = new AnimationCurve(ToKeyframesForLocation(ly_keys));
                     AnimationCurve curve_z = new AnimationCurve(ToKeyframesForLocation(lz_keys));
                     const string property_name = "m_LocalPosition";
-                    SetEditorCurve(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
+                    SetEditorCurves(clip, bone_path, typeof(Transform), property_name, curve_x, curve_y, curve_z);
                 }
             }
             catch (KeyNotFoundException)
