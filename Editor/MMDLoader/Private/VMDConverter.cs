@@ -144,6 +144,30 @@ namespace MMD
             }
             public float time { get; set; }
             public Type value { get; set; }
+
+            protected static void AddKeyframe(byte[] interpolation, int type,
+                CustomKeyframe<Type> prev_keyframe, CustomKeyframe<Type> cur_keyframe, int interpolationQuality,
+                ref CustomKeyframe<Type>[] keyframes, ref int index)
+            {
+                if (prev_keyframe == null || IsLinear(interpolation, type))
+                {
+                    keyframes[index++] = cur_keyframe;
+                }
+                else
+                {
+                    Vector2 bezierHandleA = GetBezierHandle(interpolation, type, 0);
+                    Vector2 bezierHandleB = GetBezierHandle(interpolation, type, 1);
+                    int sampleCount = interpolationQuality;
+                    for (int j = 0; j < sampleCount; j++)
+                    {
+                        float t = (j + 1) / (float)sampleCount;
+                        Vector2 sample = SampleBezier(bezierHandleA, bezierHandleB, t);
+                        keyframes[index++] = prev_keyframe.Lerp(cur_keyframe, sample);
+                    }
+                }
+            }
+
+            public abstract CustomKeyframe<Type> Lerp(CustomKeyframe<Type> to, Vector2 t);
         }
 
         // float型のvalueを持つキーフレーム
@@ -153,6 +177,7 @@ namespace MMD
                 : base(time, value)
             {
             }
+
             // 線形補間
             public static FloatKeyframe Lerp(FloatKeyframe from, FloatKeyframe to, Vector2 t)
             {
@@ -161,6 +186,14 @@ namespace MMD
                     Mathf.Lerp(from.value, to.value, t.y)
                 );
             }
+
+            public override CustomKeyframe<float> Lerp(CustomKeyframe<float> to, Vector2 t)
+            {
+                return new FloatKeyframe(
+                    Mathf.Lerp(time, to.time, t.x),
+                    Mathf.Lerp(value, to.value, t.y));
+            }
+
             // ベジェを線形補間で近似したキーフレームを追加する
             public static void AddBezierKeyframes(byte[] interpolation, int type,
                 FloatKeyframe prev_keyframe, FloatKeyframe cur_keyframe, int interpolationQuality,
@@ -200,6 +233,14 @@ namespace MMD
                     Quaternion.Slerp(from.value, to.value, t.y)
                 );
             }
+
+            public override CustomKeyframe<Quaternion> Lerp(CustomKeyframe<Quaternion> to, Vector2 t)
+            {
+                return new QuaternionKeyframe(
+                    Mathf.Lerp(time, to.time, t.x),
+                    Quaternion.Slerp(value, to.value, t.y));
+            }
+
             // ベジェを線形補間で近似したキーフレームを追加する
             public static void AddBezierKeyframes(byte[] interpolation, int type,
                 QuaternionKeyframe prev_keyframe, QuaternionKeyframe cur_keyframe, int interpolationQuality,
