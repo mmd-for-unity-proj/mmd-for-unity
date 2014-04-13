@@ -174,23 +174,24 @@ namespace MMD
             AddDummyKeyframe(ref rz_keys);
         }
 
-        void SetEditorCurve(AnimationClip clip, string bone_path, System.Type type, string property_name, AnimationCurve curve_x, AnimationCurve curve_y, AnimationCurve curve_z)
+        void SetEditorCurveSingle(AnimationClip clip, string bone_path, System.Type type, string property_name, string element, AnimationCurve curve)
         {
 #if UNITY_EDITOR
 #if !UNITY_4_2
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".x"), curve_x);
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".y"), curve_y);
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + ".z"), curve_z);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + element), curve);
 #else
-            AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".x",curve_x);
-			AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".y",curve_y);
-			AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + ".z",curve_z);
+            AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + element,curve);
 #endif
 #else
-            clip.SetCurve(bone_path, typeof(Transform), property_name + ".x", curve_x);
-            clip.SetCurve(bone_path, typeof(Transform), property_name + ".y", curve_y);
-            clip.SetCurve(bone_path, typeof(Transform), property_name + ".z", curve_z);
+            clip.SetCurve(bone_path, typeof(Transform), property_name + element, curve_x);
 #endif
+        }
+
+        void SetEditorCurve(AnimationClip clip, string bone_path, System.Type type, string property_name, AnimationCurve curve_x, AnimationCurve curve_y, AnimationCurve curve_z)
+        {
+            SetEditorCurveSingle(clip, bone_path, type, property_name, ".x", curve_x);
+            SetEditorCurveSingle(clip, bone_path, type, property_name, ".y", curve_y);
+            SetEditorCurveSingle(clip, bone_path, type, property_name, ".z", curve_z);
         }
 
         // あるボーンに含まれるキーフレを抽出
@@ -347,17 +348,7 @@ namespace MMD
                 AnimationCurve curve = new AnimationCurve(keyframe);
                 const string property_name = "m_LocalPosition";
                 string skin_path = "Expression/" + skin.Key;
-#if UNITY_EDITOR
-#if !UNITY_4_2 //4.3以降
-                AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(skin_path, typeof(Transform), property_name + ".z"), curve);
-#else
-				AnimationUtility.SetEditorCurve(clip,skin_path,typeof(Transform),property_name + ".z",curve);
-#endif
-#else
-                // 動的に生成したい場合
-                clip.SetCurve(skin_path, typeof(Transform), property_name + ".z", curve);
-#endif
-
+                SetEditorCurveSingle(clip, skin_path, typeof(Transform), property_name, ".z", curve);
             }
         }
 
