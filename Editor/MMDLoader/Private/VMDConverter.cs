@@ -70,6 +70,7 @@ namespace MMD
             Vector2 bezierHandle = new Vector2((float)interpolation[ab * 8 + type], (float)interpolation[ab * 8 + 4 + type]);
             return bezierHandle / 127f;
         }
+
         // p0:(0f,0f),p3:(1f,1f)のベジェ曲線上の点を取得する
         // tは0～1の範囲
         static Vector2 SampleBezier(Vector2 bezierHandleA, Vector2 bezierHandleB, float t)
@@ -89,6 +90,7 @@ namespace MMD
             Vector2 s0 = Vector2.Lerp(r0, r1, t);
             return s0;
         }
+
         // 補間曲線が線形補間と等価か
         static bool IsLinear(byte[] interpolation, int type)
         {
@@ -98,8 +100,9 @@ namespace MMD
             byte by = interpolation[1 * 8 + 4 + type];
             return (ax == ay) && (bx == by);
         }
+
         // 補間曲線の近似のために追加するキーフレームを含めたキーフレーム数を取得する
-        int GetKeyframeCount(List<MMD.VMD.VMDFormat.Motion> mlist, int type, int interpolationQuality)
+        int GetKeyframeCount(List<VMDFormat.Motion> mlist, int type, int interpolationQuality)
         {
             int count = 0;
             for (int i = 0; i < mlist.Count; i++)
@@ -115,6 +118,7 @@ namespace MMD
             }
             return count;
         }
+
         //キーフレームが1つの時、ダミーキーフレームを追加する
         void AddDummyKeyframe(ref Keyframe[] keyframes)
         {
@@ -129,6 +133,7 @@ namespace MMD
                 keyframes = newKeyframes;
             }
         }
+
         // 任意の型のvalueを持つキーフレーム
         abstract class CustomKeyframe<Type>
         {
@@ -140,6 +145,7 @@ namespace MMD
             public float time { get; set; }
             public Type value { get; set; }
         }
+
         // float型のvalueを持つキーフレーム
         class FloatKeyframe : CustomKeyframe<float>
         {
@@ -178,6 +184,7 @@ namespace MMD
                 }
             }
         }
+
         // Quaternion型のvalueを持つキーフレーム
         class QuaternionKeyframe : CustomKeyframe<Quaternion>
         {
@@ -223,12 +230,14 @@ namespace MMD
         {
             return (to_keyframe.value - from_keyframe.value) / (to_keyframe.time - from_keyframe.time);
         }
+
         //-359～+359度の範囲を等価な0～359度へ変換する。
         float Mod360(float angle)
         {
             //剰余演算の代わりに加算にする
             return (angle < 0) ? (angle + 360f) : (angle);
         }
+
         //回転の線形補間用tangentを求める
         float GetLinearTangentForRotation(Keyframe from_keyframe, Keyframe to_keyframe)
         {
@@ -245,6 +254,7 @@ namespace MMD
                 return (delta_value - 360f) / (to_keyframe.time - from_keyframe.time);
             }
         }
+
         //アニメーションエディタでBothLinearを選択したときの値
         private const int TangentModeBothLinear = 21;
 
@@ -286,11 +296,11 @@ namespace MMD
 
         // あるボーンに含まれるキーフレを抽出
         // これは回転のみ
-        void CreateKeysForRotation(MMD.VMD.VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality)
+        void CreateKeysForRotation(VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality)
         {
             try
             {
-                List<MMD.VMD.VMDFormat.Motion> mlist = format.motion_list.motion[current_bone];
+                List<VMDFormat.Motion> mlist = format.motion_list.motion[current_bone];
                 int keyframeCount = GetKeyframeCount(mlist, 3, interpolationQuality);
 
                 QuaternionKeyframe[] r_keys = new QuaternionKeyframe[keyframeCount];
@@ -350,7 +360,7 @@ namespace MMD
             return keys;
         }
         // 移動のみの抽出
-        void CreateKeysForLocation(MMD.VMD.VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality, GameObject current_obj = null)
+        void CreateKeysForLocation(VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality, GameObject current_obj = null)
         {
             try
             {
@@ -358,7 +368,7 @@ namespace MMD
                 if (current_obj != null)
                     default_position = current_obj.transform.localPosition;
 
-                List<MMD.VMD.VMDFormat.Motion> mlist = format.motion_list.motion[current_bone];
+                List<VMDFormat.Motion> mlist = format.motion_list.motion[current_bone];
 
                 int keyframeCountX = GetKeyframeCount(mlist, 0, interpolationQuality);
                 int keyframeCountY = GetKeyframeCount(mlist, 1, interpolationQuality);
@@ -417,7 +427,7 @@ namespace MMD
             }
         }
 
-        void CreateKeysForSkin(MMD.VMD.VMDFormat format, AnimationClip clip)
+        void CreateKeysForSkin(VMDFormat format, AnimationClip clip)
         {
             const float tick_time = 1f / 30f;
 
@@ -497,7 +507,7 @@ namespace MMD
         }
 
         // 無駄なカーブを登録してるけどどうするか
-        void FullEntryBoneAnimation(MMD.VMD.VMDFormat format, AnimationClip clip, Dictionary<string, string> dic, Dictionary<string, GameObject> obj, int interpolationQuality)
+        void FullEntryBoneAnimation(VMDFormat format, AnimationClip clip, Dictionary<string, string> dic, Dictionary<string, GameObject> obj, int interpolationQuality)
         {
             foreach (KeyValuePair<string, string> p in dic)	// keyはtransformの名前, valueはパス
             {
