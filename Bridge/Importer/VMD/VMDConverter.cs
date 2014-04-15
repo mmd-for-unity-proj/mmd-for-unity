@@ -182,10 +182,10 @@ namespace MMD
 #if !UNITY_4_2
             AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), property_name + element), curve);
 #else
-            AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),property_name + element,curve);
+            AnimationUtility.SetEditorCurve(clip,bone_path, typeof(Transform), property_name + element, curve);
 #endif
 #else
-            clip.SetCurve(bone_path, typeof(Transform), property_name + element, curve_x);
+            clip.SetCurve(bone_path, typeof(Transform), property_name + element, curve);
 #endif
         }
 
