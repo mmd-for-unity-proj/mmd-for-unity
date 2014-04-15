@@ -122,7 +122,7 @@ namespace MMD
         }
 
         //回転の線形補間用tangentを求める
-        float GetLinearTangentForRotation(Keyframe from_keyframe, Keyframe to_keyframe)
+        float GetLinearTangentForRotationSingle(Keyframe from_keyframe, Keyframe to_keyframe)
         {
             float tv = Mod360(to_keyframe.value);
             float fv = Mod360(from_keyframe.value);
@@ -160,9 +160,9 @@ namespace MMD
                 rz_keys[i].tangentMode = TangentModeBothLinear;
                 if (i > 0)
                 {
-                    float tx = GetLinearTangentForRotation(rx_keys[i - 1], rx_keys[i]);
-                    float ty = GetLinearTangentForRotation(ry_keys[i - 1], ry_keys[i]);
-                    float tz = GetLinearTangentForRotation(rz_keys[i - 1], rz_keys[i]);
+                    float tx = GetLinearTangentForRotationSingle(rx_keys[i - 1], rx_keys[i]);
+                    float ty = GetLinearTangentForRotationSingle(ry_keys[i - 1], ry_keys[i]);
+                    float tz = GetLinearTangentForRotationSingle(rz_keys[i - 1], rz_keys[i]);
                     rx_keys[i - 1].outTangent = tx;
                     ry_keys[i - 1].outTangent = ty;
                     rz_keys[i - 1].outTangent = tz;
