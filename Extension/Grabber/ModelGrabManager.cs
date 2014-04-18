@@ -13,6 +13,7 @@ public class ModelGrabManager : MonoBehaviour
     }
 
     GameObject grab;
+    GameObject target = null;
     bool is_ik;
     Mode mode = Mode.Rotate;
 
@@ -30,6 +31,14 @@ public class ModelGrabManager : MonoBehaviour
     }
 
     void Grabbing(Mode mode)
+    {
+        if (Input.GetMouseButton(0) && target != null)
+        {
+            ToEachMode(mode);
+        }
+    }
+
+    void ToEachMode(Mode mode)
     {
         switch (mode)
         {
@@ -52,9 +61,23 @@ public class ModelGrabManager : MonoBehaviour
         }
     }
 
-    void ViewCircle(GameObject target_bone)
+    /// <summary>
+    /// 引数でボーンを指定し，円を表示させる
+    /// </summary>
+    /// <param name="target_bone"></param>
+    void SelectedBoneAsViewCircle(GameObject target_bone)
     {
         var screen_point = Camera.main.ViewportToScreenPoint(target_bone.transform.position);
         grab.transform.position = screen_point;
+        target = target_bone;
+    }
+
+    /// <summary>
+    /// 色を返る
+    /// </summary>
+    /// <param name="color"></param>
+    void ChangeColor(Color color)
+    {
+        grab.guiTexture.color = color;
     }
 }
