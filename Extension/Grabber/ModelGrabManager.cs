@@ -40,6 +40,8 @@ public class ModelGrabManager : MonoBehaviour
     {
         if (Input.GetMouseButton(0) && target != null)
         {
+            moving_vector.x = moving_vector.x / Screen.width;
+            moving_vector.y = moving_vector.y / Screen.height;  // 相対的な座標に置き換える
             ToEachMode(mode, target, ref moving_vector);
         }
     }
