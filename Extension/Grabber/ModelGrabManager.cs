@@ -6,15 +6,14 @@ using UnityEngine;
 
 public class ModelGrabManager : MonoBehaviour
 {
-    GameObject grab;
-
-    bool is_ik;
-
     enum Mode
     {
         Rotate,
         Translate
     }
+
+    GameObject grab;
+    bool is_ik;
     Mode mode = Mode.Rotate;
 
     void Start()
@@ -26,17 +25,30 @@ public class ModelGrabManager : MonoBehaviour
 
     void Update()
     {
-        ChangeGrabMode(mode);
+        ChangeGrabMode(mode, KeyCode.Space);
+        Grabbing(mode);
     }
 
-    void ChangeGrabMode(Mode mode)
+    void Grabbing(Mode mode)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        switch (mode)
         {
-            if (mode == Mode.Rotate)
-                mode = Mode.Translate;
+            case Mode.Rotate:
+                break;
+
+            case Mode.Translate:
+                break;
+        }
+    }
+
+    void ChangeGrabMode(Mode grab_mode, KeyCode kcode)
+    {
+        if (Input.GetKeyDown(kcode))
+        {
+            if (grab_mode == Mode.Rotate)
+                grab_mode = Mode.Translate;
             else
-                mode = Mode.Rotate;
+                grab_mode = Mode.Rotate;
         }
     }
 
