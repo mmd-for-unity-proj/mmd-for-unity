@@ -50,6 +50,16 @@ public class ModelGrabManager : MonoBehaviour
         }
     }
 
+    void DoRotate(GameObject target)
+    {
+
+    }
+
+    void DoTranslate(GameObject target)
+    {
+
+    }
+
     void ChangeGrabMode(Mode grab_mode, KeyCode kcode)
     {
         if (Input.GetKeyDown(kcode))
