@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-public class ModelGrabber : MonoBehaviour
+public class GrabCircle : MonoBehaviour
 {
     void Start()
     {
