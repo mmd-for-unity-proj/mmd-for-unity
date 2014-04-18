@@ -17,45 +17,53 @@ public class ModelGrabManager : MonoBehaviour
     bool is_ik;
     Mode mode = Mode.Rotate;
 
+    Vector3 prev_mouse_pos;
+    Vector3 moving_vector;
+
     void Start()
     {
         grab = new GameObject("GrabCircle");
         grab.transform.position = new Vector3(-1f, -1f, 0);
         grab.AddComponent<GrabCircle>();
+        prev_mouse_pos = Input.mousePosition;
     }
 
     void Update()
     {
+        moving_vector = Input.mousePosition - prev_mouse_pos;
         ChangeGrabMode(mode, KeyCode.Space);
-        Grabbing(mode);
+        Grabbing(mode, target, ref moving_vector);
+        prev_mouse_pos = Input.mousePosition;
     }
 
-    void Grabbing(Mode mode)
+    void Grabbing(Mode mode, GameObject target, ref Vector3 moving_vector)
     {
         if (Input.GetMouseButton(0) && target != null)
         {
-            ToEachMode(mode);
+            ToEachMode(mode, target, ref moving_vector);
         }
     }
 
-    void ToEachMode(Mode mode)
+    void ToEachMode(Mode mode, GameObject target, ref Vector3 moving_vector)
     {
         switch (mode)
         {
             case Mode.Rotate:
+                DoRotate(target, ref moving_vector);
                 break;
 
             case Mode.Translate:
+                DoRotate(target, ref moving_vector);
                 break;
         }
     }
 
-    void DoRotate(GameObject target)
+    void DoRotate(GameObject target, ref Vector3 moving_vector)
     {
 
     }
 
-    void DoTranslate(GameObject target)
+    void DoTranslate(GameObject target, ref Vector3 moving_vector)
     {
 
     }
