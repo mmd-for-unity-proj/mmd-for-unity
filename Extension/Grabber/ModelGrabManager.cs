@@ -19,6 +19,7 @@ public class ModelGrabManager : MonoBehaviour
 
     Vector3 prev_mouse_pos;
     Vector3 moving_vector;
+    Transform camera_t;
 
     void Start()
     {
@@ -26,6 +27,7 @@ public class ModelGrabManager : MonoBehaviour
         grab.transform.position = new Vector3(-1f, -1f, 0);
         grab.AddComponent<GrabCircle>();
         prev_mouse_pos = Input.mousePosition;
+        camera_t = Camera.main.transform;
     }
 
     void Update()
@@ -42,32 +44,36 @@ public class ModelGrabManager : MonoBehaviour
         {
             moving_vector.x = moving_vector.x / Screen.width;
             moving_vector.y = moving_vector.y / Screen.height;  // 相対的な座標に置き換える
-            ToEachMode(mode, target, ref moving_vector);
+            var distance = (target.transform.position - camera_t.position).magnitude;
+
+            ToEachMode(mode, target, ref moving_vector, distance);
         }
     }
 
-    void ToEachMode(Mode mode, GameObject target, ref Vector3 moving_vector)
+    void ToEachMode(Mode mode, GameObject target, ref Vector3 moving_vector, float distance)
     {
         switch (mode)
         {
             case Mode.Rotate:
-                DoRotate(target, ref moving_vector);
+                DoRotate(target, ref moving_vector, distance);
                 break;
 
             case Mode.Translate:
-                DoRotate(target, ref moving_vector);
+                DoRotate(target, ref moving_vector, distance);
                 break;
         }
     }
 
-    void DoRotate(GameObject target, ref Vector3 moving_vector)
+    void DoRotate(GameObject target, ref Vector3 moving_vector, float distance)
     {
-
+        // distanceが近いほど回転量が大きくなる，遠いと小さくなる
+        var moving_power = 1f / distance;
     }
 
-    void DoTranslate(GameObject target, ref Vector3 moving_vector)
+    void DoTranslate(GameObject target, ref Vector3 moving_vector, float distance)
     {
-
+        // distanceが近いほど移動量が小さくなる，遠いと大きくなる
+        var moving_power = Mathf.Log10(distance);
     }
 
     void ChangeGrabMode(Mode grab_mode, KeyCode kcode)
