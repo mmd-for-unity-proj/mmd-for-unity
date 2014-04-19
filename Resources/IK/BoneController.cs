@@ -13,6 +13,11 @@ public class BoneController : MonoBehaviour
 	public bool add_move;
 	public bool add_rotate;
 
+    public bool display_flag;
+    public bool movable;
+    public bool rotatable;
+    public bool operatable;
+
 	/// <summary>
 	/// 簡略化トランスフォーム
 	/// </summary>

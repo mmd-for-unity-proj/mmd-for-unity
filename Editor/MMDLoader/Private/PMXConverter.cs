@@ -1522,6 +1522,12 @@ namespace MMD
 		BoneController ConvertBoneController(PMXFormat.Bone bone, int bone_index, GameObject[] bones)
 		{
 			BoneController result = bones[bone_index].GetComponent<BoneController>();
+
+            result.display_flag = (bone.bone_flag & PMXFormat.Bone.Flag.DisplayFlag) > 0;
+            result.operatable = (bone.bone_flag & PMXFormat.Bone.Flag.CanOperate) > 0;
+            result.rotatable = (bone.bone_flag & PMXFormat.Bone.Flag.Rotatable) > 0;
+            result.movable = (bone.bone_flag & PMXFormat.Bone.Flag.Movable) > 0;
+
 			if (0.0f != bone.additional_rate) {
 				//付与親が有るなら
 				result.additive_parent = bones[bone.additional_parent_index].GetComponent<BoneController>();
