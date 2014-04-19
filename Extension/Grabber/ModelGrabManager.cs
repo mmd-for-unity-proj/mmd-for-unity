@@ -14,8 +14,9 @@ public class ModelGrabManager : MonoBehaviour
 
     GameObject grab;
     GameObject target = null;
+    BoneController controller;
     bool is_ik;
-    Mode mode = Mode.Rotate;
+    Mode grab_mode = Mode.Rotate;
 
     Vector3 prev_mouse_pos;
     Vector3 moving_vector;
@@ -33,50 +34,50 @@ public class ModelGrabManager : MonoBehaviour
     void Update()
     {
         moving_vector = Input.mousePosition - prev_mouse_pos;
-        ChangeGrabMode(mode, KeyCode.Space);
-        Grabbing(mode, target, ref moving_vector);
+        ChangeGrabMode(KeyCode.Space);
+        Grabbing(ref moving_vector);
         prev_mouse_pos = Input.mousePosition;
     }
 
-    void Grabbing(Mode mode, GameObject target, ref Vector3 moving_vector)
+    void Grabbing(ref Vector3 moving_vector)
     {
-        if (Input.GetMouseButton(0) && target != null)
+        if (Input.GetMouseButton(0) && target != null && controller.operatable && controller.display_flag)
         {
             moving_vector.x = moving_vector.x / Screen.width;
             moving_vector.y = moving_vector.y / Screen.height;  // 相対的な座標に置き換える
             var distance = (target.transform.position - camera_t.position).magnitude;
 
-            ToEachMode(mode, target, ref moving_vector, distance);
+            ToEachMode(ref moving_vector, distance);
         }
     }
 
-    void ToEachMode(Mode mode, GameObject target, ref Vector3 moving_vector, float distance)
+    void ToEachMode(ref Vector3 moving_vector, float distance)
     {
-        switch (mode)
+        switch (grab_mode)
         {
             case Mode.Rotate:
-                DoRotate(target, ref moving_vector, distance);
+                DoRotate(ref moving_vector, distance);
                 break;
 
             case Mode.Translate:
-                DoRotate(target, ref moving_vector, distance);
+                DoRotate(ref moving_vector, distance);
                 break;
         }
     }
 
-    void DoRotate(GameObject target, ref Vector3 moving_vector, float distance)
+    void DoRotate(ref Vector3 moving_vector, float distance)
     {
         // distanceが近いほど回転量が大きくなる，遠いと小さくなる
         var moving_power = 1f / distance;
     }
 
-    void DoTranslate(GameObject target, ref Vector3 moving_vector, float distance)
+    void DoTranslate(ref Vector3 moving_vector, float distance)
     {
         // distanceが近いほど移動量が小さくなる，遠いと大きくなる
         var moving_power = Mathf.Log10(distance);
     }
 
-    void ChangeGrabMode(Mode grab_mode, KeyCode kcode)
+    void ChangeGrabMode(KeyCode kcode)
     {
         if (Input.GetKeyDown(kcode))
         {
@@ -95,11 +96,13 @@ public class ModelGrabManager : MonoBehaviour
     {
         var screen_point = Camera.main.ViewportToScreenPoint(target_bone.transform.position);
         grab.transform.position = screen_point;
+
         target = target_bone;
+        controller = target.GetComponent<BoneController>();
     }
 
     /// <summary>
-    /// 色を返る
+    /// 色を変える
     /// </summary>
     /// <param name="color"></param>
     void ChangeColor(Color color)
