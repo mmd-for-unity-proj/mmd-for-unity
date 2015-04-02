@@ -7,7 +7,7 @@ namespace MMD
     {
         namespace PMD
         {
-            public class Header
+            public class Header : Chunk
             {
                 public string magic;
                 public float version;

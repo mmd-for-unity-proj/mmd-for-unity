@@ -8,13 +8,9 @@ namespace MMD
     {
         namespace PMD
         {
-            public class MaterialList
-            {
-                public uint materialCount;
-                public List<Material> materials;
-            }
+            public class MaterialList : ChunkList<Material, uint> { }
 
-            public class Material
+            public class Material : Chunk
             {
                 public Vector3 diffuse;
                 public float alpha;

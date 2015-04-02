@@ -8,13 +8,9 @@ namespace MMD
     {
         namespace PMD
         {
-            public class BoneList
-            {
-                public uint boneCount;
-                public List<Bone> bones;
-            }
+            public class BoneList : ChunkList<Bone, ushort> { }
 
-            public class Bone
+            public class Bone : Chunk
             {
                 public string boneName;
                 public ushort parentBoneIndex;

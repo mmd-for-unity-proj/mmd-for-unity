@@ -8,13 +8,9 @@ namespace MMD
     {
         namespace PMD
         {
-            public class MorphList
-            {
-                public uint morphCount;
-                public List<Morph> morphs;
-            }
+            public class MorphList : ChunkList<Morph, ushort> { }
 
-            public class Morph
+            public class Morph : Chunk
             {
                 public string name;
                 public uint vertexCount;
@@ -22,7 +18,7 @@ namespace MMD
                 public List<MorphVertex> vertices;
             }
 
-            public class MorphVertex
+            public class MorphVertex : Chunk
             {
                 public uint vertexIndex;
                 public Vector3 offset;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MMD
 {
@@ -8,13 +9,9 @@ namespace MMD
     {
         namespace PMD
         {
-            public class VertexList
-            {
-                public uint vertexCount;
-                public List<Vertex> vertices;
-            }
+            public class VertexList : ChunkList<Vertex, uint> { }
 
-            public class Vertex
+            public class Vertex : Chunk
             {
                 public Vector3 position;
                 public Vector3 normal;

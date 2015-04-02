@@ -8,11 +8,12 @@ namespace MMD
     {
         namespace PMD
         {
-            public class FaceList : ChunkList<Face, uint> { }
+            public class BoneDisplayList : ChunkList<BoneDisplay, uint> { }
 
-            public class Face : Chunk
+            public class BoneDisplay : Chunk
             {
-                public ushort[] vertexIndices;
+                public ushort boneIndex;
+                public byte windowIndex;
             }
         }
     }

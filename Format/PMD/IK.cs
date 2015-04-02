@@ -8,13 +8,9 @@ namespace MMD
     {
         namespace PMD
         {
-            public class IKList
-            {
-                public uint ikCount;
-                public List<IK> iks;
-            }
+            public class IKList : ChunkList<Face, uint> { }
 
-            public class IK
+            public class IK : Chunk
             {
                 public ushort boneIndex;
                 public ushort targetBoneIndex;
