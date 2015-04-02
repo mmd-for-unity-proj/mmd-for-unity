@@ -19,7 +19,9 @@ namespace MMD
                 public Vector3 Position { get; set; }
                 public Vector3 Normal { get; set; }
                 public Vector2 UV { get; set; }
-                
+                public short[] BoneNumber { get; set; }
+                public byte[] BoneWeight { get; set; }
+                public bool EdgeFlag { get; set; }
             }
         }
     }
