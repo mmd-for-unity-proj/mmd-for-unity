@@ -1,15 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class IK : MonoBehaviour {
+namespace MMD
+{
+    namespace Format
+    {
+        namespace PMD
+        {
+            public class IKList
+            {
+                public uint ikCount;
+                public List<IK> iks;
+            }
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+            public class IK
+            {
+                public ushort boneIndex;
+                public ushort targetBoneIndex;
+                public byte chainLength;
+                public ushort iterations;
+                public float controlWeight;
+                public ushort[] childBoneIndices;
+            }
+        }
+    }
 }

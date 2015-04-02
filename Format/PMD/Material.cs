@@ -11,20 +11,20 @@ namespace MMD
             public class MaterialList
             {
                 public uint materialCount;
-                public List<Face> materials;
+                public List<Material> materials;
             }
 
             public class Material
             {
-                Vector3 diffuse;
-                float alpha;
-                float specularity;
-                Vector3 specular;
-                Vector3 mirror;
-                byte toonIndex;
-                byte edgeFlag;
-                uint assignedFaceConut;
-                string textureFileName;
+                public Vector3 diffuse;
+                public float alpha;
+                public float specularity;
+                public Vector3 specular;
+                public Vector3 mirror;
+                public byte toonIndex;
+                public byte edgeFlag;
+                public uint assignedFaceConut;
+                public string textureFileName;
             }
         }
     }
