@@ -17,7 +17,19 @@ namespace MMD
                 public byte chainLength;
                 public ushort iterations;
                 public float controlWeight;
-                public ushort[] childBoneIndices;
+                public List<ushort> childBoneIndices;
+
+                public override void Read(System.IO.BinaryReader r)
+                {
+                    boneIndex = ReadUShort(r);
+                    targetBoneIndex = ReadUShort(r);
+                    chainLength = ReadByte(r);
+                    iterations = ReadUShort(r);
+                    controlWeight = ReadFloat(r);
+                    childBoneIndices = new List<ushort>(chainLength);
+                    for (uint i = 0; i < chainLength; ++i)
+                        childBoneIndices.Add(ReadUShort(r));
+                }
             }
         }
     }

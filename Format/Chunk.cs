@@ -54,6 +54,27 @@ namespace MMD
                 var bytes = r.ReadBytes(length);
                 return Encoding.GetEncoding("Shift_JIS").GetString(bytes);
             }
+
+            protected void ReadItems<ElemType>(BinaryReader r, List<ElemType> elements, int size)
+                where ElemType : Chunk, new()
+            {
+                elements = new List<ElemType>(size);
+                for (int i = 0; i < size; ++i)
+                {
+                    var elem = new ElemType();
+                    elem.Read(r);
+                    elements.Add(elem);
+                }
+            }
+
+            protected void ReadStrings(BinaryReader r, List<string> elements, int count, int length)
+            {
+                elements = new List<string>(count);
+                for (int i = 0; i < count; ++i)
+                {
+                    elements.Add(ReadString(r, length));
+                }
+            }
         }
     }
 }

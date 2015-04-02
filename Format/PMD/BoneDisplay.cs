@@ -14,6 +14,12 @@ namespace MMD
             {
                 public ushort boneIndex;
                 public byte windowIndex;
+
+                public override void Read(System.IO.BinaryReader r)
+                {
+                    boneIndex = ReadUShort(r);
+                    windowIndex = ReadByte(r);
+                }
             }
         }
     }
