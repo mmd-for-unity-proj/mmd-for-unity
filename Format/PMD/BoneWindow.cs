@@ -8,11 +8,11 @@ namespace MMD
     {
         namespace PMD
         {
-            public class BoneWindowList : ChunkStructList<string, byte> 
+            public class BoneWindowList : StringChunkList
             {
                 public override void Read(System.IO.BinaryReader r)
                 {
-                    int count = ReadCount(r);
+                    int count = ReadByte(r);
                     ReadStrings(r, elements, count, 50);
                 }
             }

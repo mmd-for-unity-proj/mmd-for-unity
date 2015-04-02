@@ -8,7 +8,7 @@ namespace MMD
     {
         namespace PMD
         {
-            public class ToonTexture : ChunkStructList<string, ushort> 
+            public class ToonTexture : StringChunkList
             {
                 public override void Read(System.IO.BinaryReader r)
                 {

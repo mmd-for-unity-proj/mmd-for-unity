@@ -75,6 +75,27 @@ namespace MMD
                     elements.Add(ReadString(r, length));
                 }
             }
+
+            protected int ReadCount<CountType>(BinaryReader r)
+                where CountType : struct
+            {
+                CountType testObject = new CountType();
+
+                if (testObject is uint)
+                {
+                    return (int)r.ReadUInt32();
+                }
+                else if (testObject is ushort)
+                {
+                    return (int)r.ReadUInt16();
+                }
+                else if (testObject is byte)
+                {
+                    return (int)r.ReadByte();
+                }
+
+                throw new ArgumentException("無効な型です");
+            }
         }
     }
 }

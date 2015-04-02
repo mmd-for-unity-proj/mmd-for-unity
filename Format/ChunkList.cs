@@ -16,28 +16,22 @@ namespace MMD
             protected List<ElemType> elements;
             public ElemType this[int i] { get { return elements[i]; } set { elements[i] = value; } }
 
-            protected int ReadCount(BinaryReader r)
+            
+        }
+
+        public class StringChunkList : Chunk
+        {
+            protected List<string> elements;
+            public string this[int i] { get { return elements[i]; } set { elements[i] = value; } }
+
+            protected void ReadStrings<CountType>(BinaryReader r, int count)
+                where CountType : struct
             {
-                CountType testObject = new CountType();
 
-                if (testObject is uint)
-                {
-                    return (int)r.ReadUInt32();
-                }
-                else if (testObject is ushort)
-                {
-                    return (int)r.ReadUInt16();
-                }
-                else if (testObject is byte)
-                {
-                    return (int)r.ReadByte();
-                }
-
-                throw new ArgumentException("無効な型です");
             }
         }
 
-        public class ChunkStructList<ElemType, CountType> : ChunkListBase<ElemType, CountType>
+        public class StructChunkList<ElemType, CountType> : ChunkListBase<ElemType, CountType>
             where ElemType : new()
             where CountType : struct
         {
@@ -55,7 +49,7 @@ namespace MMD
         {
             public override void Read(BinaryReader r)
             {
-                var count = ReadCount(r);
+                var count = ReadCount<CountType>(r);
                 elements = new List<ElemType>(count);
 
                 for (int i = 0; i < count; ++i)
