@@ -9,10 +9,10 @@ namespace MMD
         {
             public class Header
             {
-                public string Magic { get; set; }
-                public float Version { get; set; }
-                public string ModelName { get; set; }
-                public string Comment { get; set; }
+                public string magic;
+                public float version;
+                public string modelName;
+                public string comment;
             }
         }
     }

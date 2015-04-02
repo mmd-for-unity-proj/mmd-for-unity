@@ -1,15 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Material : MonoBehaviour {
+namespace MMD
+{
+    namespace Format
+    {
+        namespace PMD
+        {
+            public class MaterialList
+            {
+                public uint materialCount;
+                public List<Face> materials;
+            }
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+            public class Material
+            {
+                Vector3 diffuse;
+                float alpha;
+                float specularity;
+                Vector3 specular;
+                Vector3 mirror;
+                byte toonIndex;
+                byte edgeFlag;
+                uint assignedFaceConut;
+                string textureFileName;
+            }
+        }
+    }
 }

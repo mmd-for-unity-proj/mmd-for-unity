@@ -1,15 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Face : MonoBehaviour {
+namespace MMD
+{
+    namespace Format
+    {
+        namespace PMD
+        {
+            public class FaceList
+            {
+                public uint faceCount;
+                public List<Face> faces;
+            }
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+            public class Face
+            {
+                public ushort[] vertexIndices;
+            }
+        }
+    }
 }
