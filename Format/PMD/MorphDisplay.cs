@@ -8,7 +8,7 @@ namespace MMD
     {
         namespace PMD
         {
-            public class MorphDisplayList : ChunkList<ushort, byte> { }
+            public class MorphDisplayList : ChunkStructList<ushort, byte> { }
         }
     }
 }

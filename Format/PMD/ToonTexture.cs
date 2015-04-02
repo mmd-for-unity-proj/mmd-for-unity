@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class ToonTexture : ChunkList<string, ushort> { }
+            public class ToonTexture : ChunkStructList<string, ushort> 
+            {
+
+            }
         }
     }
 }

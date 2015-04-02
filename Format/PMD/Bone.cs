@@ -18,6 +18,16 @@ namespace MMD
                 public byte boneType;
                 public ushort ikBoneIndex;
                 public Vector3 position;
+
+                public override void Read(System.IO.BinaryReader r)
+                {
+                    boneName = ReadString(r, 20);
+                    parentBoneIndex = ReadUShort(r);
+                    tailBoneIndex = ReadUShort(r);
+                    boneType = ReadByte(r);
+                    ikBoneIndex = ReadUShort(r);
+                    position = ReadVector3(r);
+                }
             }
         }
     }

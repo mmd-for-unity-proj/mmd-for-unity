@@ -8,7 +8,7 @@ namespace MMD
     {
         namespace PMD
         {
-            public class BoneWindowList : ChunkList<string, byte> { }
+            public class BoneWindowList : ChunkStructList<string, byte> { }
         }
     }
 }

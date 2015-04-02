@@ -9,18 +9,14 @@ namespace MMD
 {
     namespace Format
     {
-        /// <summary>
-        /// チャンクのリスト
-        /// </summary>
-        /// <typeparam name="ElemType">要素の型</typeparam>
-        /// <typeparam name="CountType">カウントの型</typeparam>
-        public class ChunkList<ElemType, CountType> : Chunk
+        public class ChunkListBase<ElemType, CountType> : Chunk
             where ElemType : new()
             where CountType : struct
         {
-            List<ElemType> elements;
+            protected List<ElemType> elements;
+            public ElemType this[int i] { get { return elements[i]; } set { elements[i] = value; } }
 
-            public uint ReadCount(BinaryReader r)
+            protected uint ReadCount(BinaryReader r)
             {
                 CountType testObject = new CountType();
 
@@ -39,7 +35,24 @@ namespace MMD
 
                 throw new ArgumentException("無効な型です");
             }
+        }
 
+        public class ChunkStructList<ElemType, CountType> : Chunk
+            where ElemType : new()
+            where CountType : struct
+        {
+            
+        }
+
+        /// <summary>
+        /// チャンクのリスト
+        /// </summary>
+        /// <typeparam name="ElemType">要素の型</typeparam>
+        /// <typeparam name="CountType">カウントの型</typeparam>
+        public class ChunkList<ElemType, CountType> : ChunkListBase<ElemType, CountType>
+            where ElemType : Chunk, new()
+            where CountType : struct
+        {
             public override void Read(BinaryReader r)
             {
                 CountType testObject = new CountType();
@@ -48,11 +61,10 @@ namespace MMD
                 for (uint i = 0; i < count; ++i)
                 {
                     var elem = new ElemType();
+                    elem.Read(r);
                     elements.Add(new ElemType());
                 }
             }
-
-            public ElemType this[int i] { get { return elements[i]; } set { elements[i] = value; } }
         }
     }
 }

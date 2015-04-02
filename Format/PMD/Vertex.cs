@@ -19,6 +19,11 @@ namespace MMD
                 public ushort[] boneNumber;
                 public byte[] boneWeight;
                 public byte edgeFlag;
+
+                public override void Read(BinaryReader r)
+                {
+                    
+                }
             }
         }
     }
