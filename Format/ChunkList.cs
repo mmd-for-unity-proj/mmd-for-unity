@@ -15,7 +15,7 @@ namespace MMD
         {
             protected List<ElemType> elements;
             public ElemType this[int i] { get { return elements[i]; } set { elements[i] = value; } }
-
+            public int Count { get { return elements.Count; } }
             
         }
 
@@ -23,6 +23,7 @@ namespace MMD
         {
             protected List<string> elements;
             public string this[int i] { get { return elements[i]; } set { elements[i] = value; } }
+            public int Count { get { return elements.Count; } }
 
             protected void ReadStrings<CountType>(BinaryReader r, int count)
                 where CountType : struct

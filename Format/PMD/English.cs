@@ -7,6 +7,22 @@ namespace MMD
     {
         namespace PMD
         {
+            public class English : Chunk
+            {
+                public EnglishHeader header;
+                public EnglishBone bones;
+                public EnglishMorph morphs;
+                public EnglishBoneWindow boneWindows;
+
+                public override void Read(System.IO.BinaryReader r, int boneCount, int morphCount)
+                {
+                    header.Read(r);
+                    bones.Read(r, boneCount);
+                    morphs.Read(r, morphCount - 1);
+                    boneWindows.Read(r, boneCount);
+                }
+            }
+
             public class EnglishHeader : Chunk
             {
                 public byte nameCompability;
