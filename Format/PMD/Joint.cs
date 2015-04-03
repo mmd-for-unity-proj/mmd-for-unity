@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -29,14 +29,14 @@ namespace MMD
                     name = ReadString(r, 20);
                     rigidbodyA = ReadUInt(r);
                     rigidbodyB = ReadUInt(r);
-                    position = ReadVector3(r);
-                    rotation = ReadVector3(r);
-                    constrainPosition1 = ReadVector3(r);
-                    constrainPosition2 = ReadVector3(r);
-                    constrainRotation1 = ReadVector3(r);
-                    constrainRotation2 = ReadVector3(r);
-                    springPositoin = ReadVector3(r);
-                    springRotation = ReadVector3(r);
+                    position.Read(r);
+                    rotation.Read(r);
+                    constrainPosition1.Read(r);
+                    constrainPosition2.Read(r);
+                    constrainRotation1.Read(r);
+                    constrainRotation2.Read(r);
+                    springPositoin.Read(r);
+                    springRotation.Read(r);
                 }
             }
         }

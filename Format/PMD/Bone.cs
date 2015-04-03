@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -26,7 +26,7 @@ namespace MMD
                     tailBoneIndex = ReadUShort(r);
                     boneType = ReadByte(r);
                     ikBoneIndex = ReadUShort(r);
-                    position = ReadVector3(r);
+                    position.Read(r);
                 }
             }
         }
