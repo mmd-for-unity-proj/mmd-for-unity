@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -24,11 +24,11 @@ namespace MMD
 
                 public override void Read(System.IO.BinaryReader r)
                 {
-                    diffuse = ReadVector3(r);
+                    diffuse.Read(r);
                     alpha = ReadFloat(r);
                     specularity = ReadFloat(r);
-                    specular = ReadVector3(r);
-                    mirror = ReadVector3(r);
+                    specular.Read(r);
+                    mirror.Read(r);
                     toonIndex = ReadByte(r);
                     edgeFlag = ReadByte(r);
                     assignedFaceConut = ReadUInt(r);
