@@ -16,9 +16,9 @@ namespace MMD
 
             public class Vertex : Chunk
             {
-                public Vector3 position;
-                public Vector3 normal;
-                public Vector2 uv;
+                public Vector3 position = new Vector3();
+                public Vector3 normal = new Vector3();
+                public Vector2 uv = new Vector2();
                 public ushort[] boneNumber;
                 public byte boneWeight;
                 public byte boneWeight1;

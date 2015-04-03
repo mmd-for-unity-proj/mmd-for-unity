@@ -20,9 +20,9 @@ namespace MMD
                 public byte groupIndex;
                 public ushort groupTarget;
                 public byte shapeType;
-                public Vector3 shape;
-                public Vector3 position;
-                public Vector3 rotation;
+                public Vector3 shape = new Vector3();
+                public Vector3 position = new Vector3();
+                public Vector3 rotation = new Vector3();
                 public float weight;
                 public float positionDiminish;
                 public float rotationDiminish;

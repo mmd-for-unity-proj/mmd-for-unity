@@ -52,7 +52,7 @@ namespace MMD
             protected string ReadString(BinaryReader r, int length)
             {
                 var bytes = r.ReadBytes(length);
-                return Encoding.GetEncoding("Shift_JIS").GetString(bytes);
+                return ConvertByteToString(bytes, "");
             }
 
             protected void ReadItems<ElemType>(BinaryReader r, List<ElemType> elements, int size)
@@ -65,6 +65,33 @@ namespace MMD
                     elem.Read(r);
                     elements.Add(elem);
                 }
+            }
+
+            string ConvertByteToString(byte[] bytes, string line_feed_code)
+            {
+                // パディングの消去, 文字を詰める
+                if (bytes[0] == 0) return "";
+
+                int count;
+                for (count = 0; count < bytes.Length; count++)
+                    if (bytes[count] == 0) break;
+
+                byte[] buf = new byte[count]; // NULL文字を含めるとうまく行かない
+                for (int i = 0; i < count; i++)
+                    buf[i] = bytes[i];
+
+#if UNITY_STANDALONE_OSX
+buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
+#else
+                buf = Encoding.Convert(Encoding.GetEncoding(0), Encoding.UTF8, buf);
+#endif
+
+                string result = Encoding.UTF8.GetString(buf);
+
+                //改行コード統一(もしくは除去)
+                if (Environment.NewLine != line_feed_code)
+                    result = result.Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", line_feed_code);
+                return result;
             }
 
             protected void ReadStrings(BinaryReader r, List<string> elements, int count, int length)

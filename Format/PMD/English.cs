@@ -14,7 +14,7 @@ namespace MMD
                 public EnglishMorph morphs;
                 public EnglishBoneWindow boneWindows;
 
-                public override void Read(System.IO.BinaryReader r, int boneCount, int morphCount)
+                public void Read(System.IO.BinaryReader r, int boneCount, int morphCount)
                 {
                     header.Read(r);
                     bones.Read(r, boneCount);

@@ -15,11 +15,11 @@ namespace MMD
 
             public class Material : Chunk
             {
-                public Vector3 diffuse;
+                public Vector3 diffuse = new Vector3();
                 public float alpha;
                 public float specularity;
-                public Vector3 specular;
-                public Vector3 mirror;
+                public Vector3 specular = new Vector3();
+                public Vector3 mirror = new Vector3();
                 public byte toonIndex;
                 public byte edgeFlag;
                 public uint assignedFaceConut;

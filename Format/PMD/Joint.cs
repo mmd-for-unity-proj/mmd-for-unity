@@ -18,14 +18,14 @@ namespace MMD
                 public string name;
                 public uint rigidbodyA;
                 public uint rigidbodyB;
-                public Vector3 position;
-                public Vector3 rotation;
-                public Vector3 constrainPosition1;
-                public Vector3 constrainPosition2;
-                public Vector3 constrainRotation1;
-                public Vector3 constrainRotation2;
-                public Vector3 springPositoin;
-                public Vector3 springRotation;
+                public Vector3 position = new Vector3();
+                public Vector3 rotation = new Vector3();
+                public Vector3 constrainPosition1 = new Vector3();
+                public Vector3 constrainPosition2 = new Vector3();
+                public Vector3 constrainRotation1 = new Vector3();
+                public Vector3 constrainRotation2 = new Vector3();
+                public Vector3 springPositoin = new Vector3();
+                public Vector3 springRotation = new Vector3();
 
                 public override void Read(System.IO.BinaryReader r)
                 {

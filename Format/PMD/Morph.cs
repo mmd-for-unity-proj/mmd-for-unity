@@ -32,7 +32,7 @@ namespace MMD
             public class MorphVertex : Chunk
             {
                 public uint vertexIndex;
-                public Vector3 offset;
+                public Vector3 offset = new Vector3();
 
                 public override void Read(System.IO.BinaryReader r)
                 {

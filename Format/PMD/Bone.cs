@@ -20,7 +20,7 @@ namespace MMD
                 public ushort tailBoneIndex;
                 public byte boneType;
                 public ushort ikBoneIndex;
-                public Vector3 position;
+                public Vector3 position = new Vector3();
 
                 public override void Read(System.IO.BinaryReader r)
                 {
