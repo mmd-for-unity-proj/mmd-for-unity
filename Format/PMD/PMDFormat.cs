@@ -43,11 +43,11 @@ namespace MMD
                 public List<Rigidbody> Rigidbodies { get { return rigidbodies.Rigidbodies; } }
                 public List<Joint> Joints { get { return joints.Joints; } }
 
-                public void Read(System.IO.BinaryReader r)
+                public PMDFormat Read(System.IO.BinaryReader r)
                 {
                     header.Read(r);
-                    //vertices.Read(r);
-                    //faces.Read(r);
+                    vertices.Read(r);
+                    faces.Read(r);
                     //materials.Read(r);
                     //bones.Read(r);
                     //iks.Read(r);
@@ -59,6 +59,7 @@ namespace MMD
                     //toonTextures.Read(r);
                     //rigidbodies.Read(r);
                     //joints.Read(r);
+                    return this;
                 }
             }
         }
