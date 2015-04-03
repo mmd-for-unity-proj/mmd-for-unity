@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace MMD
 {
@@ -22,6 +23,25 @@ namespace MMD
                 ToonTexture toonTextures = new ToonTexture();
                 RigidbodyList rigidbodies = new RigidbodyList();
                 JointList joints = new JointList();
+
+                Header Header { get { return header; } }
+                List<Vertex> Vertices { get { return vertices.Vertices; } }
+                List<Face> Faces { get { return faces.Faces; } }
+                List<Material> Materials { get { return materials.Materials; } }
+                List<Bone> Bones { get { return bones.Bones; } }
+                List<IK> IKs { get { return iks.IKs; } }
+                List<Morph> Morphs { get { return morphs.Morphs; } }
+                List<ushort> MorphDisplays { get { return morphDisplays.MorphDisplays; } }
+                List<string> BoneWindows { get { return boneWindows.BoneWindows; } }
+                List<BoneDisplay> BoneDisplays { get { return boneDisplays.BoneDisplays; } }
+                English Englishes { get { return englishes; } }
+                EnglishHeader EnglishHeader { get { return englishes.header; } }
+                List<string> EnglishMorphes { get { return englishes.morphs.MorphNames; } }
+                List<string> EnglishBones { get { return englishes.bones.BoneNames; } }
+                List<string> EnglishBoneWindows { get { return englishes.boneWindows.BoneWindows; } }
+                List<string> ToonTextures { get { return toonTextures.ToonTextures; } }
+                List<Rigidbody> Rigidbodies { get { return rigidbodies.Rigidbodies; } }
+                List<Joint> Joints { get { return joints.Joints; } }
 
                 public void Read(System.IO.BinaryReader r)
                 {
