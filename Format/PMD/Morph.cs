@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -34,7 +34,7 @@ namespace MMD
                 public override void Read(System.IO.BinaryReader r)
                 {
                     vertexIndex = ReadUInt(r);
-                    offset = ReadVector3(r);
+                    offset.Read(r);
                 }
             }
         }

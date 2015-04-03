@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -24,9 +24,9 @@ namespace MMD
 
                 public override void Read(BinaryReader r)
                 {
-                    position = ReadVector3(r);
-                    normal = ReadVector3(r);
-                    uv = ReadVector2(r);
+                    position.Read(r);
+                    normal.Read(r);
+                    uv.Read(r);
                     boneNumber = new ushort[2];
                     boneNumber[0] = ReadUShort(r);
                     boneNumber[1] = ReadUShort(r);

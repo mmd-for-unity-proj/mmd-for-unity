@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using MMD.Format.Common;
 
 namespace MMD
 {
@@ -34,9 +34,9 @@ namespace MMD
                     groupIndex = ReadByte(r);
                     groupTarget = ReadUShort(r);
                     shapeType = ReadByte(r);
-                    shape = ReadVector3(r);
-                    position = ReadVector3(r);
-                    rotation = ReadVector3(r);
+                    shape.Read(r);
+                    position.Read(r);
+                    rotation.Read(r);
                     weight = ReadFloat(r);
                     positionDiminish = ReadFloat(r);
                     rotationDiminish = ReadFloat(r);
