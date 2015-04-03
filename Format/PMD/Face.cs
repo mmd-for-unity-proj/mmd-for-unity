@@ -7,7 +7,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class FaceList : ChunkList<Face, uint> { }
+            public class FaceList : ChunkList<Face, uint> 
+            {
+                public List<Face> Faces { get { return elements; } }
+            }
 
             public class Face : Chunk
             {

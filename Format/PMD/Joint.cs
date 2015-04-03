@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class JointList : ChunkList<Joint, uint> { }
+            public class JointList : ChunkList<Joint, uint> 
+            {
+                public List<Joint> Joints { get { return elements; } }
+            }
 
             public class Joint : Chunk
             {

@@ -7,7 +7,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class IKList : ChunkList<Face, uint> { }
+            public class IKList : ChunkList<IK, uint> 
+            {
+                public List<IK> IKs { get { return elements; } }
+            }
 
             public class IK : Chunk
             {

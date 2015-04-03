@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class MorphList : ChunkList<Morph, ushort> { }
+            public class MorphList : ChunkList<Morph, ushort> 
+            {
+                public List<Morph> Morphs { get { return elements; } }
+            }
 
             public class Morph : Chunk
             {

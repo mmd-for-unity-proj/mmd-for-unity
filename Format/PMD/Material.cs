@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class MaterialList : ChunkList<Material, uint> { }
+            public class MaterialList : ChunkList<Material, uint> 
+            {
+                public List<Material> Materials { get { return elements; } }
+            }
 
             public class Material : Chunk
             {

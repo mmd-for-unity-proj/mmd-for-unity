@@ -9,6 +9,8 @@ namespace MMD
         {
             public class ToonTexture : StringChunkList
             {
+                public List<string> ToonTextures { get { return elements; } }
+
                 public override void Read(System.IO.BinaryReader r)
                 {
                     ReadStrings(r, elements, 10, 100);

@@ -9,6 +9,8 @@ namespace MMD
         {
             public class MorphDisplayList : StructChunkList<ushort, byte> 
             {
+                public List<ushort> MorphDisplays { get { return elements; } }
+
                 public override void Read(System.IO.BinaryReader r)
                 {
                     var count = ReadCount<byte>(r);

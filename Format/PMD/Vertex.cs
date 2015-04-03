@@ -9,7 +9,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class VertexList : ChunkList<Vertex, uint> { }
+            public class VertexList : ChunkList<Vertex, uint> 
+            {
+                public List<Vertex> Vertices { get { return elements; } }
+            }
 
             public class Vertex : Chunk
             {

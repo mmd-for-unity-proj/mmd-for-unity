@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class RigidbodyList : ChunkList<Rigidbody, uint> { }
+            public class RigidbodyList : ChunkList<Rigidbody, uint> 
+            {
+                public List<Rigidbody> Rigidbodies { get { return elements; } }
+            }
 
             public class Rigidbody : Chunk
             {
