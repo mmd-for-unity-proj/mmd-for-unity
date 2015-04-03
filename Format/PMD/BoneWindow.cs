@@ -9,6 +9,8 @@ namespace MMD
         {
             public class BoneWindowList : StringChunkList
             {
+                public List<string> BoneWindows { get { return elements; } }
+
                 public override void Read(System.IO.BinaryReader r)
                 {
                     int count = ReadByte(r);

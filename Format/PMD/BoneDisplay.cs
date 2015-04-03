@@ -7,7 +7,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class BoneDisplayList : ChunkList<BoneDisplay, uint> { }
+            public class BoneDisplayList : ChunkList<BoneDisplay, uint> 
+            {
+                public List<BoneDisplay> BoneDisplays { get { return elements; } }
+            }
 
             public class BoneDisplay : Chunk
             {

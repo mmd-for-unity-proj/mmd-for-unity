@@ -21,34 +21,42 @@ namespace MMD
                 }
             }
 
-            public class EnglishBone : Chunk
+            public class EnglishList : Chunk
             {
-                public List<string> boneNames;
+                protected int byteSize;
+                protected List<string> elements;
+                public string this[int i] { get { return elements[i]; } set { elements[i] = value; } }
 
-                public void Read(System.IO.BinaryReader r, int boneCount)
+                public EnglishList(int byteSize)
                 {
-                    ReadStrings(r, boneNames, boneCount, 20);
+                    this.byteSize = byteSize;
+                }
+
+                public void Read(System.IO.BinaryReader r, int count)
+                {
+                    ReadStrings(r, elements, count, byteSize);
                 }
             }
 
-            public class EnglishMorph : Chunk
+            public class EnglishBone : EnglishList
             {
-                public List<string> morphNames;
+                public List<string> BoneNames { get { return elements; } }
 
-                public void Read(System.IO.BinaryReader r, int morphCount)
-                {
-                    ReadStrings(r, morphNames, morphCount, 20);
-                }
+                public EnglishBone() : base(20) { }
             }
 
-            public class EnglishBoneWindow : Chunk
+            public class EnglishMorph : EnglishList
             {
-                public List<string> boneWindows;
+                public List<string> MorphNames { get { return elements; } }
 
-                public void Read(System.IO.BinaryReader r, int boneCount)
-                {
-                    ReadStrings(r, boneWindows, boneCount, 50);
-                }
+                public EnglishMorph() : base(20) { }
+            }
+
+            public class EnglishBoneWindow : EnglishList
+            {
+                public List<string> BoneWindows { get; private set; }
+
+                public EnglishBoneWindow() : base(50) { }
             }
         }
     }

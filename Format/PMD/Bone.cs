@@ -8,7 +8,10 @@ namespace MMD
     {
         namespace PMD
         {
-            public class BoneList : ChunkList<Bone, ushort> { }
+            public class BoneList : ChunkList<Bone, ushort> 
+            {
+                public List<Bone> Bones { get { return elements; } }
+            }
 
             public class Bone : Chunk
             {
