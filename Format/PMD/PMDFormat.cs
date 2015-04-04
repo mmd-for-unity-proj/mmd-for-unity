@@ -48,16 +48,16 @@ namespace MMD
                 vertices.Read(r);
                 faces.Read(r);
                 materials.Read(r);
-                //bones.Read(r);
-                //iks.Read(r);
-                //morphs.Read(r);
-                //morphDisplays.Read(r);
-                //boneWindows.Read(r);
-                //boneDisplays.Read(r);
-                //englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count);
-                //toonTextures.Read(r);
-                //rigidbodies.Read(r);
-                //joints.Read(r);
+                bones.Read(r);
+                iks.Read(r);
+                morphs.Read(r);
+                morphDisplays.Read(r);
+                boneWindows.Read(r);
+                boneDisplays.Read(r);
+                englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count);
+                toonTextures.Read(r);
+                rigidbodies.Read(r);
+                joints.Read(r);
                 return this;
             }
         }

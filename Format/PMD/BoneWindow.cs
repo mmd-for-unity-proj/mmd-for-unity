@@ -14,7 +14,7 @@ namespace MMD
                 public override void Read(System.IO.BinaryReader r)
                 {
                     int count = ReadByte(r);
-                    ReadStrings(r, elements, count, 50);
+                    elements = ReadStrings(r, count, 50);
                 }
             }
         }

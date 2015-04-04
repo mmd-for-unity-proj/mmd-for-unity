@@ -9,10 +9,10 @@ namespace MMD
         {
             public class English : Chunk
             {
-                public EnglishHeader header;
-                public EnglishBone bones;
-                public EnglishMorph morphs;
-                public EnglishBoneWindow boneWindows;
+                public EnglishHeader header = new EnglishHeader();
+                public EnglishBone bones = new EnglishBone();
+                public EnglishMorph morphs = new EnglishMorph();
+                public EnglishBoneWindow boneWindows = new EnglishBoneWindow();
 
                 public void Read(System.IO.BinaryReader r, int boneCount, int morphCount)
                 {
@@ -40,8 +40,9 @@ namespace MMD
             public class EnglishList : Chunk
             {
                 protected int byteSize;
-                protected List<string> elements;
+                protected List<string> elements = new List<string>();
                 public string this[int i] { get { return elements[i]; } set { elements[i] = value; } }
+                public int Count { get { return elements.Count; } }
 
                 public EnglishList(int byteSize)
                 {
@@ -50,27 +51,27 @@ namespace MMD
 
                 public void Read(System.IO.BinaryReader r, int count)
                 {
-                    ReadStrings(r, elements, count, byteSize);
+                    elements = ReadStrings(r, count, byteSize);
                 }
             }
 
             public class EnglishBone : EnglishList
             {
-                public List<string> BoneNames { get { return elements; } }
+                public List<string> BoneNames { get { return elements; } set { elements = value; } }
 
                 public EnglishBone() : base(20) { }
             }
 
             public class EnglishMorph : EnglishList
             {
-                public List<string> MorphNames { get { return elements; } }
+                public List<string> MorphNames { get { return elements; } set { elements = value; } }
 
                 public EnglishMorph() : base(20) { }
             }
 
             public class EnglishBoneWindow : EnglishList
             {
-                public List<string> BoneWindows { get; private set; }
+                public List<string> BoneWindows { get { return elements; } set { elements = value; } }
 
                 public EnglishBoneWindow() : base(50) { }
             }

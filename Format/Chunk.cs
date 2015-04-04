@@ -81,7 +81,7 @@ namespace MMD
                     buf[i] = bytes[i];
 
 #if UNITY_STANDALONE_OSX
-buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
+                buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
 #else
                 buf = Encoding.Convert(Encoding.GetEncoding(0), Encoding.UTF8, buf);
 #endif
@@ -94,29 +94,30 @@ buf = Encoding.Convert(Encoding.GetEncoding(932), Encoding.UTF8, buf);
                 return result;
             }
 
-            protected void ReadStrings(BinaryReader r, List<string> elements, int count, int length)
+            protected List<string> ReadStrings(BinaryReader r, int count, int length)
             {
-                elements = new List<string>(count);
+                var elements = new List<string>(count);
                 for (int i = 0; i < count; ++i)
                 {
                     elements.Add(ReadString(r, length));
                 }
+                return elements;
             }
 
             protected int ReadCount<CountType>(BinaryReader r)
                 where CountType : struct
             {
-                CountType testObject = new CountType();
+                var testObject = new CountType().GetType().ToString();
 
-                if (testObject is uint)
+                if (testObject == "System.UInt32")
                 {
                     return (int)r.ReadUInt32();
                 }
-                else if (testObject is ushort)
+                else if (testObject == "System.UInt16")
                 {
                     return (int)r.ReadUInt16();
                 }
-                else if (testObject is byte)
+                else if (testObject == "System.Byte")
                 {
                     return (int)r.ReadByte();
                 }

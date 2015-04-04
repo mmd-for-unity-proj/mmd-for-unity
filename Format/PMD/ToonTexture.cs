@@ -13,7 +13,7 @@ namespace MMD
 
                 public override void Read(System.IO.BinaryReader r)
                 {
-                    ReadStrings(r, elements, 10, 100);
+                    elements = ReadStrings(r, 10, 100);
                 }
             }
         }

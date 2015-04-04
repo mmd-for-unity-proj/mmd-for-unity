@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MMD.Format.PMD;
 using MMD.Format.Common;
 using MMD.Format;
+using UnityEngine;
 
 [TestFixture]
 public class PMDAnimasaTest
@@ -67,5 +68,87 @@ public class PMDAnimasaTest
         Assert.AreEqual(format.Materials[7].assignedFaceConut, 2810);
         Assert.AreEqual(format.Materials[8].assignedFaceConut, 36);
         Assert.AreEqual(format.Materials[16].assignedFaceConut, 312);
+    }
+
+    void TestBone(Bone b, int parent, string name)
+    {
+        Assert.AreEqual(b.parentBoneIndex, parent);
+        Assert.AreEqual(b.boneName, name);
+    }
+
+    [Test]
+    public void ReadBone()
+    {
+        format.Read(ReadFile());
+        var bone = format.Bones;
+        Assert.AreEqual(bone.Count, 140);
+        TestBone(bone[0], 65535, "センター");
+        TestBone(bone[10], 9, "腰飾り");
+        TestBone(bone[100], 25, "左親指先");
+        TestBone(bone[139], 50, "右腕捩3");
+    }
+
+    void TestMorph(Morph m, int count, string name)
+    {
+        Assert.AreEqual(m.vertexCount, count);
+        Assert.AreEqual(m.name, name);
+    }
+
+    [Test]
+    public void ReadMorph()
+    {
+        var morph = format.Read(ReadFile()).Morphs;
+        Assert.AreEqual(morph.Count, 31);
+        TestMorph(morph[1], 78, "真面目");
+        TestMorph(morph[30], 45, "にやり");
+    }
+
+    [Test]
+    public void ReadDisp()
+    {
+        var f = format.Read(ReadFile());
+        var morph = f.MorphDisplays;
+        Assert.AreEqual(morph.Count, 30);
+
+        var window = f.BoneWindows;
+        Assert.AreEqual(window.Count, 7);
+    }
+
+    [Test]
+    public void ReadEnglish()
+    {
+        var english = format.Read(ReadFile()).Englishes;
+        Assert.AreEqual(english.header.modelName, "Miku Hatsune");
+
+        Assert.AreEqual(english.bones.Count, 140);
+        Assert.AreEqual(english.bones[0], "center");
+        Assert.AreEqual(english.bones[6], "necktie1");
+        Assert.AreEqual(english.bones[92], "toe IK_R");
+
+        Debug.Log("enmr:" + english.morphs.Count);
+        Debug.Log("enbw:" + english.boneWindows.Count.ToString());
+    }
+
+    [Test]
+    public void ReadToon()
+    {
+        var toon = format.Read(ReadFile()).ToonTextures;
+        Debug.Log("toon:" + toon.Count);
+        for (int i = 0; i < toon.Count; ++i)
+            Debug.Log("toon" + i.ToString() + ":" + toon[i]);
+    }
+
+    [Test]
+    public void ReadRigidbody()
+    {
+        var rigidbody = format.Read(ReadFile()).Rigidbodies;
+        Assert.AreEqual(rigidbody.Count, 45);
+    }
+
+    [Test]
+    public void ReadJoint()
+    {
+        var joint = format.Read(ReadFile()).Joints;
+        Assert.AreEqual(joint.Count, 27);
     }
 }

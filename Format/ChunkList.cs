@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using UnityEngine;
 
 namespace MMD
 {
@@ -13,7 +14,7 @@ namespace MMD
             where ElemType : new()
             where CountType : struct
         {
-            protected List<ElemType> elements;
+            protected List<ElemType> elements = new List<ElemType>();
             public ElemType this[int i] { get { return elements[i]; } set { elements[i] = value; } }
             public int Count { get { return elements.Count; } }
             
@@ -21,7 +22,7 @@ namespace MMD
 
         public class StringChunkList : Chunk
         {
-            protected List<string> elements;
+            protected List<string> elements = new List<string>();
             public string this[int i] { get { return elements[i]; } set { elements[i] = value; } }
             public int Count { get { return elements.Count; } }
 
