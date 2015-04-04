@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using MMD.Format.PMD;
 using MMD.Format.Common;
+using MMD.Format;
 
 [TestFixture]
 public class PMDAnimasaTest
@@ -55,5 +56,16 @@ public class PMDAnimasaTest
         TestFace(format.Faces[1000], 3109, 3110, 3107);
         TestFace(format.Faces[10000], 10547, 11231, 11230);
         TestFace(format.Faces[22960], 11296, 11287, 11286);
+    }
+
+    [Test]
+    public void ReadMaterial()
+    {
+        format.Read(ReadFile());
+        Assert.AreEqual(format.Materials.Count, 17);
+        Assert.AreEqual(format.Materials[0].assignedFaceConut, 2425);
+        Assert.AreEqual(format.Materials[7].assignedFaceConut, 2810);
+        Assert.AreEqual(format.Materials[8].assignedFaceConut, 36);
+        Assert.AreEqual(format.Materials[16].assignedFaceConut, 312);
     }
 }
