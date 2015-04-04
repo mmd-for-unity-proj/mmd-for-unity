@@ -73,7 +73,7 @@ public class PMDAnimasaTest
     void TestBone(Bone b, int parent, string name)
     {
         Assert.AreEqual(b.parentBoneIndex, parent);
-        Assert.AreEqual(b.boneName, name);
+        Assert.AreEqual(b.name, name);
     }
 
     [Test]
@@ -138,9 +138,8 @@ public class PMDAnimasaTest
     public void ReadToon()
     {
         var toon = format.Read(ReadFile()).ToonTextures;
-        Debug.Log("toon:" + toon.Count);
         for (int i = 0; i < toon.Count; ++i)
-            Debug.Log("toon" + i.ToString() + ":" + toon[i]);
+            Assert.AreEqual(toon[i], "toon" + i.ToString() + ".bmp");
     }
 
     [Test]
@@ -148,6 +147,8 @@ public class PMDAnimasaTest
     {
         var rigidbody = format.Read(ReadFile()).Rigidbodies;
         Assert.AreEqual(rigidbody.Count, 45);
+        Assert.AreEqual(rigidbody[0].name, "頭");
+        Assert.AreEqual(rigidbody[44].name, "ネクタイ3");
     }
 
     [Test]
@@ -155,5 +156,7 @@ public class PMDAnimasaTest
     {
         var joint = format.Read(ReadFile()).Joints;
         Assert.AreEqual(joint.Count, 27);
+        Assert.AreEqual(joint[0].name, "右髪1");
+        Assert.AreEqual(joint[26].name, "左スカート前2");
     }
 }

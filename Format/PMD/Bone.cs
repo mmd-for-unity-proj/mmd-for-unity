@@ -15,7 +15,7 @@ namespace MMD
 
             public class Bone : Chunk
             {
-                public string boneName;
+                public string name;
                 public ushort parentBoneIndex;
                 public ushort tailBoneIndex;
                 public byte boneType;
@@ -24,7 +24,7 @@ namespace MMD
 
                 public override void Read(System.IO.BinaryReader r)
                 {
-                    boneName = ReadString(r, 20);
+                    name = ReadString(r, 20);
                     parentBoneIndex = ReadUShort(r);
                     tailBoneIndex = ReadUShort(r);
                     boneType = ReadByte(r);
