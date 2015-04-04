@@ -7,7 +7,7 @@ using MMD.Adapter.PMD;
 
 namespace MMD.Component
 {
-    public class MMDBone : UnityEngine.Component
+    public class PMDBone : UnityEngine.Component
     {
         public GameObject TailBone { get; set; }
         public BoneType BoneType { get; set; }

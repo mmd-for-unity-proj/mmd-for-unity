@@ -54,18 +54,18 @@ namespace MMD.Adapter.PMD
             }
         }
 
-        public static List<MMDBone> Components(List<GameObject> gameObjects, List<Bone> bones)
+        public static List<PMDBone> Components(List<GameObject> gameObjects, List<Bone> bones)
         {
-            List<MMDBone> boneComponents = new List<MMDBone>(bones.Count);
+            List<PMDBone> boneComponents = new List<PMDBone>(bones.Count);
 
             for (int i = 0; i < bones.Count; ++i)
             {
-                var component = new MMDBone();
+                var component = new PMDBone();
                 component.BoneType = (BoneType)bones[i].boneType;
                 component.InfluencedIKBone = gameObjects[bones[i].ikBoneIndex];
                 component.TailBone = gameObjects[bones[i].tailBoneIndex];
 
-                gameObjects[i].AddComponent<MMDBone>();
+                gameObjects[i].AddComponent<PMDBone>();
 
                 boneComponents.Add(component);
             }

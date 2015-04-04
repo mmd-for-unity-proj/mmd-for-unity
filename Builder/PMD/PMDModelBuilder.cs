@@ -15,7 +15,7 @@ namespace MMD.Builder.PMD
 
         List<GameObject> bones = new List<GameObject>();
         List<Transform> boneTransforms = new List<Transform>();
-        List<MMDBone> boneComponents = new List<MMDBone>();
+        List<PMDBone> boneComponents = new List<PMDBone>();
 
         public PMDModelBuilder()
         {
@@ -33,6 +33,8 @@ namespace MMD.Builder.PMD
             boneTransforms = BoneAdapter.Transforms(bones, format.Bones);
             boneComponents = BoneAdapter.Components(bones, format.Bones);
             BoneAdapter.Parent(boneTransforms, format.Bones);
+
+            // 明日はウェイトやります
         }
     }
 }
