@@ -10,7 +10,24 @@ namespace MMD.Adapter.PMD
 {
     public class BoneAdapter
     {
-        public static List<GameObject> GameObjects(List<Bone> bones)
+        List<GameObject> gameObjects = new List<GameObject>();
+        List<Bone> bones = new List<Bone>();
+        List<Transform> boneTransforms = new List<Transform>();
+        List<PMDBone> boneComponents = new List<PMDBone>();
+
+        public BoneAdapter(List<Bone> bones)
+        {
+            this.bones = bones;
+
+            gameObjects = GameObjects();
+            boneTransforms = Transforms();
+            boneComponents = Components();
+            Parent();
+        }
+
+        public Transform[] BoneTransforms { get { return boneTransforms.ToArray(); } }
+
+        List<GameObject> GameObjects()
         {
             var objects = new List<GameObject>(bones.Count);
 
@@ -23,7 +40,7 @@ namespace MMD.Adapter.PMD
             return objects;
         }
 
-        public static List<Transform> Transforms(List<GameObject> gameObjects, List<Bone> bones)
+        List<Transform> Transforms()
         {
             var transforms = new Transform[bones.Count];
 
@@ -43,18 +60,18 @@ namespace MMD.Adapter.PMD
             return new List<Transform>(transforms);
         }
 
-        public static void Parent(List<Transform> transforms, List<Bone> bones)
+        void Parent()
         {
-            for (int i = 0; i < transforms.Count; ++i)
+            for (int i = 0; i < boneTransforms.Count; ++i)
             {
                 if (bones[i].parentBoneIndex == 0xFFFF) continue;
 
-                var parent = transforms[bones[i].parentBoneIndex];
-                transforms[i].parent = parent;
+                var parent = boneTransforms[bones[i].parentBoneIndex];
+                boneTransforms[i].parent = parent;
             }
         }
 
-        public static List<PMDBone> Components(List<GameObject> gameObjects, List<Bone> bones)
+        List<PMDBone> Components()
         {
             List<PMDBone> boneComponents = new List<PMDBone>(bones.Count);
 
