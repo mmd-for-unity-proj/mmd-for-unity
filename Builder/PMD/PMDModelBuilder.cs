@@ -9,14 +9,23 @@ namespace MMD.Builder.PMD
 {
     public class PMDModelBuilder
     {
+        SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
         Mesh mesh = new Mesh();
+        List<GameObject> bones = new List<GameObject>();
 
-        void Read(MMD.Format.PMDFormat format)
+        public PMDModelBuilder()
         {
-            mesh.vertices = PMDModelAdapter.Vertices(format.Vertices);
-            mesh.uv = PMDModelAdapter.UVs(format.Vertices);
-            mesh.normals = PMDModelAdapter.Nolmals(format.Vertices);
-            mesh.SetTriangles(PMDModelAdapter.Triangles(format.Faces), 0);
+            renderer.sharedMesh = mesh;
+        }
+
+        public void Read(MMD.Format.PMDFormat format)
+        {
+            mesh.vertices = ModelAdapter.Vertices(format.Vertices);
+            mesh.uv = ModelAdapter.UVs(format.Vertices);
+            mesh.normals = ModelAdapter.Nolmals(format.Vertices);
+            mesh.SetTriangles(ModelAdapter.Triangles(format.Faces), 0);
+
+            bones = BoneAdapter.BoneObjects(format.Bones);
         }
     }
 }

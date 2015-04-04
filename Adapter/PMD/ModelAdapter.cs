@@ -7,7 +7,7 @@ using MMD.Format.PMD;
 
 namespace MMD.Adapter.PMD
 {
-    public class PMDModelAdapter
+    public class ModelAdapter
     {
         public static UnityEngine.Vector3[] Vertices(List<MMD.Format.PMD.Vertex> vertices)
         {
