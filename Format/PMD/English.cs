@@ -14,12 +14,12 @@ namespace MMD
                 public EnglishMorph morphs = new EnglishMorph();
                 public EnglishBoneWindow boneWindows = new EnglishBoneWindow();
 
-                public void Read(System.IO.BinaryReader r, int boneCount, int morphCount)
+                public void Read(System.IO.BinaryReader r, int boneCount, int morphCount, int boneWindowCount)
                 {
                     header.Read(r);
                     bones.Read(r, boneCount);
                     morphs.Read(r, morphCount - 1);
-                    boneWindows.Read(r, boneCount);
+                    boneWindows.Read(r, boneWindowCount);
                 }
             }
 
@@ -49,7 +49,7 @@ namespace MMD
                     this.byteSize = byteSize;
                 }
 
-                public void Read(System.IO.BinaryReader r, int count)
+                public virtual void Read(System.IO.BinaryReader r, int count)
                 {
                     elements = ReadStrings(r, count, byteSize);
                 }
@@ -67,6 +67,11 @@ namespace MMD
                 public List<string> MorphNames { get { return elements; } set { elements = value; } }
 
                 public EnglishMorph() : base(20) { }
+
+                public override void Read(System.IO.BinaryReader r, int count)
+                {
+                    elements = ReadStrings(r, count, byteSize);
+                }
             }
 
             public class EnglishBoneWindow : EnglishList

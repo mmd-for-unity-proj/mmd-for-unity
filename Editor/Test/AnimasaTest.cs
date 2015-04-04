@@ -126,7 +126,12 @@ public class PMDAnimasaTest
         Assert.AreEqual(english.bones[92], "toe IK_R");
 
         Debug.Log("enmr:" + english.morphs.Count);
+        for (int i = 0; i < english.morphs.Count; ++i)
+            Debug.Log(english.morphs[i]);
+
         Debug.Log("enbw:" + english.boneWindows.Count.ToString());
+        for (int i = 0; i < english.boneWindows.Count; ++i)
+            Debug.Log(english.boneWindows[i]);
     }
 
     [Test]

@@ -54,7 +54,7 @@ namespace MMD
                 morphDisplays.Read(r);
                 boneWindows.Read(r);
                 boneDisplays.Read(r);
-                englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count);
+                englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count, BoneWindows.Count);
                 toonTextures.Read(r);
                 rigidbodies.Read(r);
                 joints.Read(r);
