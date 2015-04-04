@@ -34,7 +34,7 @@ namespace MMD
                     mirror.Read(r);
                     toonIndex = ReadByte(r);
                     edgeFlag = ReadByte(r);
-                    assignedFaceConut = ReadUInt(r);
+                    assignedFaceConut = ReadUInt(r) / 3;
                     textureFileName = ReadString(r, 20);
                 }
             }
