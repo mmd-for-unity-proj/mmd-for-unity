@@ -11,7 +11,9 @@ namespace MMD.Builder.PMD
     {
         SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
         Mesh mesh = new Mesh();
+
         List<GameObject> bones = new List<GameObject>();
+        List<Transform> boneTransforms = new List<Transform>();
 
         public PMDModelBuilder()
         {
