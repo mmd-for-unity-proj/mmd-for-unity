@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using MMD.Format.Common;
 using MMD.Format.PMD;
+using MMD.Component;
 
 namespace MMD.Adapter.PMD
 {
     public class BoneAdapter
     {
-        public static List<GameObject> BoneObjects(List<Bone> bones)
+        public static List<GameObject> GameObjects(List<Bone> bones)
         {
             var objects = new List<GameObject>(bones.Count);
 
@@ -51,6 +52,25 @@ namespace MMD.Adapter.PMD
                 var parent = transforms[bones[i].parentBoneIndex];
                 transforms[i].parent = parent;
             }
+        }
+
+        public static List<MMDBone> Components(List<GameObject> gameObjects, List<Bone> bones)
+        {
+            List<MMDBone> boneComponents = new List<MMDBone>(bones.Count);
+
+            for (int i = 0; i < bones.Count; ++i)
+            {
+                var component = new MMDBone();
+                component.BoneType = (BoneType)bones[i].boneType;
+                component.InfluencedIKBone = gameObjects[bones[i].ikBoneIndex];
+                component.TailBone = gameObjects[bones[i].tailBoneIndex];
+
+                gameObjects[i].AddComponent<MMDBone>();
+
+                boneComponents.Add(component);
+            }
+
+            return boneComponents;
         }
     }
 }

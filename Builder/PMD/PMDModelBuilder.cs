@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MMD.Adapter.PMD;
 using UnityEngine;
+using MMD.Component;
 
 namespace MMD.Builder.PMD
 {
@@ -14,6 +15,7 @@ namespace MMD.Builder.PMD
 
         List<GameObject> bones = new List<GameObject>();
         List<Transform> boneTransforms = new List<Transform>();
+        List<MMDBone> boneComponents = new List<MMDBone>();
 
         public PMDModelBuilder()
         {
@@ -27,7 +29,10 @@ namespace MMD.Builder.PMD
             mesh.normals = ModelAdapter.Nolmals(format.Vertices);
             mesh.SetTriangles(ModelAdapter.Triangles(format.Faces), 0);
 
-            bones = BoneAdapter.BoneObjects(format.Bones);
+            bones = BoneAdapter.GameObjects(format.Bones);
+            boneTransforms = BoneAdapter.Transforms(bones, format.Bones);
+            boneComponents = BoneAdapter.Components(bones, format.Bones);
+            BoneAdapter.Parent(boneTransforms, format.Bones);
         }
     }
 }
