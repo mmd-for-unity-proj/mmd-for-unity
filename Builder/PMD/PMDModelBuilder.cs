@@ -35,8 +35,10 @@ namespace MMD.Builder.PMD
 
             // マテリアルの参照
             var materialAdapter = new MaterialAdapter(shader, format);
-            materials = materialAdapter.Materials.ToArray();
+            materials = materialAdapter.Materials;
             textures = materialAdapter.Textures.ToArray();
+
+            // 剛体の参照
         }
     }
 }

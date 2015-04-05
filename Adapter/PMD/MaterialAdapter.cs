@@ -9,18 +9,18 @@ namespace MMD.Adapter.PMD
 {
     public class MaterialAdapter
     {
-        public List<Material> Materials { get; set; }
+        public Material[] Materials { get; set; }
         public List<Texture2D> Textures { get; set; }
 
         public MaterialAdapter(Shader shader, MMD.Format.PMDFormat format)
         {
             var source = format.Materials;
 
-            Materials = new List<Material>(source.Count);
+            Materials = new Material[source.Count];
             Textures = new List<Texture2D>();
 
             for (int i = 0; i < source.Count; ++i)
-                Materials.Add(AddMaterial(shader, source[i], format.Path));
+                Materials[i] = AddMaterial(shader, source[i], format.Path);
         }
 
         Color ToColor(MMD.Format.Common.Vector3 v)
