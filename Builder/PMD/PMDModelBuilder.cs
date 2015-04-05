@@ -13,13 +13,14 @@ namespace MMD.Builder.PMD
         SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
         Mesh mesh = new Mesh();
         Material[] materials;
+        Texture[] textures;
 
         public PMDModelBuilder()
         {
             renderer.sharedMesh = mesh;
         }
 
-        public void Read(MMD.Format.PMDFormat format)
+        public void Read(MMD.Format.PMDFormat format, Shader shader)
         {
             // メッシュの参照
             var modelAdapter = new ModelAdapter(format);
@@ -32,6 +33,10 @@ namespace MMD.Builder.PMD
             // ウェイトの参照
             mesh.boneWeights = boneAdapter.Weights(format.Vertices);
 
+            // マテリアルの参照
+            var materialAdapter = new MaterialAdapter(shader, format);
+            materials = materialAdapter.Materials.ToArray();
+            textures = materialAdapter.Textures.ToArray();
         }
     }
 }

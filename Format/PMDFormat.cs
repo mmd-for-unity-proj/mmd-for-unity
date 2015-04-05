@@ -43,6 +43,8 @@ namespace MMD
             public List<Rigidbody> Rigidbodies { get { return rigidbodies.Rigidbodies; } }
             public List<Joint> Joints { get { return joints.Joints; } }
 
+            public string Path { get; private set; }
+
             public PMDFormat Read(string filePath)
             {
                 BinaryReader r = new BinaryReader(File.OpenRead(filePath));
@@ -60,6 +62,7 @@ namespace MMD
                 toonTextures.Read(r);
                 rigidbodies.Read(r);
                 joints.Read(r);
+                Path = filePath;
                 return this;
             }
         }

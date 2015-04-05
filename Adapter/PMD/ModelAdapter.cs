@@ -18,7 +18,8 @@ namespace MMD.Adapter.PMD
             Mesh.vertices = Vertices(format.Vertices);
             Mesh.uv = UVs(format.Vertices);
             Mesh.normals = Nolmals(format.Vertices);
-            Mesh.SetTriangles(Triangles(format.Faces), 0);
+            SetTriangles(Mesh, format.Faces, format.Materials);
+            //Mesh.SetTriangles(Triangles(format.Faces), 0);
         }
 
         UnityEngine.Vector3[] Vertices(List<MMD.Format.PMD.Vertex> vertices)
@@ -62,20 +63,28 @@ namespace MMD.Adapter.PMD
             return vectors;
         }
 
-        int[] Triangles(List<Face> faces)
+        void SetTriangles(Mesh mesh, List<Face> faces, List<MMD.Format.PMD.Material> materials)
         {
-            int[] trinagles = new int[faces.Count * 3];
+            int total = 0;
 
-            for (int i = 0; i < faces.Count; ++i)
+            // マテリアルごとにポリゴンを分ける
+            mesh.subMeshCount = materials.Count;
+            for (int submesh = 0; submesh < materials.Count; ++submesh)
             {
-                int index = i * 3;
-                var face = faces[i];
-                trinagles[index] = face[0];
-                trinagles[++index] = face[1];
-                trinagles[++index] = face[2];
-            }
+                int faceCount = (int)materials[submesh].assignedFaceConut;
+                int[] trinagles = new int[faceCount * 3];
 
-            return trinagles;
+                for (int j = 0; j < faceCount; ++j, ++total)
+                {
+                    int index = total * 3;
+                    var face = faces[total];
+                    trinagles[index] = face[0];
+                    trinagles[++index] = face[1];
+                    trinagles[++index] = face[2];
+                }
+
+                mesh.SetTriangles(trinagles, submesh);
+            }
         }
     }
 }
