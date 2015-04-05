@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using MMD.Format.PMD;
 
 namespace MMD
@@ -42,8 +43,9 @@ namespace MMD
             public List<Rigidbody> Rigidbodies { get { return rigidbodies.Rigidbodies; } }
             public List<Joint> Joints { get { return joints.Joints; } }
 
-            public PMDFormat Read(System.IO.BinaryReader r)
+            public PMDFormat Read(string filePath)
             {
+                BinaryReader r = new BinaryReader(File.OpenRead(filePath));
                 header.Read(r);
                 vertices.Read(r);
                 faces.Read(r);

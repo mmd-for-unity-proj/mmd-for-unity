@@ -19,7 +19,7 @@ namespace MMD
                 public float alpha;
                 public float specularity;
                 public Vector3 specular = new Vector3();
-                public Vector3 mirror = new Vector3();
+                public Vector3 ambient = new Vector3();
 
                 /// <summary>
                 /// toon??.bmp
@@ -47,7 +47,7 @@ namespace MMD
                     alpha = ReadFloat(r);
                     specularity = ReadFloat(r);
                     specular.Read(r);
-                    mirror.Read(r);
+                    ambient.Read(r);
                     toonIndex = ReadByte(r);
                     edgeFlag = ReadByte(r);
                     assignedFaceConut = ReadUInt(r) / 3;

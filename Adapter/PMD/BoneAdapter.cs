@@ -19,16 +19,16 @@ namespace MMD.Adapter.PMD
         {
             this.bones = bones;
 
-            gameObjects = GameObjects();
-            boneTransforms = Transforms();
-            boneComponents = Components();
+            gameObjects = GameObject();
+            boneTransforms = Transform();
+            boneComponents = Component();
             Parent();
         }
 
         public List<Transform> BoneTransforms { get { return boneTransforms; } }
         public List<GameObject> GameObjects { get { return gameObjects; } }
 
-        List<GameObject> GameObjects()
+        List<GameObject> GameObject()
         {
             var objects = new List<GameObject>(bones.Count);
 
@@ -41,7 +41,7 @@ namespace MMD.Adapter.PMD
             return objects;
         }
 
-        List<Transform> Transforms()
+        List<Transform> Transform()
         {
             var transforms = new Transform[bones.Count];
 
@@ -72,7 +72,7 @@ namespace MMD.Adapter.PMD
             }
         }
 
-        List<PMDBone> Components()
+        List<PMDBone> Component()
         {
             List<PMDBone> boneComponents = new List<PMDBone>(bones.Count);
 
