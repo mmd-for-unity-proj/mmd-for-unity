@@ -20,16 +20,16 @@ namespace MMD.Builder.PMD
 
         public void Read(MMD.Format.PMDFormat format)
         {
-            mesh.vertices = ModelAdapter.Vertices(format.Vertices);
-            mesh.uv = ModelAdapter.UVs(format.Vertices);
-            mesh.normals = ModelAdapter.Nolmals(format.Vertices);
-            mesh.SetTriangles(ModelAdapter.Triangles(format.Faces), 0);
+            // メッシュの参照
+            var modelAdapter = new ModelAdapter(format);
+            mesh = modelAdapter.Mesh;
 
+            // ボーンの参照
             var boneAdapter = new BoneAdapter(format.Bones);
-            renderer.bones = boneAdapter.BoneTransforms;
-            renderer.rootBone = renderer.bones[0];
+            renderer.bones = boneAdapter.BoneTransforms.ToArray();
 
-            // 明日はウェイトやります
+            // ウェイトの参照
+            mesh.boneWeights = boneAdapter.Weights(format.Vertices);
         }
     }
 }

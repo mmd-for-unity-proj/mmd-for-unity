@@ -139,7 +139,7 @@ public class PMDAnimasaTest
     {
         var toon = format.Read(ReadFile()).ToonTextures;
         for (int i = 0; i < toon.Count; ++i)
-            Assert.AreEqual(toon[i], "toon" + i.ToString() + ".bmp");
+            Assert.AreEqual(toon[i].Contains("toon"), true);
     }
 
     [Test]

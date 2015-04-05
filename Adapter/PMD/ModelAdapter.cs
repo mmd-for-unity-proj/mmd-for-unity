@@ -9,7 +9,19 @@ namespace MMD.Adapter.PMD
 {
     public class ModelAdapter
     {
-        public static UnityEngine.Vector3[] Vertices(List<MMD.Format.PMD.Vertex> vertices)
+        public Mesh Mesh { get; set; }
+
+        public ModelAdapter(MMD.Format.PMDFormat format)
+        {
+            Mesh = new Mesh();
+
+            Mesh.vertices = Vertices(format.Vertices);
+            Mesh.uv = UVs(format.Vertices);
+            Mesh.normals = Nolmals(format.Vertices);
+            Mesh.SetTriangles(Triangles(format.Faces), 0);
+        }
+
+        UnityEngine.Vector3[] Vertices(List<MMD.Format.PMD.Vertex> vertices)
         {
             var vectors = new UnityEngine.Vector3[vertices.Count];
 
@@ -23,7 +35,7 @@ namespace MMD.Adapter.PMD
             return vectors;
         }
 
-        public static UnityEngine.Vector3[] Nolmals(List<MMD.Format.PMD.Vertex> vertices)
+        UnityEngine.Vector3[] Nolmals(List<MMD.Format.PMD.Vertex> vertices)
         {
             var vectors = new UnityEngine.Vector3[vertices.Count];
 
@@ -37,7 +49,7 @@ namespace MMD.Adapter.PMD
             return vectors;
         }
 
-        public static UnityEngine.Vector2[] UVs(List<MMD.Format.PMD.Vertex> vertices)
+        UnityEngine.Vector2[] UVs(List<MMD.Format.PMD.Vertex> vertices)
         {
             var vectors = new UnityEngine.Vector2[vertices.Count];
 
@@ -50,7 +62,7 @@ namespace MMD.Adapter.PMD
             return vectors;
         }
 
-        public static int[] Triangles(List<Face> faces)
+        int[] Triangles(List<Face> faces)
         {
             int[] trinagles = new int[faces.Count * 3];
 

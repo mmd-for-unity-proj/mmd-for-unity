@@ -25,7 +25,8 @@ namespace MMD.Adapter.PMD
             Parent();
         }
 
-        public Transform[] BoneTransforms { get { return boneTransforms.ToArray(); } }
+        public List<Transform> BoneTransforms { get { return boneTransforms; } }
+        public List<GameObject> GameObjects { get { return gameObjects; } }
 
         List<GameObject> GameObjects()
         {
@@ -88,6 +89,25 @@ namespace MMD.Adapter.PMD
             }
 
             return boneComponents;
+        }
+
+        public BoneWeight[] Weights(List<Vertex> vertices)
+        {
+            var weights = new BoneWeight[vertices.Count];
+
+            for (int i = 0; i < vertices.Count; ++i)
+            {
+                weights[i].boneIndex0 = vertices[i].boneNumber[0];
+                weights[i].weight0 = vertices[i].boneWeight1;
+
+                if (vertices[i].boneWeight1 < 100)
+                {
+                    weights[i].boneIndex1 = vertices[i].boneNumber[1];
+                    weights[i].weight1 = vertices[i].boneWeight2;
+                }
+            }
+
+            return weights;
         }
     }
 }
