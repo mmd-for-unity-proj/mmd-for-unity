@@ -12,6 +12,7 @@ namespace MMD.Builder.PMD
     {
         SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
         Mesh mesh = new Mesh();
+        Material[] materials;
 
         public PMDModelBuilder()
         {
@@ -30,6 +31,7 @@ namespace MMD.Builder.PMD
 
             // ウェイトの参照
             mesh.boneWeights = boneAdapter.Weights(format.Vertices);
+
         }
     }
 }

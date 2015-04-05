@@ -20,10 +20,26 @@ namespace MMD
                 public float specularity;
                 public Vector3 specular = new Vector3();
                 public Vector3 mirror = new Vector3();
+
+                /// <summary>
+                /// toon??.bmp
+                /// 0 == 0xFF, 1 == 0x00, 10 == 0x09
+                /// </summary>
                 public byte toonIndex;
+
                 public byte edgeFlag;
                 public uint assignedFaceConut;
                 public string textureFileName;
+
+                /// <summary>
+                /// toon??.bmpのインデックスに修正した値を返す
+                /// </summary>
+                public int ToonIndex { get { return toonIndex == 0xFF ? 0 : toonIndex - 1; } }
+
+                /// <summary>
+                /// セルフシャドウの有無
+                /// </summary>
+                public bool SelfShadow { get { return alpha == 0.98f; } }
 
                 public override void Read(System.IO.BinaryReader r)
                 {
