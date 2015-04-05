@@ -1,31 +1,29 @@
 ﻿using NUnit.Framework;
 using System.IO;
 using System.Collections.Generic;
+
 using MMD.Format.PMD;
 using MMD.Format.Common;
 using MMD.Format;
+
 using UnityEngine;
 
 [TestFixture]
 public class PMDAnimasaTest
 {
     PMDFormat format = new PMDFormat();
-
-    BinaryReader ReadFile()
-    {
-        return new BinaryReader(File.OpenRead(@"./Assets/Models/ANIMASA/初音ミクVer2.pmd"));
-    }
+    const string path = @"./Assets/Models/ANIMASA/初音ミクVer2.pmd";
 
     [Test]
     public void OpenPMD()
     {
-        Assert.AreNotEqual(ReadFile(), null);
+        Assert.AreNotEqual(path, null);
     }
 
     [Test]
     public void ReadHeader()
     {
-        format.Read(ReadFile());
+        format.Read(path);
         Assert.AreEqual(format.Header.magic, "Pmd");
         Assert.AreEqual(format.Header.version, 1.0f);
         Assert.AreEqual(format.Header.modelName, @"初音ミク");
@@ -34,7 +32,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadVertex()
     {
-        format.Read(ReadFile());
+        format.Read(path);
         Assert.AreEqual(format.Vertices.Count, 12354);
         Assert.AreEqual(format.Vertices[0].boneNumber[0], 66);
         Assert.AreEqual(format.Vertices[3578].boneNumber[0], 55);
@@ -51,7 +49,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadFace()
     {
-        format.Read(ReadFile());
+        format.Read(path);
         Assert.AreEqual(format.Faces.Count, 22961);
         TestFace(format.Faces[0], 647, 648, 649);
         TestFace(format.Faces[1000], 3109, 3110, 3107);
@@ -62,7 +60,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadMaterial()
     {
-        format.Read(ReadFile());
+        format.Read(path);
         Assert.AreEqual(format.Materials.Count, 17);
         Assert.AreEqual(format.Materials[0].assignedFaceConut, 2425);
         Assert.AreEqual(format.Materials[7].assignedFaceConut, 2810);
@@ -79,7 +77,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadBone()
     {
-        format.Read(ReadFile());
+        format.Read(path);
         var bone = format.Bones;
         Assert.AreEqual(bone.Count, 140);
         TestBone(bone[0], 65535, "センター");
@@ -97,7 +95,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadMorph()
     {
-        var morph = format.Read(ReadFile()).Morphs;
+        var morph = format.Read(path).Morphs;
         Assert.AreEqual(morph.Count, 31);
         TestMorph(morph[1], 78, "真面目");
         TestMorph(morph[30], 45, "にやり");
@@ -106,7 +104,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadDisp()
     {
-        var f = format.Read(ReadFile());
+        var f = format.Read(path);
         var morph = f.MorphDisplays;
         Assert.AreEqual(morph.Count, 30);
 
@@ -117,7 +115,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadEnglish()
     {
-        var english = format.Read(ReadFile()).Englishes;
+        var english = format.Read(path).Englishes;
         Assert.AreEqual(english.header.modelName, "Miku Hatsune");
 
         Assert.AreEqual(english.bones.Count, 140);
@@ -137,7 +135,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadToon()
     {
-        var toon = format.Read(ReadFile()).ToonTextures;
+        var toon = format.Read(path).ToonTextures;
         for (int i = 0; i < toon.Count; ++i)
             Assert.AreEqual(toon[i].Contains("toon"), true);
     }
@@ -145,7 +143,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadRigidbody()
     {
-        var rigidbody = format.Read(ReadFile()).Rigidbodies;
+        var rigidbody = format.Read(path).Rigidbodies;
         Assert.AreEqual(rigidbody.Count, 45);
         Assert.AreEqual(rigidbody[0].name, "頭");
         Assert.AreEqual(rigidbody[44].name, "ネクタイ3");
@@ -154,7 +152,7 @@ public class PMDAnimasaTest
     [Test]
     public void ReadJoint()
     {
-        var joint = format.Read(ReadFile()).Joints;
+        var joint = format.Read(path).Joints;
         Assert.AreEqual(joint.Count, 27);
         Assert.AreEqual(joint[0].name, "右髪1");
         Assert.AreEqual(joint[26].name, "左スカート前2");
