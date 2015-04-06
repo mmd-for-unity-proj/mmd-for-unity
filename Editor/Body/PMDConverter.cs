@@ -49,7 +49,7 @@ namespace MMD.Body.Converter
             AssetDatabase.CreateFolder(directory, "Materials");
             for (int i = 0; i < materials.Length; ++i)
             {
-                AssetDatabase.CreateAsset(materials[i], directory + "/Materials/材質" + (i + 1).ToString());
+                AssetDatabase.CreateAsset(materials[i], directory + "/Materials/材質" + (i + 1).ToString() + ".mat");
             }
         }
 
