@@ -9,18 +9,32 @@ namespace MMD.Adapter.PMD
 {
     public class MaterialAdapter
     {
-        public Material[] Materials { get; set; }
+        public List<Material> Materials { get; set; }
         public List<Texture2D> Textures { get; set; }
 
-        public MaterialAdapter(Shader shader, MMD.Format.PMDFormat format)
+        Texture2D[] toons;
+
+        public MaterialAdapter()
+        {
+            toons = new Texture2D[11];
+
+            toons[0] = null;
+            for (int i = 1; i < 10; ++i)
+            {
+                toons[i] = Resources.Load<Texture2D>("Toon/toon0" + i.ToString() + ".bmp");
+            }
+            toons[10] = Resources.Load<Texture2D>("Toon/toon10.bmp");
+        }
+
+        public void Read(Shader shader, MMD.Format.PMDFormat format)
         {
             var source = format.Materials;
 
-            Materials = new Material[source.Count];
+            Materials = new List<Material>(source.Count);
             Textures = new List<Texture2D>();
 
             for (int i = 0; i < source.Count; ++i)
-                Materials[i] = AddMaterial(shader, source[i], format.Path);
+                Materials.Add(AddMaterial(shader, source[i], format.Path));
         }
 
         Color ToColor(MMD.Format.Common.Vector3 v)
@@ -82,6 +96,7 @@ namespace MMD.Adapter.PMD
                 material.SetFloat("Transparency", 1.0f - source.alpha);  // 不透明な度合いなので逆転させる
 
             material.SetInt("SelfShadow", source.SelfShadow ? 1 : 0);
+            material.SetTexture("ToonTexture", toons[source.ToonIndex]);
 
             SetTexture(material, source, path);
 

@@ -10,40 +10,44 @@ namespace MMD.Builder.PMD
 {
     public class ModelBuilder
     {
-        SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
+        public SkinnedMeshRenderer Renderer { get; set; }
 
-        Mesh mesh = new Mesh();
+        public Mesh Mesh { get; set; }
 
-        Material[] materials;
-        Texture[] textures;
+        public Material[] Materials { get; set; }
+        public Texture[] Textures { get; set; }
 
-        GameObject[] bones;
+        public GameObject[] Bones { get; set; }
 
-        GameObject[] rigidbodies;
+        public GameObject[] Rigidbodies { get; set; }
 
-        public ModelBuilder()
+        public ModelBuilder(SkinnedMeshRenderer renderer)
         {
-            renderer.sharedMesh = mesh;
+            Mesh = new UnityEngine.Mesh();
+            Renderer = renderer;
+            Renderer.sharedMesh = Mesh;
         }
 
-        public void Read(MMD.Format.PMDFormat format, Shader shader)
+        public void Read(MMD.Format.PMDFormat format, Shader shader, float scale)
         {
             // メッシュの参照
-            var modelAdapter = new ModelAdapter(format);
-            mesh = modelAdapter.Mesh;
+            var modelAdapter = new ModelAdapter(format, scale);
+            Mesh = modelAdapter.Mesh;
 
             // ボーンの参照
-            var boneAdapter = new BoneAdapter(format.Bones);
-            renderer.bones = boneAdapter.BoneTransforms.ToArray();
-            bones = boneAdapter.GameObjects.ToArray();
+            var boneAdapter = new BoneAdapter(format.Bones, scale);
+            Renderer.bones = boneAdapter.BoneTransforms.ToArray();
+            Bones = boneAdapter.GameObjects.ToArray();
 
             // ウェイトの参照
-            mesh.boneWeights = boneAdapter.Weights(format.Vertices);
+            Mesh.boneWeights = boneAdapter.Weights(format.Vertices);
 
             // マテリアルの参照
-            var materialAdapter = new MaterialAdapter(shader, format);
-            materials = materialAdapter.Materials;
-            textures = materialAdapter.Textures.ToArray();
+            var materialAdapter = new MaterialAdapter();
+            materialAdapter.Read(shader, format);
+
+            Materials = materialAdapter.Materials.ToArray();
+            Textures = materialAdapter.Textures.ToArray();
 
             // 剛体の参照
         }

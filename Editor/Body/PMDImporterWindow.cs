@@ -10,7 +10,9 @@ namespace MMD.Body.Window
 {
     public class PMDImporterWindow : EditorWindow
     {
-        public GameObject pmdFile;
+        public UnityEngine.Object pmdFile;
+        public Shader shader;
+        public float scale;
 
         [MenuItem("MMD for Unity/PMD Importer")]
         public static void ShowWindow()
@@ -25,14 +27,28 @@ namespace MMD.Body.Window
 
         void OnGUI()
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("PMD File");
-            pmdFile = EditorGUILayout.ObjectField(pmdFile, typeof(GameObject), true) as GameObject;
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Convert"))
+            pmdFile = EditorGUILayout.ObjectField("PMD File", pmdFile, typeof(UnityEngine.Object), true) as UnityEngine.Object;
+            var path = AssetDatabase.GetAssetPath(pmdFile);
+            
+            if (pmdFile != null)
             {
+                if (!path.ToLower().Contains(".pmd"))
+                    pmdFile = null;
+            }
 
+            /// ここにシェーダ書く
+            ///
+            /// ここまで
+
+            /// ここにスケールを書く
+            /// 
+            /// ここまで
+
+            if (GUILayout.Button("Convert") && pmdFile != null)
+            {
+                var converter = new MMD.Body.Converter.PMDConverter(path);
+                converter.Import(shader, scale);
+                pmdFile = null;
             }
         }
     }

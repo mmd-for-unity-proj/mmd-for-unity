@@ -11,9 +11,12 @@ namespace MMD.Adapter.PMD
     {
         public Mesh Mesh { get; set; }
 
-        public ModelAdapter(MMD.Format.PMDFormat format)
+        float scale;
+
+        public ModelAdapter(MMD.Format.PMDFormat format, float scale)
         {
             Mesh = new Mesh();
+            this.scale = scale;
 
             Mesh.vertices = Vertices(format.Vertices);
             Mesh.uv = UVs(format.Vertices);
@@ -28,9 +31,9 @@ namespace MMD.Adapter.PMD
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vectors[i].x = vertices[i].position.x;
-                vectors[i].y = vertices[i].position.y;
-                vectors[i].z = vertices[i].position.z;
+                vectors[i].x = vertices[i].position.x * scale;
+                vectors[i].y = vertices[i].position.y * scale;
+                vectors[i].z = vertices[i].position.z * scale;
             }
 
             return vectors;
@@ -42,9 +45,9 @@ namespace MMD.Adapter.PMD
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vectors[i].x = vertices[i].normal.x;
-                vectors[i].y = vertices[i].normal.y;
-                vectors[i].z = vertices[i].normal.z;
+                vectors[i].x = vertices[i].normal.x * scale;
+                vectors[i].y = vertices[i].normal.y * scale;
+                vectors[i].z = vertices[i].normal.z * scale;
             }
 
             return vectors;
