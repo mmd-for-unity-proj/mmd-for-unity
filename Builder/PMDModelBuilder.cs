@@ -8,14 +8,20 @@ using MMD.Component;
 
 namespace MMD.Builder.PMD
 {
-    public class PMDModelBuilder
+    public class ModelBuilder
     {
         SkinnedMeshRenderer renderer = new SkinnedMeshRenderer();
+
         Mesh mesh = new Mesh();
+
         Material[] materials;
         Texture[] textures;
 
-        public PMDModelBuilder()
+        GameObject[] bones;
+
+        GameObject[] rigidbodies;
+
+        public ModelBuilder()
         {
             renderer.sharedMesh = mesh;
         }
@@ -29,6 +35,7 @@ namespace MMD.Builder.PMD
             // ボーンの参照
             var boneAdapter = new BoneAdapter(format.Bones);
             renderer.bones = boneAdapter.BoneTransforms.ToArray();
+            bones = boneAdapter.GameObjects.ToArray();
 
             // ウェイトの参照
             mesh.boneWeights = boneAdapter.Weights(format.Vertices);
