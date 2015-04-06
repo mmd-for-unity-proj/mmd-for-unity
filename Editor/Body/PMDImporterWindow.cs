@@ -10,16 +10,30 @@ namespace MMD.Body.Window
 {
     public class PMDImporterWindow : EditorWindow
     {
-        [MenuItem("MMD for Unity/PMD Importer")]
+        public GameObject pmdFile;
 
+        [MenuItem("MMD for Unity/PMD Importer")]
         public static void ShowWindow()
         {
             EditorWindow.GetWindow<PMDImporterWindow>("PMD Importer");
         }
 
+        public PMDImporterWindow()
+        {
+
+        }
+
         void OnGUI()
         {
-            
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("PMD File");
+            pmdFile = EditorGUILayout.ObjectField(pmdFile, typeof(GameObject), true) as GameObject;
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Convert"))
+            {
+
+            }
         }
     }
 }
