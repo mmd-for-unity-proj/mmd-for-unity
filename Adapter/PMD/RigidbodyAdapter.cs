@@ -7,5 +7,6 @@ namespace MMD.Adapter.PMD
 {
     public class RigidbodyAdapter
     {
+
     }
 }

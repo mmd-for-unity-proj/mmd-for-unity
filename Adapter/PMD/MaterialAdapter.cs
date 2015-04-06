@@ -65,18 +65,18 @@ namespace MMD.Adapter.PMD
 
                 if (textures[i].Contains(".sph"))
                 {
-                    material.SetInt("SphereAdd", 0);    // 乗算
-                    material.SetTexture("SphereMap", textureRef);
+                    material.SetInt("_SphereAdd", 0);    // 乗算
+                    material.SetTexture("_SphereMap", textureRef);
                 }
                 else if (textures[i].Contains(".spa"))
                 {
-                    material.SetInt("SphereAdd", 1);    // 加算
-                    material.SetTexture("SphereMap", textureRef);
+                    material.SetInt("_SphereAdd", 1);    // 加算
+                    material.SetTexture("_SphereMap", textureRef);
                 }
                 else
                 {
-                    material.SetInt("SphereAdd", 0);
-                    material.SetTexture("Texture", textureRef);
+                    material.SetInt("_SphereAdd", 0);
+                    material.SetTexture("_Texture", textureRef);
                 }
             }
         }
@@ -85,18 +85,20 @@ namespace MMD.Adapter.PMD
         {
             var material = new Material(shader);
 
-            material.SetColor("Diffuse", ToColor(source.diffuse));
-            material.SetColor("Ambient", ToColor(source.ambient));
-            material.SetColor("Specular", ToColor(source.specular));
-            material.SetFloat("Specularity", source.specularity);
+            material.SetColor("_Diffuse", ToColor(source.diffuse));
+            material.SetColor("_Ambient", ToColor(source.ambient));
+            material.SetColor("_Specular", ToColor(source.specular));
+            material.SetFloat("_Specularity", source.specularity);
+            material.SetInt("_Edge Flag", source.edgeFlag);
 
             if (source.SelfShadow)
-                material.SetFloat("Transparency", 1.0f);
+                material.SetFloat("_Transparency", 1.0f);
             else
-                material.SetFloat("Transparency", 1.0f - source.alpha);  // 不透明な度合いなので逆転させる
+                material.SetFloat("_Transparency", 1.0f - source.alpha);  // 不透明な度合いなので逆転させる
 
-            material.SetInt("SelfShadow", source.SelfShadow ? 1 : 0);
-            material.SetTexture("ToonTexture", toons[source.ToonIndex]);
+            material.SetInt("_SelfShadow", source.SelfShadow ? 1 : 0);
+            material.SetTexture("_ToonTexture", toons[source.ToonIndex]);
+            material.SetInt("_BackCull", source.BackFaceCulling ? 1 : 0);
 
             SetTexture(material, source, path);
 

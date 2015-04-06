@@ -17,7 +17,7 @@ namespace MMD.Adapter.PMD
 
         float scale;
 
-        public BoneAdapter(List<Bone> bones, float scale)
+        public void Read(List<Bone> bones, float scale)
         {
             this.bones = bones;
             this.scale = scale;

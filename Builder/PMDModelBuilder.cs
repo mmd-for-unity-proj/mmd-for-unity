@@ -31,11 +31,13 @@ namespace MMD.Builder.PMD
         public void Read(MMD.Format.PMDFormat format, Shader shader, float scale)
         {
             // メッシュの参照
-            var modelAdapter = new ModelAdapter(format, scale);
+            var modelAdapter = new ModelAdapter();
+            modelAdapter.Read(format, scale);
             Mesh = modelAdapter.Mesh;
 
             // ボーンの参照
-            var boneAdapter = new BoneAdapter(format.Bones, scale);
+            var boneAdapter = new BoneAdapter();
+            boneAdapter.Read(format.Bones, scale);
             Renderer.bones = boneAdapter.BoneTransforms.ToArray();
             Bones = boneAdapter.GameObjects.ToArray();
 

@@ -13,9 +13,13 @@ namespace MMD.Adapter.PMD
 
         float scale;
 
-        public ModelAdapter(MMD.Format.PMDFormat format, float scale)
+        public ModelAdapter()
         {
             Mesh = new Mesh();
+        }
+
+        public void Read(MMD.Format.PMDFormat format, float scale)
+        {
             this.scale = scale;
 
             Mesh.vertices = Vertices(format.Vertices);

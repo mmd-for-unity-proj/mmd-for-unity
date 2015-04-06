@@ -41,6 +41,11 @@ namespace MMD
                 /// </summary>
                 public bool SelfShadow { get { return alpha == 0.98f; } }
 
+                /// <summary>
+                /// 両面描画フラグ
+                /// </summary>
+                public bool BackFaceCulling { get { return alpha == 1.0f; } }
+
                 public override void Read(System.IO.BinaryReader r)
                 {
                     diffuse.Read(r);
