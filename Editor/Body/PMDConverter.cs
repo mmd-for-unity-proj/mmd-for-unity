@@ -12,6 +12,9 @@ namespace MMD.Body.Converter
     {
         MMD.Format.PMDFormat format;
 
+        string directory;
+        string filename;
+
         public PMDConverter(string path)
         {
             if (!path.ToLower().Contains(".pmd"))
@@ -19,6 +22,9 @@ namespace MMD.Body.Converter
 
             format = new MMD.Format.PMDFormat();
             format.Read(path);
+
+            directory = System.IO.Path.GetDirectoryName(path);
+            filename = System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
         GameObject CreateRoot()
@@ -33,18 +39,49 @@ namespace MMD.Body.Converter
             return root;
         }
 
+        void EntryMesh(Mesh mesh)
+        {
+            AssetDatabase.CreateAsset(mesh, directory + "/" + filename + ".asset");
+        }
+
+        void EntryMaterials(Material[] materials)
+        {
+            AssetDatabase.CreateFolder(directory, "Materials");
+            for (int i = 0; i < materials.Length; ++i)
+            {
+                AssetDatabase.CreateAsset(materials[i], directory + "/Materials/材質" + (i + 1).ToString());
+            }
+        }
+
+        void ConnectBones(GameObject[] bones, GameObject root)
+        {
+            bones[0].transform.parent = root.transform;
+        }
+
+        void EntryPrefab(GameObject root)
+        {
+            AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
+        }
+
         public void Import(Shader shader, float scale)
         {
             var root = CreateRoot();
-            var renderer = root.AddComponent<SkinnedMeshRenderer>();
 
+            var renderer = root.AddComponent<SkinnedMeshRenderer>();
             var builder = new MMD.Builder.PMD.ModelBuilder(renderer);
             builder.Read(format, shader, scale);
 
             // ここより下でアセットの登録を行う
-            
-            // マテリアルの生成/登録
-            // 剛体の生成/登録
+            ConnectBones(builder.Bones, root);
+            EntryMesh(builder.Mesh);
+            EntryMaterials(builder.Materials);
+            EntryPrefab(root);
+
+            // 剛体のほうをいい加減取り組む
+
+            /// TODO
+            /// 剛体のAdapter/Builder部分を書く
+            /// シェーダを書く
         }
     }
 }
