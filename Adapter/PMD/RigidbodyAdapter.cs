@@ -30,7 +30,7 @@ namespace MMD.Adapter.PMD
 
         }
 
-        public void Read(MMD.Format.PMDFormat format, GameObject[] bones, float scale)
+        public void Read(MMD.Format.PMDFormat format, GameObject[] bones)
         {
             this.scale = scale;
             rigidbodies = new List<GameObject>(format.Rigidbodies.Count);
@@ -38,7 +38,7 @@ namespace MMD.Adapter.PMD
             
             // 剛体の読み込み
             CreateRigidbodyObjects(format.Rigidbodies, bones);
-            colliderAdapter.Read(format.Rigidbodies, bones, scale);
+            colliderAdapter.Read(format.Rigidbodies, bones);
 
             // ジョイントの読み込み
             ReadJoints(format.Joints);
