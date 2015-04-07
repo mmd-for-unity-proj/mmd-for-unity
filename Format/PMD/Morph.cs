@@ -20,7 +20,7 @@ namespace MMD
                 public byte morphType;
                 public List<MorphVertex> vertices;
 
-                public override void Read(System.IO.BinaryReader r)
+                public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     name = ReadString(r, 20);
                     vertexCount = ReadUInt(r);
@@ -34,10 +34,10 @@ namespace MMD
                 public uint vertexIndex;
                 public Vector3 offset = new Vector3();
 
-                public override void Read(System.IO.BinaryReader r)
+                public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     vertexIndex = ReadUInt(r);
-                    offset.Read(r);
+                    offset.Read(r, scale);
                 }
             }
         }

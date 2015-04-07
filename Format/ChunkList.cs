@@ -61,6 +61,19 @@ namespace MMD
                     elements.Add(elem);
                 }
             }
+
+            public override void Read(BinaryReader r, float scale)
+            {
+                var count = ReadCount<CountType>(r);
+                elements = new List<ElemType>(count);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    var elem = new ElemType();
+                    elem.Read(r, scale);
+                    elements.Add(elem);
+                }
+            }
         }
     }
 }

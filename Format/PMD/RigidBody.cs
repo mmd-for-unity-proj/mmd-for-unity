@@ -30,15 +30,15 @@ namespace MMD
                 public float friction;
                 public byte rigidbodyType;
 
-                public override void Read(System.IO.BinaryReader r)
+                public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     name = ReadString(r, 20);
                     boneIndex = ReadUShort(r);
                     groupIndex = ReadByte(r);
                     groupTarget = ReadUShort(r);
                     shapeType = ReadByte(r);
-                    shape.Read(r);
-                    position.Read(r);
+                    shape.Read(r, scale);
+                    position.Read(r, scale);
                     rotation.Read(r);
                     weight = ReadFloat(r);
                     positionDiminish = ReadFloat(r);

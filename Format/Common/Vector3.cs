@@ -16,6 +16,13 @@ namespace MMD
                     y = ReadFloat(r);
                     z = ReadFloat(r);
                 }
+
+                public override void Read(System.IO.BinaryReader r, float scale)
+                {
+                    x = ReadFloat(r) * scale;
+                    y = ReadFloat(r) * scale;
+                    z = ReadFloat(r) * scale;
+                }
             }
         }
     }

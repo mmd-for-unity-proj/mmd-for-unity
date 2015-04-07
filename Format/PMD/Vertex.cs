@@ -25,9 +25,9 @@ namespace MMD
                 public byte boneWeight2;
                 public byte edgeFlag;
 
-                public override void Read(BinaryReader r)
+                public override void Read(BinaryReader r, float scale)
                 {
-                    position.Read(r);
+                    position.Read(r, scale);
                     normal.Read(r);
                     uv.Read(r);
                     boneNumber = new ushort[2];

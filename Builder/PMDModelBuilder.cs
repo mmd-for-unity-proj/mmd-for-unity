@@ -28,16 +28,16 @@ namespace MMD.Builder.PMD
             Renderer.sharedMesh = Mesh;
         }
 
-        public void Read(MMD.Format.PMDFormat format, Shader shader, float scale)
+        public void Read(MMD.Format.PMDFormat format, Shader shader)
         {
             // メッシュの参照
             var modelAdapter = new ModelAdapter();
-            modelAdapter.Read(format, scale);
+            modelAdapter.Read(format);
             Mesh = modelAdapter.Mesh;
 
             // ボーンの参照
             var boneAdapter = new BoneAdapter();
-            boneAdapter.Read(format.Bones, scale);
+            boneAdapter.Read(format.Bones);
             Renderer.bones = boneAdapter.BoneTransforms.ToArray();
             Bones = boneAdapter.GameObjects.ToArray();
 

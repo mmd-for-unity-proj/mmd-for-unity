@@ -46,8 +46,8 @@ namespace MMD.Body.Window
 
             if (GUILayout.Button("Convert") && pmdFile != null)
             {
-                var converter = new MMD.Body.Converter.PMDConverter(path);
-                converter.Import(shader, scale);
+                var converter = new MMD.Body.Converter.PMDConverter(path, scale);
+                converter.Import(shader);
                 pmdFile = null;
             }
         }

@@ -22,14 +22,14 @@ namespace MMD
                 public ushort ikBoneIndex;
                 public Vector3 position = new Vector3();
 
-                public override void Read(System.IO.BinaryReader r)
+                public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     name = ReadString(r, 20);
                     parentBoneIndex = ReadUShort(r);
                     tailBoneIndex = ReadUShort(r);
                     boneType = ReadByte(r);
                     ikBoneIndex = ReadUShort(r);
-                    position.Read(r);
+                    position.Read(r, scale);
                 }
             }
         }

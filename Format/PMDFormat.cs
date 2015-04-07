@@ -45,22 +45,22 @@ namespace MMD
 
             public string Path { get; private set; }
 
-            public PMDFormat Read(string filePath)
+            public PMDFormat Read(string filePath, float scale = 1.0f)
             {
                 BinaryReader r = new BinaryReader(File.OpenRead(filePath));
                 header.Read(r);
-                vertices.Read(r);
+                vertices.Read(r, scale);
                 faces.Read(r);
                 materials.Read(r);
-                bones.Read(r);
+                bones.Read(r, scale);
                 iks.Read(r);
-                morphs.Read(r);
+                morphs.Read(r, scale);
                 morphDisplays.Read(r);
                 boneWindows.Read(r);
                 boneDisplays.Read(r);
                 englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count, BoneWindows.Count);
                 toonTextures.Read(r);
-                rigidbodies.Read(r);
+                rigidbodies.Read(r, scale);
                 joints.Read(r);
                 Path = filePath;
                 return this;

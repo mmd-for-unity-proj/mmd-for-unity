@@ -15,12 +15,9 @@ namespace MMD.Adapter.PMD
         List<Transform> boneTransforms = new List<Transform>();
         List<PMDBone> boneComponents = new List<PMDBone>();
 
-        float scale;
-
-        public void Read(List<Bone> bones, float scale)
+        public void Read(List<Bone> bones)
         {
             this.bones = bones;
-            this.scale = scale;
 
             gameObjects = GameObject();
             boneTransforms = Transform();
@@ -53,9 +50,9 @@ namespace MMD.Adapter.PMD
                 var transform = gameObjects[i].transform;
 
                 UnityEngine.Vector3 position;
-                position.x = bones[i].position.x * scale;
-                position.y = bones[i].position.y * scale;
-                position.z = bones[i].position.z * scale;
+                position.x = bones[i].position.x;
+                position.y = bones[i].position.y;
+                position.z = bones[i].position.z;
                 transform.position = position;
 
                 transforms[i] = transform;

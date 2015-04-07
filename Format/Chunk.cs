@@ -12,7 +12,9 @@ namespace MMD
         public abstract class Chunk
         {
             public virtual void Read(BinaryReader r) { }
+            public virtual void Read(BinaryReader r, float scale) { }
             public virtual void Write(BinaryWriter w) { }
+            public virtual void Write(BinaryWriter w, float scale) { }
 
             protected Vector3 ReadVector3(BinaryReader r)
             {

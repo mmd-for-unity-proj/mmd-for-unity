@@ -15,13 +15,13 @@ namespace MMD.Body.Converter
         string directory;
         string filename;
 
-        public PMDConverter(string path)
+        public PMDConverter(string path, float scale)
         {
             if (!path.ToLower().Contains(".pmd"))
                 throw new System.ArgumentException("PMDファイル以外のファイルがロードされました");
 
             format = new MMD.Format.PMDFormat();
-            format.Read(path);
+            format.Read(path, scale);
 
             directory = System.IO.Path.GetDirectoryName(path);
             filename = System.IO.Path.GetFileNameWithoutExtension(path);
@@ -63,13 +63,13 @@ namespace MMD.Body.Converter
             AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
         }
 
-        public void Import(Shader shader, float scale)
+        public void Import(Shader shader)
         {
             var root = CreateRoot();
 
             var renderer = root.AddComponent<SkinnedMeshRenderer>();
             var builder = new MMD.Builder.PMD.ModelBuilder(renderer);
-            builder.Read(format, shader, scale);
+            builder.Read(format, shader);
 
             // ここより下でアセットの登録を行う
             ConnectBones(builder.Bones, root);
