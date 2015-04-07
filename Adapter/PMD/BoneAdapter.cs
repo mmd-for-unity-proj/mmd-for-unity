@@ -21,7 +21,7 @@ namespace MMD.Adapter.PMD
 
             gameObjects = GameObject();
             boneTransforms = Transform();
-            boneComponents = Component();
+            boneComponents = PMDBoneComponent();
             Parent();
         }
 
@@ -72,7 +72,7 @@ namespace MMD.Adapter.PMD
             }
         }
 
-        List<PMDBone> Component()
+        List<PMDBone> PMDBoneComponent()
         {
             List<PMDBone> boneComponents = new List<PMDBone>(bones.Count);
 

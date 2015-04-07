@@ -79,6 +79,7 @@ namespace MMD.Body.Converter
 
             // 剛体のほうをいい加減取り組む
 
+
             /// TODO
             /// 剛体のAdapter/Builder部分を書く
             /// シェーダを書く

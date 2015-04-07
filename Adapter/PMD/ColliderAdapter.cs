@@ -57,6 +57,10 @@ namespace MMD.Adapter.PMD
         {
             var material = new PhysicMaterial("p" + rigidbody.name);
 
+            material.dynamicFriction = rigidbody.friction;
+            material.staticFriction = rigidbody.friction;
+            material.bounciness = rigidbody.recoil;
+
             PhysicMaterials.Add(material);
         }
 

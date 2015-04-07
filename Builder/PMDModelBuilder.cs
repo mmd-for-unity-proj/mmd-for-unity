@@ -20,6 +20,8 @@ namespace MMD.Builder.PMD
         public GameObject[] Bones { get; set; }
 
         public GameObject[] Rigidbodies { get; set; }
+        public PhysicMaterial[] PhysicMaterials { get; set; }
+        public Collider[] Colliders { get; set; }
 
         public ModelBuilder(SkinnedMeshRenderer renderer)
         {
@@ -52,6 +54,11 @@ namespace MMD.Builder.PMD
             Textures = materialAdapter.Textures.ToArray();
 
             // 剛体の参照
+            var rigidbodyAdapter = new RigidbodyAdapter();
+            rigidbodyAdapter.Read(format, Bones);
+            Rigidbodies = rigidbodyAdapter.Rigidbodies.ToArray();
+            PhysicMaterials = rigidbodyAdapter.PhysicMaterials.ToArray();
+            Colliders = rigidbodyAdapter.Colliders.ToArray();
         }
     }
 }
