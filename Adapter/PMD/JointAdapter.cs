@@ -50,7 +50,7 @@ namespace MMD.Adapter.PMD
             limiter.MinLimitMotion = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainPosition1);
             limiter.MaxLimitMotion = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainPosition2);
             limiter.MinLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation1);
-            limiter.MaxLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation2);
+            limiter.MaxLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation2);            
         }
 
         void SettingData(MMD.Format.PMD.Joint mmdJoint, ConfigurableJoint joint)
