@@ -27,7 +27,12 @@ namespace MMD.Adapter.PMD
             // 位置の設定
             var transform = gameObject.transform;
             transform.position = new Vector3(rigidbody.position.x, rigidbody.position.y, rigidbody.position.z);
-            transform.rotation = Quaternion.Euler(rigidbody.rotation.x, rigidbody.rotation.y, rigidbody.rotation.z);
+
+            // 回転順がYXZなので，それを考慮してる（つもり）
+            var rotation = Quaternion.Euler(0, rigidbody.rotation.y * Mathf.Rad2Deg, 0);
+            rotation *= Quaternion.Euler(rigidbody.rotation.x * Mathf.Rad2Deg, 0, 0);
+            rotation *= Quaternion.Euler(0, 0, rigidbody.rotation.z * Mathf.Rad2Deg);
+            transform.rotation = rotation;
         }
 
         void CreateRigidbodyObjects(List<MMD.Format.PMD.Rigidbody> rigids, GameObject[] bones)
