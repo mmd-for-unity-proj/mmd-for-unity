@@ -64,7 +64,10 @@ namespace MMD.Adapter.PMD
 
             /// ばね係数をここに設定する
             ///
-            ///
+            /// インスタンスを作成してから，～Driveに代入する必要がある
+            /// joint.angularXDrive.positionSpring = mmdJoint.springRotation.x;
+            /// joint.xDrive.positionSpring = mmdJoint.springPositoin.x;
+
 
             TestingLock(mmdJoint, joint);
             AddLimitComponent(mmdJoint, joint);
