@@ -23,6 +23,8 @@ namespace MMD.Builder.PMD
         public PhysicMaterial[] PhysicMaterials { get; set; }
         public Collider[] Colliders { get; set; }
 
+        public GameObject PhysicsRoot { get; set; }
+
         public ModelBuilder(SkinnedMeshRenderer renderer)
         {
             Mesh = new UnityEngine.Mesh();
@@ -59,6 +61,10 @@ namespace MMD.Builder.PMD
             Rigidbodies = rigidbodyAdapter.Rigidbodies.ToArray();
             PhysicMaterials = rigidbodyAdapter.PhysicMaterials.ToArray();
             Colliders = rigidbodyAdapter.Colliders.ToArray();
+            PhysicsRoot = rigidbodyAdapter.RigidbodyRoot;
+
+            // ジョイントの参照
+
         }
     }
 }

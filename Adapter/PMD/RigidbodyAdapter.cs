@@ -29,10 +29,7 @@ namespace MMD.Adapter.PMD
             transform.position = new Vector3(rigidbody.position.x, rigidbody.position.y, rigidbody.position.z);
 
             // 回転順がYXZなので，それを考慮してる（つもり）
-            var rotation = Quaternion.Euler(0, rigidbody.rotation.y * Mathf.Rad2Deg, 0);
-            rotation *= Quaternion.Euler(rigidbody.rotation.x * Mathf.Rad2Deg, 0, 0);
-            rotation *= Quaternion.Euler(0, 0, rigidbody.rotation.z * Mathf.Rad2Deg);
-            transform.rotation = rotation;
+            transform.rotation = MMD.Adapter.Utility.ToQuaternion(rigidbody.rotation);
         }
 
         void CreateRigidbodyObjects(List<MMD.Format.PMD.Rigidbody> rigids, GameObject[] bones)
@@ -83,7 +80,7 @@ namespace MMD.Adapter.PMD
             Rigidbodies = new List<GameObject>(format.Rigidbodies.Count);
             RigidbodyComponents = new List<Rigidbody>(format.Rigidbodies.Count);
             MMDPhysics = new List<Engine.MMDPhysics>(format.Rigidbodies.Count);
-            RigidbodyRoot = new GameObject("Rigidbodies");
+            RigidbodyRoot = new GameObject("Physics");
             
             // 剛体の読み込み
             CreateRigidbodyObjects(format.Rigidbodies, bones);
