@@ -20,5 +20,10 @@ namespace MMD.Adapter
             q *= Quaternion.Euler(0, 0, rotation.z * Mathf.Rad2Deg);
             return q;
         }
+
+        public static Vector3 ToVector3(MMD.Format.Common.Vector3 vector)
+        {
+            return new Vector3(vector.x, vector.y, vector.z);
+        }
     }
 }
