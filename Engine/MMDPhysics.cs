@@ -8,15 +8,15 @@ namespace MMD.Engine
 {
     public class MMDPhysics : MonoBehaviour
     {
-        public Collider[] ignoreRigidbodies;
+        public Collider[] ignoreColliders;
 
         void Start()
         {
             var myCollider = GetComponent<Collider>();
 
-            for (int i = 0; i < ignoreRigidbodies.Length; ++i)
+            for (int i = 0; i < ignoreColliders.Length; ++i)
             {
-                Physics.IgnoreCollision(myCollider, ignoreRigidbodies[i]);
+                Physics.IgnoreCollision(myCollider, ignoreColliders[i]);
             }
         }
     }

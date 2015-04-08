@@ -11,20 +11,23 @@ namespace MMD.Body.Converter
     public class PMDConverter
     {
         MMD.Format.PMDFormat format;
+        MMD.Body.Argument.PMDArgument argument;
 
         string directory;
         string filename;
 
-        public PMDConverter(string path, float scale)
+        public PMDConverter(MMD.Body.Argument.PMDArgument argument)
         {
-            if (!path.ToLower().Contains(".pmd"))
+            if (!argument.path.ToLower().Contains(".pmd"))
                 throw new System.ArgumentException("PMDファイル以外のファイルがロードされました");
 
             format = new MMD.Format.PMDFormat();
-            format.Read(path, scale);
+            format.Read(argument.path, argument.scale);
 
-            directory = System.IO.Path.GetDirectoryName(path);
-            filename = System.IO.Path.GetFileNameWithoutExtension(path);
+            directory = System.IO.Path.GetDirectoryName(argument.path);
+            filename = System.IO.Path.GetFileNameWithoutExtension(argument.path);
+
+            this.argument = argument;
         }
 
         GameObject CreateRoot()
@@ -63,13 +66,13 @@ namespace MMD.Body.Converter
             AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
         }
 
-        public void Import(Shader shader)
+        public void Import()
         {
             var root = CreateRoot();
 
             var renderer = root.AddComponent<SkinnedMeshRenderer>();
             var builder = new MMD.Builder.PMD.ModelBuilder(renderer);
-            builder.Read(format, shader);
+            builder.Read(format, argument.shader);
 
             // ここより下でアセットの登録を行う
             ConnectBones(builder.Bones, root);

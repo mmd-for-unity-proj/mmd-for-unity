@@ -64,7 +64,39 @@ namespace MMD.Adapter.PMD
             PhysicMaterials.Add(material);
         }
 
-        public void Read(List<MMD.Format.PMD.Rigidbody> rigidbodies, GameObject[] bones)
+        bool[] CreateTargetIndices(MMD.Format.PMD.Rigidbody rigidbody)
+        {
+            var targetIndices = new bool[16];
+            for (int i = 0; i < targetIndices.Length; ++i)
+                targetIndices[i] = ((0xFFFF - rigidbody.groupTarget) & (1 << i)) == 1;
+            return targetIndices;
+        }
+
+        void CompareRigidbodyGroup(int ignoreIndex, List<MMD.Format.PMD.Rigidbody> rigidbodies, List<Collider> ignoreColliders)
+        {
+            for (int j = 0; j < rigidbodies.Count; ++j)
+            {
+                if (ignoreIndex == rigidbodies[j].groupIndex)
+                    ignoreColliders.Add(Colliders[j]);
+            }
+        }
+
+        void ConstructIgnoreColliders(MMD.Engine.MMDPhysics physic, MMD.Format.PMD.Rigidbody rigidbody, List<MMD.Format.PMD.Rigidbody> rigidbodies)
+        {
+            var targetIndices = CreateTargetIndices(rigidbody);
+
+            var ignoreColliders = new List<Collider>(rigidbodies.Count);
+
+            for (int i = 0; i < targetIndices.Length; ++i)
+            {
+                if (targetIndices[i])
+                    CompareRigidbodyGroup(i, rigidbodies, ignoreColliders);
+            }
+
+            physic.ignoreColliders = ignoreColliders.ToArray();
+        }
+
+        public void Read(List<MMD.Format.PMD.Rigidbody> rigidbodies, GameObject[] bones, List<MMD.Engine.MMDPhysics> mmdPhysics)
         {
             PhysicMaterials = new List<PhysicMaterial>(rigidbodies.Count);
             Colliders = new List<Collider>(rigidbodies.Count);

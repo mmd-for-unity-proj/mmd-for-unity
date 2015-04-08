@@ -11,9 +11,9 @@ namespace MMD.Adapter.PMD
         public List<GameObject> Rigidbodies { get; set; }
         public List<Rigidbody> RigidbodyComponents { get; set; }
         public List<MMD.Engine.MMDPhysics> MMDPhysics { get; set; }
-        
-        ColliderAdapter colliderAdapter = new ColliderAdapter();
+        public GameObject RigidbodyRoot { get; set; }
 
+        ColliderAdapter colliderAdapter = new ColliderAdapter();
         public List<Collider> Colliders { get { return colliderAdapter.Colliders; } set { colliderAdapter.Colliders = value; } }
         public List<PhysicMaterial> PhysicMaterials { get { return colliderAdapter.PhysicMaterials; } set { colliderAdapter.PhysicMaterials = value; } }
 
@@ -47,43 +47,43 @@ namespace MMD.Adapter.PMD
             }
         }
 
-        void SettingRigidbodyType(List<MMD.Format.PMD.Rigidbody> rigidbodies)
+        void SettingRigidbodyType(List<MMD.Format.PMD.Rigidbody> rigidbodies, GameObject[] bones)
         {
             for (int i = 0;i < rigidbodies.Count; ++i)
             {
+                var targetBoneIndex = rigidbodies[i].boneIndex;
+
                 switch (rigidbodies[i].rigidbodyType)
                 {
-                    case 0:
+                    case 0:     // ボーン追従
                         RigidbodyComponents[i].useGravity = false;
                         RigidbodyComponents[i].isKinematic = true;
+                        Rigidbodies[i].transform.parent = bones[targetBoneIndex].transform; // 一度ボーンと接続する
+                        bones[targetBoneIndex].transform.parent = RigidbodyRoot.transform;  // 接続したボーンをルートに出して，グローバルにする
                         break;
 
-                    case 1:
-                    case 2:
+                    case 1:     // 物理演算
+                    case 2:     // 位置合わせ
                         RigidbodyComponents[i].useGravity = true;
                         RigidbodyComponents[i].isKinematic = false;
+                        Rigidbodies[i].transform.parent = RigidbodyRoot.transform;          // 剛体をルートと接続する
+                        bones[targetBoneIndex].transform.parent = Rigidbodies[i].transform; // ボーンは剛体に制御される側なので，剛体をボーンの親にする
                         break;
                 }
             }
-        }
-
-        void ReadJoints(List<MMD.Format.PMD.Joint> joints)
-        {
-
         }
 
         public void Read(MMD.Format.PMDFormat format, GameObject[] bones)
         {
             Rigidbodies = new List<GameObject>(format.Rigidbodies.Count);
             RigidbodyComponents = new List<Rigidbody>(format.Rigidbodies.Count);
+            MMDPhysics = new List<Engine.MMDPhysics>(format.Rigidbodies.Count);
+            RigidbodyRoot = new GameObject("Rigidbodies");
             
             // 剛体の読み込み
             CreateRigidbodyObjects(format.Rigidbodies, bones);
-            colliderAdapter.Read(format.Rigidbodies, bones);
-            SettingRigidbodyType(format.Rigidbodies);
-
-            // ジョイントの読み込み
-            ReadJoints(format.Joints);
+            colliderAdapter.Read(format.Rigidbodies, bones, MMDPhysics);
+            SettingRigidbodyType(format.Rigidbodies, bones);
         }
     }
 }

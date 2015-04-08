@@ -27,9 +27,11 @@ namespace MMD.Body.Window
 
         void OnGUI()
         {
+            // ファイル
             pmdFile = EditorGUILayout.ObjectField("PMD File", pmdFile, typeof(UnityEngine.Object), true) as UnityEngine.Object;
             var path = AssetDatabase.GetAssetPath(pmdFile);
             
+            // ファイルのバリデーション
             if (pmdFile != null)
             {
                 if (!path.ToLower().Contains(".pmd"))
@@ -37,17 +39,17 @@ namespace MMD.Body.Window
             }
 
             /// ここにシェーダ書く
-            ///
+            
             /// ここまで
 
-            /// ここにスケールを書く
-            /// 
-            /// ここまで
+            scale = EditorGUILayout.FloatField(scale);
+
+            var argument = new MMD.Body.Argument.PMDArgument(path, scale, shader);
 
             if (GUILayout.Button("Convert") && pmdFile != null)
             {
-                var converter = new MMD.Body.Converter.PMDConverter(path, scale);
-                converter.Import(shader);
+                var converter = new MMD.Body.Converter.PMDConverter(argument);
+                converter.Import();
                 pmdFile = null;
             }
         }

@@ -22,7 +22,6 @@ namespace MMD.Adapter.PMD
             Mesh.uv = UVs(format.Vertices);
             Mesh.normals = Nolmals(format.Vertices);
             SetTriangles(Mesh, format.Faces, format.Materials);
-            //Mesh.SetTriangles(Triangles(format.Faces), 0);
         }
 
         UnityEngine.Vector3[] Vertices(List<MMD.Format.PMD.Vertex> vertices)
