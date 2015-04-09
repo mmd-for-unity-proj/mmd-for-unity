@@ -47,9 +47,16 @@ namespace MMD.Body.Converter
             AssetDatabase.CreateAsset(mesh, directory + "/" + filename + ".asset");
         }
 
+        void ExistsAsCreateDirectory(string dirname)
+        {
+            if (!System.IO.Directory.Exists(directory + dirname))
+                AssetDatabase.CreateFolder(directory, dirname);
+        }
+
         void EntryMaterials(Material[] materials)
         {
-            AssetDatabase.CreateFolder(directory, "Materials");
+            ExistsAsCreateDirectory("Materials");
+
             for (int i = 0; i < materials.Length; ++i)
             {
                 AssetDatabase.CreateAsset(materials[i], directory + "/Materials/材質" + (i + 1).ToString() + ".mat");
@@ -58,21 +65,23 @@ namespace MMD.Body.Converter
 
         void EntryPhysicMaterials(List<MMD.Builder.PMD.Physics> materials)
         {
-            AssetDatabase.CreateFolder(directory, "Physics");
+            ExistsAsCreateDirectory("Physics");
+
             for (int i = 0; i < materials.Count; ++i)
             {
                 AssetDatabase.CreateAsset(materials[i].material, directory + "/Physics/" + materials[i].name + ".physicMaterial");
             }
         }
 
-        void ConnectBones(GameObject[] bones, GameObject root)
+        void ConnectBonesToRoot(GameObject[] bones, GameObject root)
         {
             bones[0].transform.parent = root.transform;
         }
 
         void EntryPrefab(GameObject root)
         {
-            AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
+            //AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
+            PrefabUtility.CreatePrefab(directory + "/" + filename + ".prefab", root);
         }
 
         public void Import()
@@ -87,17 +96,16 @@ namespace MMD.Body.Converter
             EntryMesh(builder.Mesh);
             EntryMaterials(builder.Materials);
             EntryPhysicMaterials(builder.Physics);
-            ConnectBones(builder.Bones, boneRoot);
+
+            ConnectBonesToRoot(builder.Bones, boneRoot);
             
-            // 剛体のほうをいい加減取り組む
+            // 剛体をルートと接続
+            builder.RigidbodyRoot.transform.parent = root.transform;
 
-
+            // マテリアルを設定
+            builder.Renderer.sharedMaterials = builder.Materials;
 
             EntryPrefab(root);
-
-            /// TODO
-            /// 剛体のAdapter/Builder部分を書く
-            /// シェーダを書く
         }
     }
 }

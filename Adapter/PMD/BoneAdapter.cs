@@ -13,26 +13,26 @@ namespace MMD.Adapter.PMD
         List<GameObject> gameObjects = new List<GameObject>();
         List<Bone> bones = new List<Bone>();
         List<Transform> boneTransforms = new List<Transform>();
-        List<PMDBone> boneComponents = new List<PMDBone>();
 
         public void Read(List<Bone> bones)
         {
             this.bones = bones;
+            RootBone = new GameObject("Bones");
 
-            gameObjects = GameObject();
-            boneTransforms = Transform();
-            boneComponents = PMDBoneComponent();
+            gameObjects = CreateGameObjects();
+            boneTransforms = CreateTransforms();
             Parent();
         }
 
         public List<Transform> BoneTransforms { get { return boneTransforms; } }
         public List<GameObject> GameObjects { get { return gameObjects; } }
+        public GameObject RootBone { get; set; }
 
-        List<GameObject> GameObject()
+        List<GameObject> CreateGameObjects()
         {
             var objects = new List<GameObject>(bones.Count);
 
-            for (int i = 0; i < objects.Count; ++i)
+            for (int i = 0; i < bones.Count; ++i)
             {
                 var gameObject = new GameObject(bones[i].name);
                 objects.Add(gameObject);
@@ -41,7 +41,7 @@ namespace MMD.Adapter.PMD
             return objects;
         }
 
-        List<Transform> Transform()
+        List<Transform> CreateTransforms()
         {
             var transforms = new Transform[bones.Count];
 
@@ -49,11 +49,7 @@ namespace MMD.Adapter.PMD
             {
                 var transform = gameObjects[i].transform;
 
-                UnityEngine.Vector3 position;
-                position.x = bones[i].position.x;
-                position.y = bones[i].position.y;
-                position.z = bones[i].position.z;
-                transform.position = position;
+                transform.position = MMD.Adapter.Utility.ToVector3(bones[i].position);
 
                 transforms[i] = transform;
             }
@@ -63,27 +59,27 @@ namespace MMD.Adapter.PMD
 
         void Parent()
         {
-            for (int i = 0; i < boneTransforms.Count; ++i)
+            for (int i = 0; i < bones.Count; ++i)
             {
-                if (bones[i].parentBoneIndex == 0xFFFF) continue;
-
-                var parent = boneTransforms[bones[i].parentBoneIndex];
-                boneTransforms[i].parent = parent;
+                // 親がいない場合はルートに繋ぐ
+                int pindex = (int)bones[i].parentBoneIndex;
+                if (pindex < 65535)
+                    boneTransforms[i].parent = gameObjects[pindex].transform;
+                else
+                    boneTransforms[i].parent = RootBone.transform;
             }
         }
 
-        List<PMDBone> PMDBoneComponent()
+        List<MMDBone> PMDBoneComponent()
         {
-            List<PMDBone> boneComponents = new List<PMDBone>(bones.Count);
+            List<MMDBone> boneComponents = new List<MMDBone>(bones.Count);
 
             for (int i = 0; i < bones.Count; ++i)
             {
-                var component = new PMDBone();
+                var component = gameObjects[i].AddComponent<MMDBone>();
                 component.BoneType = (BoneType)bones[i].boneType;
                 component.InfluencedIKBone = gameObjects[bones[i].ikBoneIndex];
                 component.TailBone = gameObjects[bones[i].tailBoneIndex];
-
-                gameObjects[i].AddComponent<PMDBone>();
 
                 boneComponents.Add(component);
             }

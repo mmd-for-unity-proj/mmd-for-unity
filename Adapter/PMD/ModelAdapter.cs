@@ -30,9 +30,7 @@ namespace MMD.Adapter.PMD
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vectors[i].x = vertices[i].position.x;
-                vectors[i].y = vertices[i].position.y;
-                vectors[i].z = vertices[i].position.z;
+                vectors[i] = MMD.Adapter.Utility.ToVector3(vertices[i].position);
             }
 
             return vectors;
@@ -44,9 +42,7 @@ namespace MMD.Adapter.PMD
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vectors[i].x = vertices[i].normal.x;
-                vectors[i].y = vertices[i].normal.y;
-                vectors[i].z = vertices[i].normal.z;
+                vectors[i] = MMD.Adapter.Utility.ToVector3(vertices[i].normal);
             }
 
             return vectors;
@@ -67,26 +63,31 @@ namespace MMD.Adapter.PMD
 
         void SetTriangles(Mesh mesh, List<Face> faces, List<MMD.Format.PMD.Material> materials)
         {
-            int total = 0;
-
             // マテリアルごとにポリゴンを分ける
             mesh.subMeshCount = materials.Count;
+
+            int total = 0;
             for (int submesh = 0; submesh < materials.Count; ++submesh)
             {
                 int faceCount = (int)materials[submesh].assignedFaceConut;
-                int[] trinagles = new int[faceCount * 3];
 
-                for (int j = 0; j < faceCount; ++j, ++total)
+                int[] indices = new int[faceCount * 3];
+
+                for (int i = 0; i < faceCount; ++i)
                 {
-                    int index = total * 3;
-                    var face = faces[total];
-                    trinagles[index] = face[0];
-                    trinagles[++index] = face[1];
-                    trinagles[++index] = face[2];
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        indices[i * 3 + j] = faces[total + i][j];
+                    }
                 }
 
-                mesh.SetTriangles(trinagles, submesh);
+
+                mesh.SetTriangles(indices, submesh);
+
+                total += faceCount;
             }
+            Debug.Log("f"+(faces.Count * 3).ToString());
+            Debug.Log("t"+total.ToString());
         }
     }
 }

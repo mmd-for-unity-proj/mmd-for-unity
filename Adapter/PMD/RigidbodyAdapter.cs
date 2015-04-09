@@ -27,7 +27,7 @@ namespace MMD.Adapter.PMD
 
             // 位置の設定
             var transform = gameObject.transform;
-            transform.position = new Vector3(rigidbody.position.x, rigidbody.position.y, rigidbody.position.z);
+            transform.position = MMD.Adapter.Utility.ToVector3(rigidbody.position);
 
             // 回転順がYXZなので，それを考慮してる（つもり）
             transform.rotation = MMD.Adapter.Utility.ToQuaternion(rigidbody.rotation);
@@ -37,7 +37,6 @@ namespace MMD.Adapter.PMD
         {
             for (int i = 0; i < rigids.Count; ++i)
             {
-                var bone = bones[rigids[i].boneIndex];
                 var rigid = new GameObject("r" + rigids[i].name);
                 var rigidComponent = rigid.AddComponent<Rigidbody>();
                 var mmdphysics = rigid.AddComponent<MMD.Engine.MMDPhysics>();
@@ -70,7 +69,7 @@ namespace MMD.Adapter.PMD
                         RigidbodyComponents[i].useGravity = true;
                         RigidbodyComponents[i].isKinematic = false;
                         Rigidbodies[i].transform.parent = RigidbodyRoot.transform;          // 剛体をルートと接続する
-                        bones[targetBoneIndex].transform.parent = Rigidbodies[i].transform; // ボーンは剛体に制御される側なので，剛体をボーンの親にする
+                        //bones[targetBoneIndex].transform.parent = Rigidbodies[i].transform; // ボーンは剛体に制御される側なので，剛体をボーンの親にする
                         break;
                 }
             }
@@ -85,7 +84,7 @@ namespace MMD.Adapter.PMD
             
             // 剛体の読み込み
             CreateRigidbodyObjects(format.Rigidbodies, bones);
-            colliderAdapter.Read(format.Rigidbodies, bones, MMDPhysics);
+            colliderAdapter.Read(format.Rigidbodies, Rigidbodies, MMDPhysics);
             SettingRigidbodyType(format.Rigidbodies, bones);
         }
     }

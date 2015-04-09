@@ -45,8 +45,7 @@
 
 			fixed4 c = tex2D (_Texture, IN.uv_Texture) * _Ambient;
 			o.Albedo = c.rgb;
-			o.Alpha = c.a;
-
+			//o.Alpha = c.a;
 		}
 		ENDCG
 	} 

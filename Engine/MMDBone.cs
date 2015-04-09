@@ -7,10 +7,12 @@ using MMD.Adapter.PMD;
 
 namespace MMD.Component
 {
-    public class PMDBone : UnityEngine.Component
+    public class MMDBone : MonoBehaviour
     {
         public GameObject TailBone { get; set; }
         public BoneType BoneType { get; set; }
         public GameObject InfluencedIKBone { get; set; }
+
+        void Start() { }
     }
 }

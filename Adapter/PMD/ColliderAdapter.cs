@@ -11,42 +11,42 @@ namespace MMD.Adapter.PMD
         public List<Collider> Colliders { get; set; }
         public List<PhysicMaterial> PhysicMaterials { get; set; }
 
-        Collider AddSphereCollider(MMD.Format.PMD.Rigidbody rigidbody, GameObject bone)
+        Collider AddSphereCollider(MMD.Format.PMD.Rigidbody mmdRigidbody, GameObject rigidbody)
         {
-            var collider = bone.AddComponent<SphereCollider>();
-            collider.radius = rigidbody.shape.x;
+            var collider = rigidbody.AddComponent<SphereCollider>();
+            collider.radius = mmdRigidbody.shape.x;
             return collider;
         }
 
-        Collider AddBoxCollider(MMD.Format.PMD.Rigidbody rigidbody, GameObject bone)
+        Collider AddBoxCollider(MMD.Format.PMD.Rigidbody mmdRigidbody, GameObject rigidbody)
         {
-            var collider = bone.AddComponent<BoxCollider>();
-            collider.size = new Vector3(rigidbody.shape.x, rigidbody.shape.y, rigidbody.shape.z);
+            var collider = rigidbody.AddComponent<BoxCollider>();
+            collider.size = new Vector3(mmdRigidbody.shape.x, mmdRigidbody.shape.y, mmdRigidbody.shape.z);
             return collider;
         }
 
-        Collider AddCapsuleCollider(MMD.Format.PMD.Rigidbody rigidbody, GameObject bone)
+        Collider AddCapsuleCollider(MMD.Format.PMD.Rigidbody mmdRigidbody, GameObject rigidbody)
         {
-            var collider = bone.AddComponent<CapsuleCollider>();
-            collider.radius = rigidbody.shape.x;
-            collider.height = rigidbody.shape.y;
+            var collider = rigidbody.AddComponent<CapsuleCollider>();
+            collider.radius = mmdRigidbody.shape.x;
+            collider.height = mmdRigidbody.shape.y;
             return collider;
         }
 
-        Collider AddCollider(MMD.Format.PMD.Rigidbody rigidbody, GameObject bone)
+        Collider AddCollider(MMD.Format.PMD.Rigidbody mmdRigidbody, GameObject rigidbody)
         {
             Collider retval = null;
 
-            switch (rigidbody.shapeType)
+            switch (mmdRigidbody.shapeType)
             {
                 case 0:
-                    retval = AddSphereCollider(rigidbody, bone);
+                    retval = AddSphereCollider(mmdRigidbody, rigidbody);
                     break;
                 case 1:
-                    retval = AddBoxCollider(rigidbody, bone);
+                    retval = AddBoxCollider(mmdRigidbody, rigidbody);
                     break;
                 case 2:
-                    retval = AddCapsuleCollider(rigidbody, bone);
+                    retval = AddCapsuleCollider(mmdRigidbody, rigidbody);
                     break;
             }
             Colliders.Add(retval);
@@ -96,15 +96,18 @@ namespace MMD.Adapter.PMD
             physic.ignoreColliders = ignoreColliders.ToArray();
         }
 
-        public void Read(List<MMD.Format.PMD.Rigidbody> rigidbodies, GameObject[] bones, List<MMD.Engine.MMDPhysics> mmdPhysics)
+        public void Read(List<MMD.Format.PMD.Rigidbody> mmdRigidbodies, List<GameObject> rigidbodies, List<MMD.Engine.MMDPhysics> mmdPhysics)
         {
-            PhysicMaterials = new List<PhysicMaterial>(rigidbodies.Count);
-            Colliders = new List<Collider>(rigidbodies.Count);
+            PhysicMaterials = new List<PhysicMaterial>(mmdRigidbodies.Count);
+            Colliders = new List<Collider>(mmdRigidbodies.Count);
 
-            for (int i = 0; i < bones.Length; ++i)
+            Debug.Log("r" + mmdRigidbodies.Count.ToString());
+            Debug.Log("b" + rigidbodies.Count.ToString());
+
+            for (int i = 0; i < mmdRigidbodies.Count; ++i)
             {
-                var collider = AddCollider(rigidbodies[i], bones[i]);
-                AddPhysicMaterial(rigidbodies[i], collider);
+                var collider = AddCollider(mmdRigidbodies[i], rigidbodies[i]);
+                AddPhysicMaterial(mmdRigidbodies[i], collider);
             }
         }
     }

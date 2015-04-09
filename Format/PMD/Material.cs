@@ -34,7 +34,7 @@ namespace MMD
                 /// <summary>
                 /// toon??.bmpのインデックスに修正した値を返す
                 /// </summary>
-                public int ToonIndex { get { return toonIndex == 0xFF ? 0 : toonIndex - 1; } }
+                public int ToonIndex { get { return toonIndex >= 0xFF ? 0 : toonIndex + 1; } }
 
                 /// <summary>
                 /// セルフシャドウの有無

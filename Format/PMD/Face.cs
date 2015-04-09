@@ -27,7 +27,7 @@ namespace MMD
 
             public class Face : Chunk
             {
-                ushort[] vertexIndices;
+                public ushort[] vertexIndices;
 
                 public ushort this[int i] { get { return vertexIndices[i]; } set { vertexIndices[i] = value; } }
 

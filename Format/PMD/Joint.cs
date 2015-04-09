@@ -30,7 +30,6 @@ namespace MMD
                 public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     name = ReadString(r, 20);
-                    UnityEngine.Debug.Log(name);
                     rigidbodyA = ReadUInt(r);
                     rigidbodyB = ReadUInt(r);
                     position.Read(r, scale);
