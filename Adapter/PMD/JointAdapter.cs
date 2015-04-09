@@ -10,19 +10,14 @@ namespace MMD.Adapter.PMD
     {
         public List<ConfigurableJoint> Joints { get; set; }
 
-        public JointAdapter()
-        {
-
-        }
-
-        ConfigurableJoint AddComponent(int addComponentIndex, List<GameObject> bones)
+        ConfigurableJoint AddComponent(int addComponentIndex, GameObject[] bones)
         {
             var joint = bones[addComponentIndex].AddComponent<ConfigurableJoint>();
             Joints.Add(joint);
             return joint;
         }
 
-        void SetReference(int connectIndex, ConfigurableJoint joint, List<Rigidbody> rigidbodies)
+        void ConnectBody(int connectIndex, ConfigurableJoint joint, List<Rigidbody> rigidbodies)
         {
             joint.connectedBody = rigidbodies[connectIndex];
         }
@@ -50,7 +45,17 @@ namespace MMD.Adapter.PMD
             limiter.MinLimitMotion = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainPosition1);
             limiter.MaxLimitMotion = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainPosition2);
             limiter.MinLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation1);
-            limiter.MaxLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation2);            
+            limiter.MaxLimitAngular = MMD.Adapter.Utility.ToVector3(mmdJoint.constrainRotation2);
+        }
+
+        JointDrive SetPositionDrive(float spring, bool angular = true)
+        {
+            var drive = new JointDrive();
+            drive.mode = JointDriveMode.Position;
+            spring = Mathf.Abs(spring);
+            if (angular)
+                drive.positionSpring = Mathf.Clamp(spring, 0, 180);
+            return drive;
         }
 
         void SettingData(MMD.Format.PMD.Joint mmdJoint, ConfigurableJoint joint)
@@ -62,25 +67,28 @@ namespace MMD.Adapter.PMD
             // ジョイントの回転
             joint.axis = MMD.Adapter.Utility.ToQuaternion(mmdJoint.rotation) * Vector3.right;
 
-            /// ばね係数をここに設定する
-            ///
-            /// インスタンスを作成してから，～Driveに代入する必要がある
-            /// joint.angularXDrive.positionSpring = mmdJoint.springRotation.x;
-            /// joint.xDrive.positionSpring = mmdJoint.springPositoin.x;
+            // ばね係数をここに設定する
+            joint.xDrive = SetPositionDrive(mmdJoint.springPositoin.x, false);
+            joint.yDrive = SetPositionDrive(mmdJoint.springPositoin.y, false);
+            joint.zDrive = SetPositionDrive(mmdJoint.springPositoin.z, false);
 
+            // ばね回転の設定
+            joint.angularXDrive = SetPositionDrive(mmdJoint.springRotation.x * Mathf.Rad2Deg);
+            float average = (Mathf.Abs(mmdJoint.springRotation.y) + Mathf.Abs(mmdJoint.springRotation.z)) * 0.5f;   // YZ軸が同一なので，平均してClampする
+            joint.angularYZDrive = SetPositionDrive(average * Mathf.Rad2Deg);
 
             TestingLock(mmdJoint, joint);
             AddLimitComponent(mmdJoint, joint);
         }
 
-        public void Read(List<MMD.Format.PMD.Joint> joints, List<Rigidbody> rigidbodies, List<GameObject> bones)
+        public void Read(List<Format.PMD.Joint> joints, List<Rigidbody> rigidbodies, GameObject[] bones)
         {
             Joints = new List<ConfigurableJoint>(joints.Count);
 
             for (int i = 0; i < joints.Count; ++i)
             {
                 var joint = AddComponent((int)joints[i].rigidbodyB, bones);
-                SetReference((int)joints[i].rigidbodyA, joint, rigidbodies);
+                ConnectBody((int)joints[i].rigidbodyA, joint, rigidbodies);
                 SettingData(joints[i], joint);
             }
         }

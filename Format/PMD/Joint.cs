@@ -27,18 +27,19 @@ namespace MMD
                 public Vector3 springPositoin = new Vector3();
                 public Vector3 springRotation = new Vector3();
 
-                public override void Read(System.IO.BinaryReader r)
+                public override void Read(System.IO.BinaryReader r, float scale)
                 {
                     name = ReadString(r, 20);
+                    UnityEngine.Debug.Log(name);
                     rigidbodyA = ReadUInt(r);
                     rigidbodyB = ReadUInt(r);
-                    position.Read(r);
+                    position.Read(r, scale);
                     rotation.Read(r);
-                    constrainPosition1.Read(r);
-                    constrainPosition2.Read(r);
+                    constrainPosition1.Read(r, scale);
+                    constrainPosition2.Read(r, scale);
                     constrainRotation1.Read(r);
                     constrainRotation2.Read(r);
-                    springPositoin.Read(r);
+                    springPositoin.Read(r, scale);
                     springRotation.Read(r);
                 }
             }

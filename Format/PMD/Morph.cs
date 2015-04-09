@@ -25,7 +25,14 @@ namespace MMD
                     name = ReadString(r, 20);
                     vertexCount = ReadUInt(r);
                     morphType = ReadByte(r);
-                    ReadItems(r, vertices, (int)vertexCount);
+
+                    vertices = new List<MorphVertex>((int)vertexCount);
+                    for (int i = 0; i < (int)vertexCount; ++i)
+                    {
+                        var morph = new MorphVertex();
+                        morph.Read(r, scale);
+                        vertices.Add(morph);
+                    }
                 }
             }
 

@@ -16,6 +16,8 @@ namespace MMD.Body.Converter
         string directory;
         string filename;
 
+        GameObject boneRoot;
+
         public PMDConverter(MMD.Body.Argument.PMDArgument argument)
         {
             if (!argument.path.ToLower().Contains(".pmd"))
@@ -33,11 +35,9 @@ namespace MMD.Body.Converter
         GameObject CreateRoot()
         {
             var root = new GameObject(format.Header.modelName);
-            var boneRoot = new GameObject("Bones");
-            var rigidbodyRoot = new GameObject("Rigidbodies");
+            boneRoot = new GameObject("Bones");
 
             boneRoot.transform.parent = root.transform;
-            rigidbodyRoot.transform.parent = root.transform;
 
             return root;
         }
@@ -53,6 +53,15 @@ namespace MMD.Body.Converter
             for (int i = 0; i < materials.Length; ++i)
             {
                 AssetDatabase.CreateAsset(materials[i], directory + "/Materials/材質" + (i + 1).ToString() + ".mat");
+            }
+        }
+
+        void EntryPhysicMaterials(List<MMD.Builder.PMD.Physics> materials)
+        {
+            AssetDatabase.CreateFolder(directory, "Physics");
+            for (int i = 0; i < materials.Count; ++i)
+            {
+                AssetDatabase.CreateAsset(materials[i].material, directory + "/Physics/" + materials[i].name + ".physicMaterial");
             }
         }
 
@@ -75,13 +84,16 @@ namespace MMD.Body.Converter
             builder.Read(format, argument.shader);
 
             // ここより下でアセットの登録を行う
-            ConnectBones(builder.Bones, root);
             EntryMesh(builder.Mesh);
             EntryMaterials(builder.Materials);
-            EntryPrefab(root);
-
+            EntryPhysicMaterials(builder.Physics);
+            ConnectBones(builder.Bones, boneRoot);
+            
             // 剛体のほうをいい加減取り組む
 
+
+
+            EntryPrefab(root);
 
             /// TODO
             /// 剛体のAdapter/Builder部分を書く

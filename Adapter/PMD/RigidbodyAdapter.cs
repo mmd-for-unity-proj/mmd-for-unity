@@ -11,6 +11,7 @@ namespace MMD.Adapter.PMD
         public List<GameObject> Rigidbodies { get; set; }
         public List<Rigidbody> RigidbodyComponents { get; set; }
         public List<MMD.Engine.MMDPhysics> MMDPhysics { get; set; }
+
         public GameObject RigidbodyRoot { get; set; }
 
         ColliderAdapter colliderAdapter = new ColliderAdapter();
@@ -80,7 +81,7 @@ namespace MMD.Adapter.PMD
             Rigidbodies = new List<GameObject>(format.Rigidbodies.Count);
             RigidbodyComponents = new List<Rigidbody>(format.Rigidbodies.Count);
             MMDPhysics = new List<Engine.MMDPhysics>(format.Rigidbodies.Count);
-            RigidbodyRoot = new GameObject("Physics");
+            RigidbodyRoot = new GameObject("Rigidbodies");
             
             // 剛体の読み込み
             CreateRigidbodyObjects(format.Rigidbodies, bones);

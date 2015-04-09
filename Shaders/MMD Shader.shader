@@ -1,4 +1,4 @@
-﻿Shader "Custom/NewShader" {
+﻿Shader "MMD/MMD Shader" {
 	Properties {
 		_Ambient ("Ambient", Color) = (1,1,1,1)
 		_Diffuse ("Diffuse", Color) = (1,1,1,1)
@@ -32,10 +32,10 @@
 		float4 _Specular;
 		float _Specularity;
 		float _Transparency;
-		int _SelfShadow;
-		int _SphereAdd;
-		int _EdgeFlag;
-		int _BackCull;
+		int _SelfShadow;	// >1. true
+		int _SphereAdd;		// 1. add, 0. mul
+		int _EdgeFlag;		// >1. true
+		int _BackCull;		// >1. true
 
 		struct Input {
 			float2 uv_Texture;

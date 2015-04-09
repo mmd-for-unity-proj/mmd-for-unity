@@ -61,7 +61,7 @@ namespace MMD
                 englishes.Read(r, bones.Bones.Count, morphs.Morphs.Count, BoneWindows.Count);
                 toonTextures.Read(r);
                 rigidbodies.Read(r, scale);
-                joints.Read(r);
+                joints.Read(r, scale);
                 Path = filePath;
                 return this;
             }

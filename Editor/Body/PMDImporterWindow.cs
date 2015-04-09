@@ -12,7 +12,7 @@ namespace MMD.Body.Window
     {
         public UnityEngine.Object pmdFile;
         public Shader shader;
-        public float scale;
+        public float scale = 1;
 
         [MenuItem("MMD for Unity/PMD Importer")]
         public static void ShowWindow()
@@ -39,7 +39,7 @@ namespace MMD.Body.Window
             }
 
             /// ここにシェーダ書く
-            
+            shader = Shader.Find("MMD/MMD Shader");
             /// ここまで
 
             scale = EditorGUILayout.FloatField(scale);
@@ -48,9 +48,11 @@ namespace MMD.Body.Window
 
             if (GUILayout.Button("Convert") && pmdFile != null)
             {
+                Debug.Log("Convert Start");
                 var converter = new MMD.Body.Converter.PMDConverter(argument);
                 converter.Import();
                 pmdFile = null;
+                Debug.Log("Convert End");
             }
         }
     }

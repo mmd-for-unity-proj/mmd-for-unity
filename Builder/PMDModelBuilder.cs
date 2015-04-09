@@ -8,6 +8,18 @@ using MMD.Component;
 
 namespace MMD.Builder.PMD
 {
+    public class Physics
+    {
+        public string name;
+        public PhysicMaterial material;
+
+        public Physics(string name, PhysicMaterial material)
+        {
+            this.name = name;
+            this.material = material;
+        }
+    }
+
     public class ModelBuilder
     {
         public SkinnedMeshRenderer Renderer { get; set; }
@@ -15,15 +27,18 @@ namespace MMD.Builder.PMD
         public Mesh Mesh { get; set; }
 
         public Material[] Materials { get; set; }
+
         public Texture[] Textures { get; set; }
 
         public GameObject[] Bones { get; set; }
 
         public GameObject[] Rigidbodies { get; set; }
-        public PhysicMaterial[] PhysicMaterials { get; set; }
-        public Collider[] Colliders { get; set; }
+        
+        PhysicMaterial[] PhysicMaterials { get; set; }
 
-        public GameObject PhysicsRoot { get; set; }
+        public List<Physics> Physics { get; set; }
+
+        public GameObject RigidbodyRoot { get; set; }
 
         public ModelBuilder(SkinnedMeshRenderer renderer)
         {
@@ -60,11 +75,20 @@ namespace MMD.Builder.PMD
             rigidbodyAdapter.Read(format, Bones);
             Rigidbodies = rigidbodyAdapter.Rigidbodies.ToArray();
             PhysicMaterials = rigidbodyAdapter.PhysicMaterials.ToArray();
-            Colliders = rigidbodyAdapter.Colliders.ToArray();
-            PhysicsRoot = rigidbodyAdapter.RigidbodyRoot;
+            RigidbodyRoot = rigidbodyAdapter.RigidbodyRoot;
+
+            var rigidbodyComponents = rigidbodyAdapter.RigidbodyComponents;
 
             // ジョイントの参照
+            var jointAdapter = new JointAdapter();
+            jointAdapter.Read(format.Joints, rigidbodyComponents, Bones);
 
+            // 物理マテリアルの名前をどうにかする
+            Physics = new List<Physics>(PhysicMaterials.Length);
+            for (int i = 0; i < PhysicMaterials.Length; ++i)
+            {
+                Physics.Add(new Physics(format.Rigidbodies[i].name, PhysicMaterials[i]));
+            }
         }
     }
 }

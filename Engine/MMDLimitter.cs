@@ -22,8 +22,11 @@ namespace MMD.Engine
 
         void Check(ref float target, float min, float max)
         {
-            if (target < min) target = min;
-            else if (target > max) target = max;
+            if (min > max || (min == max && max == 0f))
+            {
+                if (target < min) target = min;
+                else if (target > max) target = max;
+            }
         }
 
         void LateUpdate()

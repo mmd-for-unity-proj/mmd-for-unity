@@ -57,16 +57,17 @@ namespace MMD
                 return ConvertByteToString(bytes, "");
             }
 
-            protected void ReadItems<ElemType>(BinaryReader r, List<ElemType> elements, int size)
+            protected List<ElemType> ReadItems<ElemType>(BinaryReader r, int size)
                 where ElemType : Chunk, new()
             {
-                elements = new List<ElemType>(size);
+                var elements = new List<ElemType>(size);
                 for (int i = 0; i < size; ++i)
                 {
                     var elem = new ElemType();
                     elem.Read(r);
                     elements.Add(elem);
                 }
+                return elements;
             }
 
             string ConvertByteToString(byte[] bytes, string line_feed_code)
