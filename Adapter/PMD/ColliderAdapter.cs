@@ -101,9 +101,6 @@ namespace MMD.Adapter.PMD
             PhysicMaterials = new List<PhysicMaterial>(mmdRigidbodies.Count);
             Colliders = new List<Collider>(mmdRigidbodies.Count);
 
-            Debug.Log("r" + mmdRigidbodies.Count.ToString());
-            Debug.Log("b" + rigidbodies.Count.ToString());
-
             for (int i = 0; i < mmdRigidbodies.Count; ++i)
             {
                 var collider = AddCollider(mmdRigidbodies[i], rigidbodies[i]);

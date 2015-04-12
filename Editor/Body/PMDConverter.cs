@@ -16,8 +16,6 @@ namespace MMD.Body.Converter
         string directory;
         string filename;
 
-        GameObject boneRoot;
-
         public PMDConverter(MMD.Body.Argument.PMDArgument argument)
         {
             if (!argument.path.ToLower().Contains(".pmd"))
@@ -35,9 +33,6 @@ namespace MMD.Body.Converter
         GameObject CreateRoot()
         {
             var root = new GameObject(format.Header.modelName);
-            boneRoot = new GameObject("Bones");
-
-            boneRoot.transform.parent = root.transform;
 
             return root;
         }
@@ -49,7 +44,7 @@ namespace MMD.Body.Converter
 
         void ExistsAsCreateDirectory(string dirname)
         {
-            if (!System.IO.Directory.Exists(directory + dirname))
+            if (!System.IO.Directory.Exists(directory + "/" + dirname))
                 AssetDatabase.CreateFolder(directory, dirname);
         }
 
@@ -73,11 +68,6 @@ namespace MMD.Body.Converter
             }
         }
 
-        void ConnectBonesToRoot(GameObject[] bones, GameObject root)
-        {
-            bones[0].transform.parent = root.transform;
-        }
-
         void EntryPrefab(GameObject root)
         {
             //AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
@@ -97,13 +87,16 @@ namespace MMD.Body.Converter
             EntryMaterials(builder.Materials);
             EntryPhysicMaterials(builder.Physics);
 
-            ConnectBonesToRoot(builder.Bones, boneRoot);
+            builder.RootBone.transform.parent = root.transform;
             
-            // 剛体をルートと接続
-            builder.RigidbodyRoot.transform.parent = root.transform;
-
             // マテリアルを設定
             builder.Renderer.sharedMaterials = builder.Materials;
+
+            // 登録したアセットを読み込む
+            renderer.sharedMesh = AssetDatabase.LoadAssetAtPath(directory + "/" + filename + ".asset", typeof(Mesh)) as Mesh;
+
+            // 剛体をルートと接続
+            //builder.RigidbodyRoot.transform.parent = root.transform;
 
             EntryPrefab(root);
         }

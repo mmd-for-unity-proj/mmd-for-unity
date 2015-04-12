@@ -81,13 +81,10 @@ namespace MMD.Adapter.PMD
                     }
                 }
 
-
                 mesh.SetTriangles(indices, submesh);
 
                 total += faceCount;
             }
-            Debug.Log("f"+(faces.Count * 3).ToString());
-            Debug.Log("t"+total.ToString());
         }
     }
 }

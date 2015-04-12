@@ -40,6 +40,8 @@ namespace MMD.Builder.PMD
 
         public GameObject RigidbodyRoot { get; set; }
 
+        public GameObject RootBone { get; set; }
+
         public ModelBuilder(SkinnedMeshRenderer renderer)
         {
             Mesh = new UnityEngine.Mesh();
@@ -59,6 +61,7 @@ namespace MMD.Builder.PMD
             boneAdapter.Read(format.Bones);
             Renderer.bones = boneAdapter.BoneTransforms.ToArray();
             Bones = boneAdapter.GameObjects.ToArray();
+            RootBone = boneAdapter.RootBone;
 
             // ウェイトの参照
             Mesh.boneWeights = boneAdapter.Weights(format.Vertices);

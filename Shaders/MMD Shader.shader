@@ -14,8 +14,10 @@
 		_BackCull ("BackFace Culling", Int) = 1
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" }
-		LOD 200
+		Tags { 
+			"RenderType" = "Transparent" 
+			"Queue" = "Transparent"
+		}
 		
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
@@ -45,7 +47,7 @@
 
 			fixed4 c = tex2D (_Texture, IN.uv_Texture) * _Ambient;
 			o.Albedo = c.rgb;
-			//o.Alpha = c.a;
+			o.Alpha = c.a;
 		}
 		ENDCG
 	} 
