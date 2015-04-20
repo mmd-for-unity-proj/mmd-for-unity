@@ -21,7 +21,7 @@ namespace MMD.Adapter.PMD
         Collider AddBoxCollider(MMD.Format.PMD.Rigidbody mmdRigidbody, GameObject rigidbody)
         {
             var collider = rigidbody.AddComponent<BoxCollider>();
-            collider.size = new Vector3(mmdRigidbody.shape.x, mmdRigidbody.shape.y, mmdRigidbody.shape.z);
+            collider.size = new Vector3(mmdRigidbody.shape.x * 2f, mmdRigidbody.shape.y * 2f, mmdRigidbody.shape.z * 2f);
             return collider;
         }
 
@@ -29,7 +29,7 @@ namespace MMD.Adapter.PMD
         {
             var collider = rigidbody.AddComponent<CapsuleCollider>();
             collider.radius = mmdRigidbody.shape.x;
-            collider.height = mmdRigidbody.shape.y;
+            collider.height = (mmdRigidbody.shape.y * mmdRigidbody.shape.x * 2f);
             return collider;
         }
 
@@ -68,7 +68,10 @@ namespace MMD.Adapter.PMD
         {
             var targetIndices = new bool[16];
             for (int i = 0; i < targetIndices.Length; ++i)
-                targetIndices[i] = ((0xFFFF - rigidbody.groupTarget) & (1 << i)) == 1;
+            {
+                //targetIndices[i] = ((0xFFFF - rigidbody.groupTarget) & (1 << i)) == 1;
+                targetIndices[i] = ((int)(0xFFFF - rigidbody.groupTarget) & (1 << i)) > 0;
+            }
             return targetIndices;
         }
 
@@ -77,7 +80,9 @@ namespace MMD.Adapter.PMD
             for (int j = 0; j < rigidbodies.Count; ++j)
             {
                 if (ignoreIndex == rigidbodies[j].groupIndex)
+                {
                     ignoreColliders.Add(Colliders[j]);
+                }
             }
         }
 
@@ -104,8 +109,13 @@ namespace MMD.Adapter.PMD
             for (int i = 0; i < mmdRigidbodies.Count; ++i)
             {
                 var collider = AddCollider(mmdRigidbodies[i], rigidbodies[i]);
+
                 AddPhysicMaterial(mmdRigidbodies[i], collider);
             }
+
+            // この処理は最後に行う
+            for (int i = 0; i < mmdRigidbodies.Count; ++i)
+                ConstructIgnoreColliders(mmdPhysics[i], mmdRigidbodies[i], mmdRigidbodies);
         }
     }
 }

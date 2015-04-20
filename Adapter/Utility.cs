@@ -16,7 +16,7 @@ namespace MMD.Adapter
         public static Quaternion ToQuaternion(MMD.Format.Common.Vector3 rotation)
         {
             var q = Quaternion.Euler(0, rotation.y * Mathf.Rad2Deg, 0);
-            q *= Quaternion.Euler(rotation.x * Mathf.Rad2Deg, 0, 0);
+            q *= Quaternion.Euler(rotation.x * Mathf.Rad2Deg, 0, 0);   // Z軸反転なので，X軸回転も反転する
             q *= Quaternion.Euler(0, 0, rotation.z * Mathf.Rad2Deg);
             return q;
         }

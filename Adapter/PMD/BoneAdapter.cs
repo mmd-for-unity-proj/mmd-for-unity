@@ -13,6 +13,7 @@ namespace MMD.Adapter.PMD
         List<GameObject> gameObjects = new List<GameObject>();
         List<Bone> bones = new List<Bone>();
         List<Transform> boneTransforms = new List<Transform>();
+        List<Matrix4x4> bindPoses = new List<Matrix4x4>();
 
         public void Read(List<Bone> bones)
         {
@@ -22,11 +23,13 @@ namespace MMD.Adapter.PMD
             gameObjects = CreateGameObjects();
             boneTransforms = CreateTransforms();
             Parent();
+            GenerateBindPoses();
         }
 
         public List<Transform> BoneTransforms { get { return boneTransforms; } }
         public List<GameObject> GameObjects { get { return gameObjects; } }
         public GameObject RootBone { get; set; }
+        public List<Matrix4x4> BindPoses { get { return bindPoses; } }
 
         List<GameObject> CreateGameObjects()
         {
@@ -49,7 +52,7 @@ namespace MMD.Adapter.PMD
             {
                 var transform = gameObjects[i].transform;
 
-                transform.position = MMD.Adapter.Utility.ToVector3(bones[i].position);
+                transform.localPosition = MMD.Adapter.Utility.ToVector3(bones[i].position);
 
                 transforms[i] = transform;
             }
@@ -104,6 +107,16 @@ namespace MMD.Adapter.PMD
             }
 
             return weights;
+        }
+
+        void GenerateBindPoses()
+        {
+            bindPoses = new List<Matrix4x4>(bones.Count);
+
+            foreach (var bone in boneTransforms)
+            {
+                bindPoses.Add(bone.worldToLocalMatrix);
+            }
         }
     }
 }

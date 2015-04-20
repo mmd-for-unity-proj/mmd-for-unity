@@ -70,7 +70,6 @@ namespace MMD.Body.Converter
 
         void EntryPrefab(GameObject root)
         {
-            //AssetDatabase.CreateAsset(root, directory + "/" + filename + ".prefab");
             PrefabUtility.CreatePrefab(directory + "/" + filename + ".prefab", root);
         }
 
@@ -87,7 +86,9 @@ namespace MMD.Body.Converter
             EntryMaterials(builder.Materials);
             EntryPhysicMaterials(builder.Physics);
 
+            // ルートボーンの設定
             builder.RootBone.transform.parent = root.transform;
+            renderer.rootBone = builder.RootBone.transform;
             
             // マテリアルを設定
             builder.Renderer.sharedMaterials = builder.Materials;
@@ -96,7 +97,7 @@ namespace MMD.Body.Converter
             renderer.sharedMesh = AssetDatabase.LoadAssetAtPath(directory + "/" + filename + ".asset", typeof(Mesh)) as Mesh;
 
             // 剛体をルートと接続
-            //builder.RigidbodyRoot.transform.parent = root.transform;
+            builder.RigidbodyRoot.transform.parent = root.transform;
 
             EntryPrefab(root);
         }

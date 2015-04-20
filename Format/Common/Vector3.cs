@@ -10,6 +10,15 @@ namespace MMD
             {
                 public float x, y, z;
 
+                public Vector3() { }
+
+                public Vector3(float x, float y, float z)
+                {
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
+                }
+
                 public override void Read(System.IO.BinaryReader r)
                 {
                     x = ReadFloat(r);
@@ -22,6 +31,20 @@ namespace MMD
                     x = ReadFloat(r) * scale;
                     y = ReadFloat(r) * scale;
                     z = ReadFloat(r) * scale;
+                }
+
+                public void Add(Vector3 v)
+                {
+                    x += v.x;
+                    y += v.y;
+                    z += v.z;
+                }
+
+                public void Sub(Vector3 v)
+                {
+                    x -= v.x;
+                    y -= v.y;
+                    z -= v.z;
                 }
             }
         }

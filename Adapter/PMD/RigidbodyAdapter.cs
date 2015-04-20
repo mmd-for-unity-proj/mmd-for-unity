@@ -18,22 +18,23 @@ namespace MMD.Adapter.PMD
         public List<Collider> Colliders { get { return colliderAdapter.Colliders; } set { colliderAdapter.Colliders = value; } }
         public List<PhysicMaterial> PhysicMaterials { get { return colliderAdapter.PhysicMaterials; } set { colliderAdapter.PhysicMaterials = value; } }
 
-        void SettingRigidbody(MMD.Format.PMD.Rigidbody rigidbody, Rigidbody component, GameObject gameObject)
+        GameObject[] bones;
+
+        void SettingRigidbody(MMD.Format.PMD.Rigidbody rigidbody, Rigidbody component, GameObject refBone)
         {
             // 物理系数の設定
-            component.mass = rigidbody.weight;
+            component.mass = Mathf.Max(Mathf.Epsilon, rigidbody.weight);    // なんでコレやるんだっけな……
             component.drag = rigidbody.positionDiminish;
             component.angularDrag = rigidbody.rotationDiminish;
 
             // 位置の設定
-            var transform = gameObject.transform;
-            transform.position = MMD.Adapter.Utility.ToVector3(rigidbody.position);
+            var transform = component.gameObject.transform;
 
-            // 回転順がYXZなので，それを考慮してる（つもり）
+            transform.position = MMD.Adapter.Utility.ToVector3(rigidbody.position);
             transform.rotation = MMD.Adapter.Utility.ToQuaternion(rigidbody.rotation);
         }
 
-        void CreateRigidbodyObjects(List<MMD.Format.PMD.Rigidbody> rigids, GameObject[] bones)
+        void CreateRigidbodyObjects(List<MMD.Format.PMD.Rigidbody> rigids)
         {
             for (int i = 0; i < rigids.Count; ++i)
             {
@@ -45,33 +46,49 @@ namespace MMD.Adapter.PMD
                 RigidbodyComponents.Add(rigidComponent);
                 MMDPhysics.Add(mmdphysics);
 
-                SettingRigidbody(rigids[i], rigidComponent, rigid);
+                var bone = GetReferenceBone(rigids[i]);
+                SettingRigidbody(rigids[i], rigidComponent, bone);
             }
         }
 
-        void SettingRigidbodyType(List<MMD.Format.PMD.Rigidbody> rigidbodies, GameObject[] bones)
+        void SetGravityAndKinematic(Rigidbody component, bool gravity, bool kinematic)
+        {
+            component.useGravity = gravity;
+            component.isKinematic = kinematic;
+        }
+
+        void SettingRigidbodyTypeEach(MMD.Format.PMD.Rigidbody rigidbody, Rigidbody component, GameObject bone)
+        {
+            var componentTransform = component.gameObject.transform;
+
+            switch (rigidbody.rigidbodyType)
+            {
+                case 0:     // ボーン追従
+                    SetGravityAndKinematic(component, false, true);
+                    componentTransform.parent = bone.transform;
+                    break;
+
+                case 1:     // 物理演算
+                case 2:     // 位置合わせ
+                    SetGravityAndKinematic(component, true, false);
+                    componentTransform.parent = RigidbodyRoot.transform;
+                    break;
+            }
+        }
+
+        GameObject GetReferenceBone(MMD.Format.PMD.Rigidbody rigidbody)
+        {
+            int refBone = rigidbody.boneIndex;
+            return refBone < 0xFFFF ? bones[refBone] : null;
+        }
+
+        void SettingRigidbodyType(List<MMD.Format.PMD.Rigidbody> rigidbodies)
         {
             for (int i = 0;i < rigidbodies.Count; ++i)
             {
-                var targetBoneIndex = rigidbodies[i].boneIndex;
+                var bone = GetReferenceBone(rigidbodies[i]);
 
-                switch (rigidbodies[i].rigidbodyType)
-                {
-                    case 0:     // ボーン追従
-                        RigidbodyComponents[i].useGravity = false;
-                        RigidbodyComponents[i].isKinematic = true;
-                        Rigidbodies[i].transform.parent = bones[targetBoneIndex].transform; // 一度ボーンと接続する
-                        bones[targetBoneIndex].transform.parent = RigidbodyRoot.transform;  // 接続したボーンをルートに出して，グローバルにする
-                        break;
-
-                    case 1:     // 物理演算
-                    case 2:     // 位置合わせ
-                        RigidbodyComponents[i].useGravity = true;
-                        RigidbodyComponents[i].isKinematic = false;
-                        Rigidbodies[i].transform.parent = RigidbodyRoot.transform;          // 剛体をルートと接続する
-                        //bones[targetBoneIndex].transform.parent = Rigidbodies[i].transform; // ボーンは剛体に制御される側なので，剛体をボーンの親にする
-                        break;
-                }
+                SettingRigidbodyTypeEach(rigidbodies[i], RigidbodyComponents[i], bone);
             }
         }
 
@@ -81,11 +98,16 @@ namespace MMD.Adapter.PMD
             RigidbodyComponents = new List<Rigidbody>(format.Rigidbodies.Count);
             MMDPhysics = new List<Engine.MMDPhysics>(format.Rigidbodies.Count);
             RigidbodyRoot = new GameObject("Rigidbodies");
+            this.bones = bones;
             
-            // 剛体の読み込み
-            CreateRigidbodyObjects(format.Rigidbodies, bones);
+            // 剛体だけ作成する
+            CreateRigidbodyObjects(format.Rigidbodies);
+
+            // 当たり判定の設定
             colliderAdapter.Read(format.Rigidbodies, Rigidbodies, MMDPhysics);
-            SettingRigidbodyType(format.Rigidbodies, bones);
+
+            // 剛体の種類ごとに
+            SettingRigidbodyType(format.Rigidbodies);
         }
     }
 }

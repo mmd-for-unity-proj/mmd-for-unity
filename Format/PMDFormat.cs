@@ -45,6 +45,29 @@ namespace MMD
 
             public string Path { get; private set; }
 
+            /// <summary>
+            /// 剛体の位置を絶対座標に変換する
+            /// </summary>
+            void CalibrateRigidbodyPosition()
+            {
+                foreach (var rigid in Rigidbodies)
+                {
+                    if (rigid.boneIndex < 0xFFFF)
+                    {
+                        var bone = Bones[(int)rigid.boneIndex];
+                        rigid.position.Add(bone.position);
+                    }
+                    else
+                    {
+                        if (Bones.Count == 0)
+                            throw new System.IndexOutOfRangeException("ボーンがありません");
+
+                        var bone = Bones[0];
+                        rigid.position.Add(bone.position);
+                    }
+                }
+            }
+
             public PMDFormat Read(string filePath, float scale = 1.0f)
             {
                 BinaryReader r = new BinaryReader(File.OpenRead(filePath));
@@ -63,6 +86,9 @@ namespace MMD
                 rigidbodies.Read(r, scale);
                 joints.Read(r, scale);
                 Path = filePath;
+
+                CalibrateRigidbodyPosition();   // 剛体の位置を絶対座標に調整する
+
                 return this;
             }
         }

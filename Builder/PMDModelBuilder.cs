@@ -62,6 +62,7 @@ namespace MMD.Builder.PMD
             Renderer.bones = boneAdapter.BoneTransforms.ToArray();
             Bones = boneAdapter.GameObjects.ToArray();
             RootBone = boneAdapter.RootBone;
+            Mesh.bindposes = boneAdapter.BindPoses.ToArray();
 
             // ウェイトの参照
             Mesh.boneWeights = boneAdapter.Weights(format.Vertices);
@@ -80,11 +81,9 @@ namespace MMD.Builder.PMD
             PhysicMaterials = rigidbodyAdapter.PhysicMaterials.ToArray();
             RigidbodyRoot = rigidbodyAdapter.RigidbodyRoot;
 
-            var rigidbodyComponents = rigidbodyAdapter.RigidbodyComponents;
-
             // ジョイントの参照
             var jointAdapter = new JointAdapter();
-            jointAdapter.Read(format.Joints, rigidbodyComponents, Bones);
+            jointAdapter.Read(format, rigidbodyAdapter.RigidbodyComponents, Bones);
 
             // 物理マテリアルの名前をどうにかする
             Physics = new List<Physics>(PhysicMaterials.Length);

@@ -10,9 +10,11 @@ namespace MMD.Adapter.PMD
     {
         public List<ConfigurableJoint> Joints { get; set; }
 
-        ConfigurableJoint AddComponent(int addComponentIndex, GameObject[] bones)
+        List<Rigidbody> rigidbodies;
+
+        ConfigurableJoint AddComponent(int addComponentIndex)
         {
-            var joint = bones[addComponentIndex].AddComponent<ConfigurableJoint>();
+            var joint = rigidbodies[addComponentIndex].gameObject.AddComponent<ConfigurableJoint>();
             Joints.Add(joint);
             return joint;
         }
@@ -58,7 +60,7 @@ namespace MMD.Adapter.PMD
             return drive;
         }
 
-        void SettingData(MMD.Format.PMD.Joint mmdJoint, ConfigurableJoint joint)
+        void SettingData(MMD.Format.PMD.Joint mmdJoint, MMD.Format.PMD.Rigidbody mmdRigid, ConfigurableJoint joint)
         {
             // ジョイントの位置
             var position = new Vector3(mmdJoint.position.x, mmdJoint.position.y, mmdJoint.position.z);
@@ -78,18 +80,24 @@ namespace MMD.Adapter.PMD
             joint.angularYZDrive = SetPositionDrive(average * Mathf.Rad2Deg);
 
             TestingLock(mmdJoint, joint);
-            AddLimitComponent(mmdJoint, joint);
+            //AddLimitComponent(mmdJoint, joint);
         }
 
-        public void Read(List<Format.PMD.Joint> joints, List<Rigidbody> rigidbodies, GameObject[] bones)
+        public void Read(Format.PMDFormat format, List<Rigidbody> rigidbodies, GameObject[] bones)
         {
+            var joints = format.Joints;
+            var mmdrigids = format.Rigidbodies;
+            
             Joints = new List<ConfigurableJoint>(joints.Count);
+            this.rigidbodies = rigidbodies;
 
             for (int i = 0; i < joints.Count; ++i)
             {
-                var joint = AddComponent((int)joints[i].rigidbodyB, bones);
+                var joint = AddComponent((int)joints[i].rigidbodyB);
+
                 ConnectBody((int)joints[i].rigidbodyA, joint, rigidbodies);
-                SettingData(joints[i], joint);
+
+                SettingData(joints[i], mmdrigids[(int)joints[i].rigidbodyB], joint);
             }
         }
     }

@@ -8,6 +8,7 @@ namespace MMD.Engine
 {
     public class MMDPhysics : MonoBehaviour
     {
+        public int groupIndex;
         public Collider[] ignoreColliders;
 
         void Start()
