@@ -8,3 +8,4 @@
 *.sln
 *.asset
 *.meta
+Editor/Config/Config.asset
