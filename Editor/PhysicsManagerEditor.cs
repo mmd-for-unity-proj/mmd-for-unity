@@ -43,7 +43,7 @@ public sealed class PhysicsManagerEditor : Editor
 					GUI.enabled = false;
 					EditorGUILayout.LabelField(joint.name);
 					GUI.enabled = crnt_gui_enabled;
-				} else if (joint.rigidbody.isKinematic) {
+				} else if (joint.GetComponent<Rigidbody>().isKinematic) {
 					//ボーン追従(isKinematic)オブジェクト付属のジョイントなら
 					//移動不可
 					GUI.enabled = false;
