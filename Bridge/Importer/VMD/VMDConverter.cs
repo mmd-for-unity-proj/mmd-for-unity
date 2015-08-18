@@ -449,21 +449,25 @@ namespace MMD
         static void SetAnimationType(AnimationClip clip, GameObject game_object)
         {
 #if UNITY_EDITOR
-            ModelImporterAnimationType animation_type;
+            //ModelImporterAnimationType animation_type;
             Animator animator = game_object.GetComponent<Animator>();
             if (null == animator)
             {
-                animation_type = ModelImporterAnimationType.Legacy;
+                //animation_type = ModelImporterAnimationType.Legacy;
+				clip.legacy = true;
             }
-            else if ((null == animator.avatar) && animator.avatar.isHuman)
-            {
-                animation_type = ModelImporterAnimationType.Human;
-            }
-            else
-            {
-                animation_type = ModelImporterAnimationType.Generic;
-            }
-            AnimationUtility.SetAnimationType(clip, animation_type);
+            //else if ((null == animator.avatar) && animator.avatar.isHuman)
+            //{
+                //animation_type = ModelImporterAnimationType.Human;
+				//clip.humanMotion = true;
+
+            //}
+            //else
+            //{
+            //    animation_type = ModelImporterAnimationType.Generic;
+            //}
+            //AnimationUtility.SetAnimationType(clip, animation_type);
+
 #endif
         }
     }
