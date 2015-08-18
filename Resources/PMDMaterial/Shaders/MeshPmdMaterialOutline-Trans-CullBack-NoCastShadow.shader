@@ -47,7 +47,7 @@ Shader "MMD/Transparent/PMDMaterial-with-Outline-CullBack-NoCastShadow"
 		Blend SrcAlpha OneMinusSrcAlpha
 		AlphaTest Greater 0.0
 		CGPROGRAM
-		#pragma surface surf MMD
+		#pragma surface surf MMD alpha
 		#include "MeshPmdMaterialSurface.cginc"
 		ENDCG
 		
