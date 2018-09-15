@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 /*
  * MMD Shader for Unity
  *
@@ -28,7 +30,7 @@ struct v2f
 v2f shadow_vert( appdata_img v )
 {
 	v2f o;
-	o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos(v.vertex);
 	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 	return o;
 }

@@ -38,7 +38,7 @@ public class ExpressionManagerScript : MonoBehaviour
 		transform.parent.gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh = renderer_shared_mesh;
 
 		// 頂点インデックス取得
-		indices = transform.FindChild("base").GetComponent<MMDSkinsScript>().targetIndices;
+		indices = transform.Find("base").GetComponent<MMDSkinsScript>().targetIndices;
 
 		skin_script = GetSkinScripts();		// 表情に付いているスクリプトを取得
 

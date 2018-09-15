@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 /*
  * MMD Shader for Unity
  *
@@ -29,8 +31,8 @@ struct v2f
 v2f vert( appdata_base v )
 {
 	v2f o;
-	float4 pos = mul(UNITY_MATRIX_MVP, v.vertex);
-	float4 normal = mul(UNITY_MATRIX_MVP, float4(v.normal, 0.0));
+	float4 pos = UnityObjectToClipPos(v.vertex);
+	float4 normal = UnityObjectToClipPos(float4(v.normal, 0.0));
 	float width = _OutlineWidth / 1024.0; //目コピ調整値(算術根拠無し)
 	float depth_offset = pos.z / 4194304.0; //僅かに奥に移動(floatの仮数部は23bitなので(1<<21)程度で割った値は丸めに入らないが非常に小さな値の筈)
 	o.pos = pos + normal * float4(width, width, 0.0, 0.0) + float4(0.0, 0.0, depth_offset, 0.0);

@@ -751,7 +751,7 @@ namespace MMD
 			public class Motion
 			{
 				public string bone_name;	// 15byte
-				public uint flame_no;
+				public uint frame_no;
 				public Vector3 location;
 				public Quaternion rotation;
 				public byte[] interpolation;	// [4][4][4], 64byte
@@ -780,7 +780,7 @@ namespace MMD
 			public class SkinData
 			{
 				public string skin_name;	// 15byte
-				public uint flame_no;
+				public uint frame_no;
 				public float weight;
 			}
 			
@@ -792,7 +792,7 @@ namespace MMD
 			
 			public class CameraData
 			{
-				public uint flame_no;
+				public uint frame_no;
 				public float length;
 				public Vector3 location;
 				public Vector3 rotation;	// オイラー角, X軸は符号が反転している
@@ -819,7 +819,7 @@ namespace MMD
 			
 			public class LightData
 			{
-				public uint flame_no;
+				public uint frame_no;
 				public Color rgb;	// αなし, 256
 				public Vector3 location;
 			}
@@ -832,7 +832,7 @@ namespace MMD
 			
 			public class SelfShadowData
 			{
-				public uint flame_no;
+				public uint frame_no;
 				public byte mode; //00-02
 				public float distance;	// 0.1 - (dist * 0.00001)
 			}

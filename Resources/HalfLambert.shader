@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Lucifuges‚³‚ñ‚Ì’ñ‹Ÿ
 Shader "MMD/HalfLambertOutline"
 {
@@ -81,11 +83,11 @@ Shader "MMD/HalfLambertOutline"
 			
 			v2f vert(appdata_base v)
 			{
-				half4 pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				half4 pos = UnityObjectToClipPos(v.vertex);
 				half width = 0.01 * _OutlineWidth;
 				half4 edge_pos = v.vertex + pos.w * width * half4(v.normal, 0.0);
 				v2f o;
-				o.pos = mul(UNITY_MATRIX_MVP, edge_pos);
+				o.pos = UnityObjectToClipPos(edge_pos);
 				return o;
 			}
 			

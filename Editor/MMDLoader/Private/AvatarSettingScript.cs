@@ -23,7 +23,7 @@ public class AvatarSettingScript
 	/// <returns>アニメーター</returns>
 	public Animator SettingGenericAvatar() {
 		//アバタールートトランスフォームの取得
-		Transform avatar_root_transform = root_game_object_.transform.FindChild("Model");
+		Transform avatar_root_transform = root_game_object_.transform.Find("Model");
 		if (null == avatar_root_transform) {
 			//ルートゲームオブジェクト直下にモデルルートオブジェクトが無い(PMDConverter)なら
 			//ルートゲームオブジェクトをアバタールートオブジェクトとする
@@ -53,7 +53,7 @@ public class AvatarSettingScript
 		SetRequirePose();
 		
 		//アバタールートトランスフォームの取得
-		Transform avatar_root_transform = root_game_object_.transform.FindChild("Model");
+		Transform avatar_root_transform = root_game_object_.transform.Find("Model");
 		if (null == avatar_root_transform) {
 			//ルートゲームオブジェクト直下にモデルルートオブジェクトが無い(PMDConverter)なら
 			//ルートゲームオブジェクトをアバタールートオブジェクトとする
@@ -184,7 +184,7 @@ public class AvatarSettingScript
 			}
 			break;
 		default:
-			if (root_game_object_.transform.FindChild("Physics") == transform.parent) {
+			if (root_game_object_.transform.Find("Physics") == transform.parent) {
 				//物理演算ルートなら
 				//後ろを向いているので向き直す
 				transform.localRotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);

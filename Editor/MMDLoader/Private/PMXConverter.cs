@@ -373,6 +373,18 @@ namespace MMD
 				//1つ目のみ登録
 				mesh.uv2 = creation_info.all_vertices.Select(x=>new Vector2(format_.vertex_list.vertex[x].add_uv[0].x, format_.vertex_list.vertex[x].add_uv[0].y)).ToArray();
 			}
+			if (1 < format_.header.additionalUV)
+			{
+				//追加UVが1つ以上有れば
+				//2つ目のみ登録
+				mesh.uv3 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[1].x, format_.vertex_list.vertex[x].add_uv[1].y)).ToArray();
+			}
+			if (2 < format_.header.additionalUV)
+			{
+				//追加UVが1つ以上有れば
+				//3つ目のみ登録
+				mesh.uv4 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[2].x, format_.vertex_list.vertex[x].add_uv[2].y)).ToArray();
+			}
 			mesh.boneWeights = creation_info.all_vertices.Select(x=>ConvertBoneWeight(format_.vertex_list.vertex[x].bone_weight)).ToArray();
 			mesh.colors = creation_info.all_vertices.Select(x=>new Color(0.0f, 0.0f, 0.0f, format_.vertex_list.vertex[x].edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む(0～8迄は表せる)
 		}
@@ -1390,7 +1402,7 @@ namespace MMD
 			
 			//材質リアサイン辞書の作成
 			Dictionary<uint, uint>[] material_reassign_dictionary = new Dictionary<uint, uint>[creation_info.Length + 1];
-			for (int i = 0, i_max = creation_info.Length; i < i_max; +++i) {
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
 				material_reassign_dictionary[i] = new Dictionary<uint, uint>();
 				for (uint k = 0, k_max = (uint)creation_info[i].value.Length; k < k_max; ++k) {
 					material_reassign_dictionary[i][creation_info[i].value[k].material_index] = k;
@@ -1470,7 +1482,7 @@ namespace MMD
 			mesh_root_transform.parent = root_game_object_.transform;
 
 			//モデルルート取得
-			Transform model_root_transform = root_game_object_.transform.FindChild("Model");
+			Transform model_root_transform = root_game_object_.transform.Find("Model");
 			//ボーン共通データ
 			Matrix4x4[] bindposes = bones.Select(x=>x.transform.worldToLocalMatrix).ToArray();
 			Transform[] bones_transform = bones.Select(x=>x.transform).ToArray();
@@ -1576,7 +1588,7 @@ namespace MMD
 			GameObject[] result = format_.rigidbody_list.rigidbody.Select(x=>ConvertRigidbody(x)).ToArray();
 			for (uint i = 0, i_max = (uint)result.Length; i < i_max; ++i) {
 				// マテリアルの設定
-				result[i].collider.material = CreatePhysicMaterial(format_.rigidbody_list.rigidbody, i);
+				result[i].GetComponent<Collider>().material = CreatePhysicMaterial(format_.rigidbody_list.rigidbody, i);
 				
 			}
 			
@@ -1590,7 +1602,7 @@ namespace MMD
 		/// <param name='rigidbody'>PMX用剛体データ</param>
 		GameObject ConvertRigidbody(PMXFormat.Rigidbody rigidbody)
 		{
-			GameObject result = new GameObject("r" + rigidbody.name);
+			GameObject result = new GameObject("rigid" + rigidbody.name);
 			//result.AddComponent<Rigidbody>();	// 1つのゲームオブジェクトに複数の剛体が付く事が有るので本体にはrigidbodyを適用しない
 			
 			//位置・回転の設定
@@ -1817,14 +1829,14 @@ namespace MMD
 			foreach (PMXFormat.Joint joint in format_.rigidbody_joint_list.joint) {
 				//相互接続する剛体の取得
 				Transform transform_a = rigids[joint.rigidbody_a].transform;
-				Rigidbody rigidbody_a = transform_a.rigidbody;
+				Rigidbody rigidbody_a = transform_a.GetComponent<Rigidbody>();
 				if (null == rigidbody_a) {
-					rigidbody_a = transform_a.parent.rigidbody;
+					rigidbody_a = transform_a.parent.GetComponent<Rigidbody>();
 				}
 				Transform transform_b = rigids[joint.rigidbody_b].transform;
-				Rigidbody rigidbody_b = transform_b.rigidbody;
+				Rigidbody rigidbody_b = transform_b.GetComponent<Rigidbody>();
 				if (null == rigidbody_b) {
-					rigidbody_b = transform_b.parent.rigidbody;
+					rigidbody_b = transform_b.parent.GetComponent<Rigidbody>();
 				}
 				if (rigidbody_a != rigidbody_b) {
 					//接続する剛体が同じ剛体を指さないなら
@@ -1946,13 +1958,11 @@ namespace MMD
 			// Angular
 			if (joint.spring_rotation.x != 0.0f) {
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = joint.spring_rotation.x;
 				conf.angularXDrive = drive;
 			}
 			if (joint.spring_rotation.y != 0.0f || joint.spring_rotation.z != 0.0f) {
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = (joint.spring_rotation.y + joint.spring_rotation.z) * 0.5f;
 				conf.angularYZDrive = drive;
 			}

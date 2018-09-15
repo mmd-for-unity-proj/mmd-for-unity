@@ -76,7 +76,8 @@ public class MMDEngine : MonoBehaviour {
 						{
 							int ignoreIndex=ignoreList[shift][j];
 							if (i == ignoreIndex) continue;
-							Physics.IgnoreCollision(rigids[i].collider, rigids[ignoreIndex].collider, true);
+							Physics.IgnoreCollision(rigids[i].GetComponent<Collider>(), 
+                                rigids[ignoreIndex].GetComponent<Collider>(), true);
 						}
 					}
 				}

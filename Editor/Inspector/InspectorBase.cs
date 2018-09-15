@@ -58,7 +58,7 @@ namespace MMD
 			T scriptableObject = ScriptableObject.CreateInstance<T>();
 			scriptableObject.assetPath = path;
 			Selection.activeObject = scriptableObject;
-			EditorUtility.UnloadUnusedAssets();
+			EditorUtility.UnloadUnusedAssetsImmediate();
 		}
 	}
 }
