@@ -32,12 +32,16 @@ namespace MMD
 		{
 			//スケール設定
 			scale_ = 1.0f;
-			if (assign_pmd) {
-				MMDEngine engine = assign_pmd.GetComponent<MMDEngine>();
-				if (engine) {
-					scale_ = engine.scale;
-				}
+			if (!assign_pmd)
+			{
+				return null;
 			}
+			MMDEngine engine = assign_pmd.GetComponent<MMDEngine>();
+			if (!engine)
+			{
+				return null;
+			}
+			scale_ = engine.scale;
 
 			//Animation anim = assign_pmd.GetComponent<Animation>();
 			
@@ -280,20 +284,20 @@ namespace MMD
 
 			for (int i = 0; i < curve_x.keys.Length; i++)
 			{
-				AnimationUtility.SetKeyLeftTangentMode(curve_x, i, AnimationUtility.TangentMode.Linear);
-				AnimationUtility.SetKeyRightTangentMode(curve_x, i, AnimationUtility.TangentMode.Linear);
+				AnimationUtility.SetKeyLeftTangentMode(curve_x, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_x, i, AnimationUtility.TangentMode.ClampedAuto);
 			}
 			for (int i = 0; i < curve_y.keys.Length; i++)
 			{
-				AnimationUtility.SetKeyLeftTangentMode(curve_y, i, AnimationUtility.TangentMode.Linear);
-				AnimationUtility.SetKeyRightTangentMode(curve_y, i, AnimationUtility.TangentMode.Linear);
+				AnimationUtility.SetKeyLeftTangentMode(curve_y, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_y, i, AnimationUtility.TangentMode.ClampedAuto);
 			}
 			for (int i = 0; i < curve_z.keys.Length; i++)
 			{
-				AnimationUtility.SetKeyLeftTangentMode(curve_z, i, AnimationUtility.TangentMode.Linear);
-				AnimationUtility.SetKeyRightTangentMode(curve_z, i, AnimationUtility.TangentMode.Linear);
+				AnimationUtility.SetKeyLeftTangentMode(curve_z, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_z, i, AnimationUtility.TangentMode.ClampedAuto);
 			}
-        }
+		}
 
 
         // あるボーンに含まれるキーフレを抽出
@@ -325,9 +329,9 @@ namespace MMD
 				AnimationCurve curve_z = null;
 				ToAnimationCurveForRotation(r_keys, out curve_x, out curve_y, out curve_z);
 				// ここで回転オイラー角をセット（補間はクォータニオン）
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.x"),curve_x);
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.y"),curve_y);
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.z"),curve_z);
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.x"), curve_x);
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.y"), curve_y);
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.z"), curve_z);
 			}
 			catch (KeyNotFoundException)
 			{
@@ -354,8 +358,8 @@ namespace MMD
 			AnimationCurve retCurve = new AnimationCurve(keys);
 			for (int i = 0; i < retCurve.keys.Length; i++)
 			{
-				AnimationUtility.SetKeyLeftTangentMode(retCurve, i, AnimationUtility.TangentMode.Linear);
-				AnimationUtility.SetKeyRightTangentMode(retCurve, i, AnimationUtility.TangentMode.Linear);
+				AnimationUtility.SetKeyLeftTangentMode(retCurve, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(retCurve, i, AnimationUtility.TangentMode.ClampedAuto);
 			}
 
 			return retCurve;
@@ -523,7 +527,7 @@ namespace MMD
 				}
 				
 				// キーフレの登録
-				CreateKeysForLocation(format, clip, p.Key, bonePath, interpolationQuality, current_obj);
+				//CreateKeysForLocation(format, clip, p.Key, bonePath, interpolationQuality, current_obj);
 				CreateKeysForRotation(format, clip, p.Key, bonePath, interpolationQuality);
 			}
 		}

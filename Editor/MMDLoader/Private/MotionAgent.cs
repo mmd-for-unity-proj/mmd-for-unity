@@ -36,6 +36,10 @@ namespace MMD {
 
 			//アニメーションクリップの作成
 			AnimationClip animation_clip = VMDConverter.CreateAnimationClip(format_, assign_pmd, interpolationQuality);
+			if (animation_clip == null)
+			{
+				throw new System.Exception("Cannot create AnimationClip");
+			}
 
 			// ここで登録
 			//anim.AddClip(animation_clip, animation_clip.name);
