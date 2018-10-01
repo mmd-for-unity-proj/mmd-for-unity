@@ -817,16 +817,19 @@ namespace MMD
 			// トゥーンテクスチャ
 			{
 				string toon_texture_name = null;
+				string toon_texture_path = null;
 				if (0 < material.common_toon) {
 					//共通トゥーン
+					string resource_path = System.IO.Path.GetDirectoryName(UnityEditor.AssetDatabase.GetAssetPath(Shader.Find("MMD/HalfLambertOutline")));
 					toon_texture_name = "toon" + material.common_toon.ToString("00") + ".bmp";
+					toon_texture_path = System.IO.Path.Combine(resource_path, toon_texture_name);
 				} else if (material.toon_texture_index < format_.texture_list.texture_file.Length) {
 					//自前トゥーン
 					toon_texture_name = format_.texture_list.texture_file[material.toon_texture_index];
+					toon_texture_path = System.IO.Path.Combine(format_.meta_header.folder, toon_texture_name);
 				}
-				if (!string.IsNullOrEmpty(toon_texture_name)) {
-					string resource_path = UnityEditor.AssetDatabase.GetAssetPath(Shader.Find("MMD/HalfLambertOutline"));
-					Texture2D toon_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(resource_path, typeof(Texture2D));
+				if (!string.IsNullOrEmpty(toon_texture_path)) {
+					Texture2D toon_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(toon_texture_path, typeof(Texture2D));
 					result.SetTexture("_ToonTex", toon_texture);
 					result.SetTextureScale("_ToonTex", new Vector2(1, -1));
 				}
