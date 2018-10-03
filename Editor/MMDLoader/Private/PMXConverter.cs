@@ -1605,7 +1605,7 @@ namespace MMD
 		/// <param name='rigidbody'>PMX用剛体データ</param>
 		GameObject ConvertRigidbody(PMXFormat.Rigidbody rigidbody)
 		{
-			GameObject result = new GameObject("rigid" + rigidbody.name);
+			GameObject result = new GameObject("r_" + rigidbody.name);
 			//result.AddComponent<Rigidbody>();	// 1つのゲームオブジェクトに複数の剛体が付く事が有るので本体にはrigidbodyを適用しない
 			
 			//位置・回転の設定
@@ -1672,7 +1672,7 @@ namespace MMD
 		PhysicMaterial CreatePhysicMaterial(PMXFormat.Rigidbody[] rigidbodys, uint index)
 		{
 			PMXFormat.Rigidbody rigidbody = rigidbodys[index];
-			PhysicMaterial material = new PhysicMaterial(format_.meta_header.name + "_r" + rigidbody.name);
+			PhysicMaterial material = new PhysicMaterial(format_.meta_header.name + "_r_" + rigidbody.name);
 			material.bounciness = rigidbody.recoil;
 			material.staticFriction = rigidbody.friction;
 			material.dynamicFriction = rigidbody.friction;
@@ -1724,33 +1724,7 @@ namespace MMD
 				//関連ボーンが有れば
 				return result;
 			}
-			//関連ボーンが無ければ
-			//ジョイントに接続されている剛体の関連ボーンを探しに行く
-			//HACK: 深さ優先探索に為っているけれど、関連ボーンとの類似性を考えれば幅優先探索の方が良いと思われる
-
-			//ジョイントのAを探しに行く(自身はBに接続されている)
-			var joint_a_list = format_.rigidbody_joint_list.joint.Where(x=>x.rigidbody_b == rigidbody_index) //自身がBに接続されているジョイントに絞る
-																.Where(x=>x.rigidbody_a < bone_count) //Aが有効な剛体に縛る
-																.Select(x=>x.rigidbody_a); //Aを返す
-			foreach (var joint_a in joint_a_list) {
-				result = GetRelBoneIndexFromNearbyRigidbody(joint_a);
-				if (result < bone_count) {
-					//関連ボーンが有れば
-					return result;
-				}
-			}
-			//ジョイントのAに無ければ
-			//ジョイントのBを探しに行く(自身はAに接続されている)
-			var joint_b_list = format_.rigidbody_joint_list.joint.Where(x=>x.rigidbody_a == rigidbody_index) //自身がAに接続されているジョイントに絞る
-																.Where(x=>x.rigidbody_b < bone_count) //Bが有効な剛体に縛る
-																.Select(x=>x.rigidbody_b); //Bを返す
-			foreach (var joint_b in joint_b_list) {
-				result = GetRelBoneIndexFromNearbyRigidbody(joint_b);
-				if (result < bone_count) {
-					//関連ボーンが有れば
-					return result;
-				}
-			}
+			Debug.Log(string.Format("No matching bone found for rigidbody: {0}", rigidbody_index));
 			//それでも無ければ
 			//諦める
 			result = uint.MaxValue;
@@ -1790,13 +1764,15 @@ namespace MMD
 		{
 			Rigidbody rigidbody = target.GetComponent<Rigidbody>();
 			if (null != rigidbody) {
+				//減衰値は平均を取る
+				float totMass = rigidbody.mass + pmx_rigidbody.weight;
+				rigidbody.drag = (rigidbody.drag * rigidbody.mass + pmx_rigidbody.position_dim * pmx_rigidbody.weight) / totMass;
+				rigidbody.angularDrag = (rigidbody.angularDrag * rigidbody.mass + pmx_rigidbody.rotation_dim * pmx_rigidbody.weight) / totMass;
 				//既にRigidbodyが付与されているなら
 				//質量は合算する
-				rigidbody.mass += pmx_rigidbody.weight;
-				//減衰値は平均を取る
-				rigidbody.drag = (rigidbody.drag + pmx_rigidbody.position_dim) * 0.5f;
-				rigidbody.angularDrag = (rigidbody.angularDrag + pmx_rigidbody.rotation_dim) * 0.5f;
-			} else {
+				rigidbody.mass = totMass;
+			}
+			else {
 				//まだRigidbodyが付与されていないなら
 				rigidbody = target.AddComponent<Rigidbody>();
 				rigidbody.isKinematic = (PMXFormat.Rigidbody.OperationType.Static == pmx_rigidbody.operation_type);
@@ -1969,6 +1945,8 @@ namespace MMD
 				drive.positionSpring = (joint.spring_rotation.y + joint.spring_rotation.z) * 0.5f;
 				conf.angularYZDrive = drive;
 			}
+
+			conf.projectionMode = JointProjectionMode.PositionAndRotation;
 		}
 
 		/// <summary>
@@ -1986,7 +1964,6 @@ namespace MMD
 															.Distinct()
 															.Select(x=>new PhysicsManager.ConnectBone(x, x.transform.parent.gameObject))
 															.ToArray();
-				
 				//isKinematicで無くConfigurableJointを持つ場合はグローバル座標化
 				foreach (ConfigurableJoint joint in joints.Where(x=>!x.GetComponent<Rigidbody>().isKinematic)
 															.Select(x=>x.GetComponent<ConfigurableJoint>())) {

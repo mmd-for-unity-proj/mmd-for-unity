@@ -17,7 +17,7 @@ MonoBehaviour:
   pmd_config:
     shader_type: 2
     animation_type: 2
-    rigidFlag: 0
+    rigidFlag: 1
     use_ik: 1
     scale: 0.085
     is_pmx_base_import: 1
