@@ -373,6 +373,18 @@ namespace MMD
 				//1つ目のみ登録
 				mesh.uv2 = creation_info.all_vertices.Select(x=>new Vector2(format_.vertex_list.vertex[x].add_uv[0].x, format_.vertex_list.vertex[x].add_uv[0].y)).ToArray();
 			}
+			if (1 < format_.header.additionalUV)
+			{
+				//追加UVが1つ以上有れば
+				//2つ目のみ登録
+				mesh.uv3 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[1].x, format_.vertex_list.vertex[x].add_uv[1].y)).ToArray();
+			}
+			if (2 < format_.header.additionalUV)
+			{
+				//追加UVが1つ以上有れば
+				//3つ目のみ登録
+				mesh.uv4 = creation_info.all_vertices.Select(x => new Vector2(format_.vertex_list.vertex[x].add_uv[2].x, format_.vertex_list.vertex[x].add_uv[2].y)).ToArray();
+			}
 			mesh.boneWeights = creation_info.all_vertices.Select(x=>ConvertBoneWeight(format_.vertex_list.vertex[x].bone_weight)).ToArray();
 			mesh.colors = creation_info.all_vertices.Select(x=>new Color(0.0f, 0.0f, 0.0f, format_.vertex_list.vertex[x].edge_magnification * 0.25f)).ToArray(); //不透明度にエッジ倍率を0.25倍した情報を仕込む(0～8迄は表せる)
 		}
@@ -805,16 +817,19 @@ namespace MMD
 			// トゥーンテクスチャ
 			{
 				string toon_texture_name = null;
+				string toon_texture_path = null;
 				if (0 < material.common_toon) {
 					//共通トゥーン
+					string resource_path = System.IO.Path.GetDirectoryName(UnityEditor.AssetDatabase.GetAssetPath(Shader.Find("MMD/HalfLambertOutline")));
 					toon_texture_name = "toon" + material.common_toon.ToString("00") + ".bmp";
+					toon_texture_path = System.IO.Path.Combine(resource_path, toon_texture_name);
 				} else if (material.toon_texture_index < format_.texture_list.texture_file.Length) {
 					//自前トゥーン
 					toon_texture_name = format_.texture_list.texture_file[material.toon_texture_index];
+					toon_texture_path = System.IO.Path.Combine(format_.meta_header.folder, toon_texture_name);
 				}
-				if (!string.IsNullOrEmpty(toon_texture_name)) {
-					string resource_path = UnityEditor.AssetDatabase.GetAssetPath(Shader.Find("MMD/HalfLambertOutline"));
-					Texture2D toon_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(resource_path, typeof(Texture2D));
+				if (!string.IsNullOrEmpty(toon_texture_path)) {
+					Texture2D toon_texture = (Texture2D)UnityEditor.AssetDatabase.LoadAssetAtPath(toon_texture_path, typeof(Texture2D));
 					result.SetTexture("_ToonTex", toon_texture);
 					result.SetTextureScale("_ToonTex", new Vector2(1, -1));
 				}
@@ -1390,7 +1405,7 @@ namespace MMD
 			
 			//材質リアサイン辞書の作成
 			Dictionary<uint, uint>[] material_reassign_dictionary = new Dictionary<uint, uint>[creation_info.Length + 1];
-			for (int i = 0, i_max = creation_info.Length; i < i_max; +++i) {
+			for (int i = 0, i_max = creation_info.Length; i < i_max; ++i) {
 				material_reassign_dictionary[i] = new Dictionary<uint, uint>();
 				for (uint k = 0, k_max = (uint)creation_info[i].value.Length; k < k_max; ++k) {
 					material_reassign_dictionary[i][creation_info[i].value[k].material_index] = k;
@@ -1470,7 +1485,7 @@ namespace MMD
 			mesh_root_transform.parent = root_game_object_.transform;
 
 			//モデルルート取得
-			Transform model_root_transform = root_game_object_.transform.FindChild("Model");
+			Transform model_root_transform = root_game_object_.transform.Find("Model");
 			//ボーン共通データ
 			Matrix4x4[] bindposes = bones.Select(x=>x.transform.worldToLocalMatrix).ToArray();
 			Transform[] bones_transform = bones.Select(x=>x.transform).ToArray();
@@ -1576,7 +1591,7 @@ namespace MMD
 			GameObject[] result = format_.rigidbody_list.rigidbody.Select(x=>ConvertRigidbody(x)).ToArray();
 			for (uint i = 0, i_max = (uint)result.Length; i < i_max; ++i) {
 				// マテリアルの設定
-				result[i].collider.material = CreatePhysicMaterial(format_.rigidbody_list.rigidbody, i);
+				result[i].GetComponent<Collider>().material = CreatePhysicMaterial(format_.rigidbody_list.rigidbody, i);
 				
 			}
 			
@@ -1590,7 +1605,7 @@ namespace MMD
 		/// <param name='rigidbody'>PMX用剛体データ</param>
 		GameObject ConvertRigidbody(PMXFormat.Rigidbody rigidbody)
 		{
-			GameObject result = new GameObject("r" + rigidbody.name);
+			GameObject result = new GameObject("r_" + rigidbody.name);
 			//result.AddComponent<Rigidbody>();	// 1つのゲームオブジェクトに複数の剛体が付く事が有るので本体にはrigidbodyを適用しない
 			
 			//位置・回転の設定
@@ -1657,7 +1672,7 @@ namespace MMD
 		PhysicMaterial CreatePhysicMaterial(PMXFormat.Rigidbody[] rigidbodys, uint index)
 		{
 			PMXFormat.Rigidbody rigidbody = rigidbodys[index];
-			PhysicMaterial material = new PhysicMaterial(format_.meta_header.name + "_r" + rigidbody.name);
+			PhysicMaterial material = new PhysicMaterial(format_.meta_header.name + "_r_" + rigidbody.name);
 			material.bounciness = rigidbody.recoil;
 			material.staticFriction = rigidbody.friction;
 			material.dynamicFriction = rigidbody.friction;
@@ -1709,33 +1724,7 @@ namespace MMD
 				//関連ボーンが有れば
 				return result;
 			}
-			//関連ボーンが無ければ
-			//ジョイントに接続されている剛体の関連ボーンを探しに行く
-			//HACK: 深さ優先探索に為っているけれど、関連ボーンとの類似性を考えれば幅優先探索の方が良いと思われる
-
-			//ジョイントのAを探しに行く(自身はBに接続されている)
-			var joint_a_list = format_.rigidbody_joint_list.joint.Where(x=>x.rigidbody_b == rigidbody_index) //自身がBに接続されているジョイントに絞る
-																.Where(x=>x.rigidbody_a < bone_count) //Aが有効な剛体に縛る
-																.Select(x=>x.rigidbody_a); //Aを返す
-			foreach (var joint_a in joint_a_list) {
-				result = GetRelBoneIndexFromNearbyRigidbody(joint_a);
-				if (result < bone_count) {
-					//関連ボーンが有れば
-					return result;
-				}
-			}
-			//ジョイントのAに無ければ
-			//ジョイントのBを探しに行く(自身はAに接続されている)
-			var joint_b_list = format_.rigidbody_joint_list.joint.Where(x=>x.rigidbody_a == rigidbody_index) //自身がAに接続されているジョイントに絞る
-																.Where(x=>x.rigidbody_b < bone_count) //Bが有効な剛体に縛る
-																.Select(x=>x.rigidbody_b); //Bを返す
-			foreach (var joint_b in joint_b_list) {
-				result = GetRelBoneIndexFromNearbyRigidbody(joint_b);
-				if (result < bone_count) {
-					//関連ボーンが有れば
-					return result;
-				}
-			}
+			Debug.Log(string.Format("No matching bone found for rigidbody: {0}", rigidbody_index));
 			//それでも無ければ
 			//諦める
 			result = uint.MaxValue;
@@ -1775,13 +1764,15 @@ namespace MMD
 		{
 			Rigidbody rigidbody = target.GetComponent<Rigidbody>();
 			if (null != rigidbody) {
+				//減衰値は平均を取る
+				float totMass = rigidbody.mass + pmx_rigidbody.weight;
+				rigidbody.drag = (rigidbody.drag * rigidbody.mass + pmx_rigidbody.position_dim * pmx_rigidbody.weight) / totMass;
+				rigidbody.angularDrag = (rigidbody.angularDrag * rigidbody.mass + pmx_rigidbody.rotation_dim * pmx_rigidbody.weight) / totMass;
 				//既にRigidbodyが付与されているなら
 				//質量は合算する
-				rigidbody.mass += pmx_rigidbody.weight;
-				//減衰値は平均を取る
-				rigidbody.drag = (rigidbody.drag + pmx_rigidbody.position_dim) * 0.5f;
-				rigidbody.angularDrag = (rigidbody.angularDrag + pmx_rigidbody.rotation_dim) * 0.5f;
-			} else {
+				rigidbody.mass = totMass;
+			}
+			else {
 				//まだRigidbodyが付与されていないなら
 				rigidbody = target.AddComponent<Rigidbody>();
 				rigidbody.isKinematic = (PMXFormat.Rigidbody.OperationType.Static == pmx_rigidbody.operation_type);
@@ -1817,14 +1808,14 @@ namespace MMD
 			foreach (PMXFormat.Joint joint in format_.rigidbody_joint_list.joint) {
 				//相互接続する剛体の取得
 				Transform transform_a = rigids[joint.rigidbody_a].transform;
-				Rigidbody rigidbody_a = transform_a.rigidbody;
+				Rigidbody rigidbody_a = transform_a.GetComponent<Rigidbody>();
 				if (null == rigidbody_a) {
-					rigidbody_a = transform_a.parent.rigidbody;
+					rigidbody_a = transform_a.parent.GetComponent<Rigidbody>();
 				}
 				Transform transform_b = rigids[joint.rigidbody_b].transform;
-				Rigidbody rigidbody_b = transform_b.rigidbody;
+				Rigidbody rigidbody_b = transform_b.GetComponent<Rigidbody>();
 				if (null == rigidbody_b) {
-					rigidbody_b = transform_b.parent.rigidbody;
+					rigidbody_b = transform_b.parent.GetComponent<Rigidbody>();
 				}
 				if (rigidbody_a != rigidbody_b) {
 					//接続する剛体が同じ剛体を指さないなら
@@ -1946,16 +1937,16 @@ namespace MMD
 			// Angular
 			if (joint.spring_rotation.x != 0.0f) {
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = joint.spring_rotation.x;
 				conf.angularXDrive = drive;
 			}
 			if (joint.spring_rotation.y != 0.0f || joint.spring_rotation.z != 0.0f) {
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = (joint.spring_rotation.y + joint.spring_rotation.z) * 0.5f;
 				conf.angularYZDrive = drive;
 			}
+
+			conf.projectionMode = JointProjectionMode.PositionAndRotation;
 		}
 
 		/// <summary>
@@ -1973,7 +1964,6 @@ namespace MMD
 															.Distinct()
 															.Select(x=>new PhysicsManager.ConnectBone(x, x.transform.parent.gameObject))
 															.ToArray();
-				
 				//isKinematicで無くConfigurableJointを持つ場合はグローバル座標化
 				foreach (ConfigurableJoint joint in joints.Where(x=>!x.GetComponent<Rigidbody>().isKinematic)
 															.Select(x=>x.GetComponent<ConfigurableJoint>())) {

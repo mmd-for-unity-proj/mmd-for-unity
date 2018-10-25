@@ -61,7 +61,9 @@ public class BoneController : MonoBehaviour
 				if (0.0f <= additive_rate) {
 					//正回転
 					delta_rotate_rate = Quaternion.Slerp(Quaternion.identity, additive_parent_transform.rotation, additive_rate);
-				} else {
+				}
+				else
+				{
 					//逆回転
 					Quaternion additive_parent_delta_rotate_reverse = Quaternion.Inverse(additive_parent_transform.rotation);
 					delta_rotate_rate = Quaternion.Slerp(Quaternion.identity, additive_parent_delta_rotate_reverse, -additive_rate);

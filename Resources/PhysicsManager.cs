@@ -16,7 +16,7 @@ public class PhysicsManager : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// hysicsに移動する前のGameObject
+	/// Physicsに移動する前のGameObject
 	/// </summary>
 	[System.Serializable]
 	public class ConnectBone {
@@ -26,5 +26,5 @@ public class PhysicsManager : MonoBehaviour {
 		public ConnectBone(GameObject j = null, GameObject p = null) {joint = j; parent = p;}
 	}
 
-	public ConnectBone[] connect_bone_list = null;	// //hysicsに移動する前のGameObjectリスト
+	public ConnectBone[] connect_bone_list = null;	// Physicsに移動する前のGameObjectリスト
 }

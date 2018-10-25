@@ -625,20 +625,20 @@ namespace MMD
 			// rigidbodyの調整
 			if (!setted)
 			{
-				targetBone.rigidbody.isKinematic = (0 == rigidbody.rigidbody_type);
-				targetBone.rigidbody.mass = Mathf.Max(float.Epsilon, rigidbody.rigidbody_weight);
-				targetBone.rigidbody.drag = rigidbody.rigidbody_pos_dim;
-				targetBone.rigidbody.angularDrag = rigidbody.rigidbody_rot_dim;
+				targetBone.GetComponent<Rigidbody>().isKinematic = (0 == rigidbody.rigidbody_type);
+				targetBone.GetComponent<Rigidbody>().mass = Mathf.Max(float.Epsilon, rigidbody.rigidbody_weight);
+				targetBone.GetComponent<Rigidbody>().drag = rigidbody.rigidbody_pos_dim;
+				targetBone.GetComponent<Rigidbody>().angularDrag = rigidbody.rigidbody_rot_dim;
 			}
 			else
 			{
 				// Rigidbodyはボーンに対して適用されるので複数ある場合は平均を取る
-				targetBone.rigidbody.mass += rigidbody.rigidbody_weight;
-				targetBone.rigidbody.drag += rigidbody.rigidbody_pos_dim;
-				targetBone.rigidbody.angularDrag += rigidbody.rigidbody_rot_dim;
-				targetBone.rigidbody.mass *= 0.5f;
-				targetBone.rigidbody.drag *= 0.5f;
-				targetBone.rigidbody.angularDrag *= 0.5f;
+				targetBone.GetComponent<Rigidbody>().mass += rigidbody.rigidbody_weight;
+				targetBone.GetComponent<Rigidbody>().drag += rigidbody.rigidbody_pos_dim;
+				targetBone.GetComponent<Rigidbody>().angularDrag += rigidbody.rigidbody_rot_dim;
+				targetBone.GetComponent<Rigidbody>().mass *= 0.5f;
+				targetBone.GetComponent<Rigidbody>().drag *= 0.5f;
+				targetBone.GetComponent<Rigidbody>().angularDrag *= 0.5f;
 			}
 		}
 
@@ -658,7 +658,7 @@ namespace MMD
 				if (rigidRefIndex >= ushort.MaxValue)
 				{
 					// 関連ボーン無し
-					if (rigid[i].rigidbody == null)
+					if (rigid[i].GetComponent<Rigidbody>() == null)
 						rigid[i].AddComponent<Rigidbody>();
 					UnityRigidbodySetting(list.rigidbody[i], rigid[i]);
 					rigid[i].transform.localPosition = localPos;
@@ -672,7 +672,7 @@ namespace MMD
 				else
 					// 関連ボーン有り
 				{	// とりあえずここで剛体を追加・設定
-					if (bones[rigidRefIndex].rigidbody == null)
+					if (bones[rigidRefIndex].GetComponent<Rigidbody>() == null)
 						bones[rigidRefIndex].AddComponent<Rigidbody>();
 					UnityRigidbodySetting(list.rigidbody[i], bones[rigidRefIndex]);
 					rigid[i].transform.localPosition = localPos;
@@ -697,7 +697,7 @@ namespace MMD
 			GameObject[] rigid = new GameObject[list.rigidbody_count];
 			for (int i = 0; i < list.rigidbody_count; i++)
 			{
-				rigid[i] = new GameObject("r" + list.rigidbody[i].rigidbody_name);
+				rigid[i] = new GameObject("r_" + list.rigidbody[i].rigidbody_name);
 				//rigid[i].AddComponent<Rigidbody>();		// 剛体本体にはrigidbodyは適用しない
 
 				// 各種Colliderの設定
@@ -874,14 +874,12 @@ namespace MMD
 			if (joint.spring_rot.x != 0f)
 			{
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = joint.spring_rot.x;
 				conf.angularXDrive = drive;
 			}
 			if (joint.spring_rot.y != 0f || joint.spring_rot.z != 0f)
 			{
 				drive = new JointDrive();
-				drive.mode = JointDriveMode.PositionAndVelocity;
 				drive.positionSpring = (joint.spring_rot.y + joint.spring_rot.z) * 0.5f;
 				conf.angularYZDrive = drive;
 			}
@@ -903,13 +901,13 @@ namespace MMD
 				//相互接続する剛体の取得
 				Transform transform_a = rigids[joint.joint_rigidbody_a].transform;
 				Transform transform_b = rigids[joint.joint_rigidbody_b].transform;
-				Rigidbody rigidbody_a = transform_a.rigidbody;
+				Rigidbody rigidbody_a = transform_a.GetComponent<Rigidbody>();
 				if (null == rigidbody_a) {
-					rigidbody_a = transform_a.parent.rigidbody;
+					rigidbody_a = transform_a.parent.GetComponent<Rigidbody>();
 				}
-				Rigidbody rigidbody_b = transform_b.rigidbody;
+				Rigidbody rigidbody_b = transform_b.GetComponent<Rigidbody>();
 				if (null == rigidbody_b) {
-					rigidbody_b = transform_b.parent.rigidbody;
+					rigidbody_b = transform_b.parent.GetComponent<Rigidbody>();
 				}
 				if (rigidbody_a != rigidbody_b) {
 					//接続する剛体が同じ剛体を指さないなら

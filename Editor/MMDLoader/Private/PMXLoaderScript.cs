@@ -88,7 +88,7 @@ public partial class PMXLoaderScript {
 			throw new System.FormatException();
 		}
 		result.version = binary_reader_.ReadSingle();
-		binary_reader_.ReadByte();
+		binary_reader_.ReadByte(); // Fixed at 8 for PMX 2.0
 		result.encodeMethod = (PMXFormat.Header.StringCode)binary_reader_.ReadByte();
 		result.additionalUV = binary_reader_.ReadByte();
 		result.vertexIndexSize = (PMXFormat.Header.IndexSize)binary_reader_.ReadByte();
@@ -526,7 +526,7 @@ public partial class PMXLoaderScript {
 		byte[] buf = binary_reader_.ReadBytes(stringLength);
 		switch (string_code_) {
 		case PMXFormat.Header.StringCode.Utf16le:
-			result = Encoding.Unicode.GetString(buf);
+			result = Encoding.UTF8.GetString(Encoding.Convert(Encoding.Unicode, Encoding.UTF8, buf));
 			break;
 		case PMXFormat.Header.StringCode.Utf8:
 			result = Encoding.UTF8.GetString(buf);

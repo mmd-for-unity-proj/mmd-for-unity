@@ -12,7 +12,7 @@ public class AlphaReadableTextureDirectoryImporter : AssetPostprocessor {
 			//MmdForUnityの解析用ディレクトリなら
 			TextureImporter importer = (TextureImporter)assetImporter;
 			importer.isReadable = true; //読み込み可能とする
-			importer.textureFormat = TextureImporterFormat.Alpha8; //アルファのみ
+			//importer.textureFormat = TextureImporterFormat.Alpha8; //アルファのみ
 			importer.mipmapEnabled = false; //mipmapを作成しない
 			if (importer.DoesSourceTextureHaveAlpha()) {
 				//アルファが有れば

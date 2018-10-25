@@ -32,12 +32,16 @@ namespace MMD
 		{
 			//スケール設定
 			scale_ = 1.0f;
-			if (assign_pmd) {
-				MMDEngine engine = assign_pmd.GetComponent<MMDEngine>();
-				if (engine) {
-					scale_ = engine.scale;
-				}
+			if (!assign_pmd)
+			{
+				return null;
 			}
+			MMDEngine engine = assign_pmd.GetComponent<MMDEngine>();
+			if (!engine)
+			{
+				return null;
+			}
+			scale_ = engine.scale;
 
 			//Animation anim = assign_pmd.GetComponent<Animation>();
 			
@@ -52,8 +56,6 @@ namespace MMD
 			FullEntryBoneAnimation(format, clip, bone_path, gameobj, interpolationQuality);
 
 			CreateKeysForSkin(format, clip);	// 表情の追加
-			
-			SetAnimationType(clip, assign_pmd); //アニメーションタイプの設定
 			
 			return clip;
 		}
@@ -244,12 +246,14 @@ namespace MMD
 		private const int TangentModeBothLinear=21;
 		
 		//UnityのKeyframeに変換する（回転用）
-		void ToKeyframesForRotation(QuaternionKeyframe[] custom_keys,ref Keyframe[] rx_keys,ref Keyframe[] ry_keys,ref Keyframe[] rz_keys)
+		void ToAnimationCurveForRotation(QuaternionKeyframe[] custom_keys, 
+			out AnimationCurve curve_x, out AnimationCurve curve_y, out AnimationCurve curve_z)
 		{
-			rx_keys=new Keyframe[custom_keys.Length];
-			ry_keys=new Keyframe[custom_keys.Length];
-			rz_keys=new Keyframe[custom_keys.Length];
-			for(int i = 0; i < custom_keys.Length; i++)
+			Keyframe[] rx_keys = new Keyframe[custom_keys.Length];
+			Keyframe[] ry_keys = new Keyframe[custom_keys.Length];
+			Keyframe[] rz_keys = new Keyframe[custom_keys.Length];
+
+			for (int i = 0; i < custom_keys.Length; i++)
 			{
 				//オイラー角を取り出す
 				Vector3 eulerAngles=custom_keys[i].value.eulerAngles;
@@ -257,34 +261,53 @@ namespace MMD
 				ry_keys[i]=new Keyframe(custom_keys[i].time,eulerAngles.y);
 				rz_keys[i]=new Keyframe(custom_keys[i].time,eulerAngles.z);
 				//線形補間する
-				rx_keys[i].tangentMode=TangentModeBothLinear;
-				ry_keys[i].tangentMode=TangentModeBothLinear;
-				rz_keys[i].tangentMode=TangentModeBothLinear;
-				if(i>0)
+				if (i > 0)
 				{
-					float tx=GetLinearTangentForRotation(rx_keys[i-1],rx_keys[i]);
-					float ty=GetLinearTangentForRotation(ry_keys[i-1],ry_keys[i]);
-					float tz=GetLinearTangentForRotation(rz_keys[i-1],rz_keys[i]);
-					rx_keys[i-1].outTangent=tx;
-					ry_keys[i-1].outTangent=ty;
-					rz_keys[i-1].outTangent=tz;
-					rx_keys[i].inTangent=tx;
-					ry_keys[i].inTangent=ty;
-					rz_keys[i].inTangent=tz;
+					float tx = GetLinearTangentForRotation(rx_keys[i - 1], rx_keys[i]);
+					float ty = GetLinearTangentForRotation(ry_keys[i - 1], ry_keys[i]);
+					float tz = GetLinearTangentForRotation(rz_keys[i - 1], rz_keys[i]);
+					rx_keys[i - 1].outTangent = tx;
+					ry_keys[i - 1].outTangent = ty;
+					rz_keys[i - 1].outTangent = tz;
+					rx_keys[i].inTangent = tx;
+					ry_keys[i].inTangent = ty;
+					rz_keys[i].inTangent = tz;
 				}
 			}
 			AddDummyKeyframe(ref rx_keys);
 			AddDummyKeyframe(ref ry_keys);
 			AddDummyKeyframe(ref rz_keys);
+
+			curve_x = new AnimationCurve(rx_keys);
+			curve_y = new AnimationCurve(ry_keys);
+			curve_z = new AnimationCurve(rz_keys);
+
+			for (int i = 0; i < curve_x.keys.Length; i++)
+			{
+				AnimationUtility.SetKeyLeftTangentMode(curve_x, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_x, i, AnimationUtility.TangentMode.ClampedAuto);
+			}
+			for (int i = 0; i < curve_y.keys.Length; i++)
+			{
+				AnimationUtility.SetKeyLeftTangentMode(curve_y, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_y, i, AnimationUtility.TangentMode.ClampedAuto);
+			}
+			for (int i = 0; i < curve_z.keys.Length; i++)
+			{
+				AnimationUtility.SetKeyLeftTangentMode(curve_z, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(curve_z, i, AnimationUtility.TangentMode.ClampedAuto);
+			}
 		}
-		
-		
-		// あるボーンに含まれるキーフレを抽出
-		// これは回転のみ
-		void CreateKeysForRotation(MMD.VMD.VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality)
+
+
+        // あるボーンに含まれるキーフレを抽出
+        // これは回転のみ
+        void CreateKeysForRotation(MMD.VMD.VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality)
 		{
 			try 
 			{
+				const float tick_time = 1.0f / VMD_FPS;
+
 				List<MMD.VMD.VMDFormat.Motion> mlist = format.motion_list.motion[current_bone];
 				int keyframeCount = GetKeyframeCount(mlist, 3, interpolationQuality);
 				
@@ -293,63 +316,61 @@ namespace MMD
 				int ir=0;
 				for (int i = 0; i < mlist.Count; i++)
 				{
-					const float tick_time = 1.0f / 30.0f;
-					float tick = mlist[i].flame_no * tick_time;
+					float tick = mlist[i].frame_no * tick_time;
 					
 					Quaternion rotation=mlist[i].rotation;
 					QuaternionKeyframe r_cur_key=new QuaternionKeyframe(tick,rotation);
 					QuaternionKeyframe.AddBezierKeyframes(mlist[i].interpolation,3,r_prev_key,r_cur_key,interpolationQuality,ref r_keys,ref ir);
 					r_prev_key=r_cur_key;
 				}
-				
-				Keyframe[] rx_keys=null;
-				Keyframe[] ry_keys=null;
-				Keyframe[] rz_keys=null;
-				ToKeyframesForRotation(r_keys, ref rx_keys, ref ry_keys, ref rz_keys);
-				AnimationCurve curve_x = new AnimationCurve(rx_keys);
-				AnimationCurve curve_y = new AnimationCurve(ry_keys);
-				AnimationCurve curve_z = new AnimationCurve(rz_keys);
-				// ここで回転オイラー角をセット（補間はクォータニオン）
-#if !UNITY_4_2 //4.3以降
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.x"),curve_x);
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.y"),curve_y);
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"localEulerAngles.z"),curve_z);
-#else
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.x",curve_x);
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.y",curve_y);
-				AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"localEulerAngles.z",curve_z);
-#endif
 
+				AnimationCurve curve_x = null;
+				AnimationCurve curve_y = null;
+				AnimationCurve curve_z = null;
+				ToAnimationCurveForRotation(r_keys, out curve_x, out curve_y, out curve_z);
+				// ここで回転オイラー角をセット（補間はクォータニオン）
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.x"), curve_x);
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.y"), curve_y);
+				AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(bone_path, typeof(Transform), "localEulerAngles.z"), curve_z);
 			}
 			catch (KeyNotFoundException)
 			{
-				//Debug.LogError("互換性のないボーンが読み込まれました:" + bone_path);
+				Debug.LogError("互換性のないボーンが読み込まれました:" + bone_path);
 			}
 		}
-		//UnityのKeyframeに変換する（移動用）
-		Keyframe[] ToKeyframesForLocation(FloatKeyframe[] custom_keys)
+        //UnityのKeyframeに変換する（移動用）
+        AnimationCurve ToAnimationCurveForLocation(FloatKeyframe[] custom_keys)
 		{
 			Keyframe[] keys=new Keyframe[custom_keys.Length];
 			for(int i = 0; i < custom_keys.Length; i++)
 			{
 				keys[i]=new Keyframe(custom_keys[i].time,custom_keys[i].value);
 				//線形補間する
-				keys[i].tangentMode=TangentModeBothLinear;
-				if(i>0)
+				if (i > 0)
 				{
-					float t=GetLinearTangentForPosition(keys[i-1],keys[i]);
-					keys[i-1].outTangent=t;
-					keys[i].inTangent=t;
+					float t = GetLinearTangentForPosition(keys[i - 1], keys[i]);
+					keys[i - 1].outTangent = t;
+					keys[i].inTangent = t;
 				}
 			}
 			AddDummyKeyframe(ref keys);
-			return keys;
+
+			AnimationCurve retCurve = new AnimationCurve(keys);
+			for (int i = 0; i < retCurve.keys.Length; i++)
+			{
+				AnimationUtility.SetKeyLeftTangentMode(retCurve, i, AnimationUtility.TangentMode.ClampedAuto);
+				AnimationUtility.SetKeyRightTangentMode(retCurve, i, AnimationUtility.TangentMode.ClampedAuto);
+			}
+
+			return retCurve;
 		}
 		// 移動のみの抽出
 		void CreateKeysForLocation(MMD.VMD.VMDFormat format, AnimationClip clip, string current_bone, string bone_path, int interpolationQuality, GameObject current_obj = null)
 		{
 			try
 			{
+				const float tick_time = 1.0f / VMD_FPS;
+
 				Vector3 default_position = Vector3.zero;
 				if(current_obj != null)
 					default_position = current_obj.transform.localPosition;
@@ -372,9 +393,7 @@ namespace MMD
 				int iz=0;
 				for (int i = 0; i < mlist.Count; i++)
 				{
-					const float tick_time = 1.0f / 30.0f;
-					
-					float tick = mlist[i].flame_no * tick_time;
+					float tick = mlist[i].frame_no * tick_time;
 					
 					FloatKeyframe lx_cur_key=new FloatKeyframe(tick,mlist[i].location.x * scale_ + default_position.x);
 					FloatKeyframe ly_cur_key=new FloatKeyframe(tick,mlist[i].location.y * scale_ + default_position.y);
@@ -393,23 +412,18 @@ namespace MMD
 				// 回転ボーンの場合はデータが入ってないはず
 				if (mlist.Count != 0)
 				{
-					AnimationCurve curve_x = new AnimationCurve(ToKeyframesForLocation(lx_keys));
-					AnimationCurve curve_y = new AnimationCurve(ToKeyframesForLocation(ly_keys));
-					AnimationCurve curve_z = new AnimationCurve(ToKeyframesForLocation(lz_keys));
-#if !UNITY_4_2 //4.3以降
+					AnimationCurve curve_x = ToAnimationCurveForLocation(lx_keys);
+					AnimationCurve curve_y = ToAnimationCurveForLocation(ly_keys);
+					AnimationCurve curve_z = ToAnimationCurveForLocation(lz_keys);
+
 					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.x"),curve_x);
 					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.y"),curve_y);
 					AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve(bone_path,typeof(Transform),"m_LocalPosition.z"),curve_z);
-#else
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.x",curve_x);
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.y",curve_y);
-					AnimationUtility.SetEditorCurve(clip,bone_path,typeof(Transform),"m_LocalPosition.z",curve_z);
-#endif
 				}
 			}
 			catch (KeyNotFoundException)
 			{
-				//Debug.LogError("互換性のないボーンが読み込まれました:" + current_bone);
+				Debug.LogError("互換性のないボーンが読み込まれました:" + current_bone);
 			}
 		}
 
@@ -417,8 +431,8 @@ namespace MMD
 		{
 			const float tick_time = 1f / 30f;
 
-				// 全ての表情に打たれているキーフレームを探索
-				List<VMD.VMDFormat.SkinData> s;
+			// 全ての表情に打たれているキーフレームを探索
+			List<VMD.VMDFormat.SkinData> s;
 
 			foreach (var skin in format.skin_list.skin)
 			{
@@ -428,26 +442,26 @@ namespace MMD
 				// キーフレームの登録を行う
 				for (int i = 0; i < skin.Value.Count; i++) 
 				{
-					keyframe[i] = new Keyframe(s[i].flame_no * tick_time, s[i].weight);
+					keyframe[i] = new Keyframe(s[i].frame_no * tick_time, s[i].weight);
 					//線形補間する
-					keyframe[i].tangentMode=TangentModeBothLinear;
-						if(i>0)
+					if (i > 0)
 					{
-						float t=GetLinearTangentForPosition(keyframe[i-1],keyframe[i]);
-						keyframe[i-1].outTangent=t;
-						keyframe[i].inTangent=t;
-						}
+						float t = GetLinearTangentForPosition(keyframe[i - 1], keyframe[i]);
+						keyframe[i - 1].outTangent = t;
+						keyframe[i].inTangent = t;
+					}
 				}
 				AddDummyKeyframe(ref keyframe);
 
 				// Z軸移動にキーフレームを打つ
 				AnimationCurve curve = new AnimationCurve(keyframe);
-#if !UNITY_4_2 //4.3以降
-				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve("Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z"),curve);
-#else
-				AnimationUtility.SetEditorCurve(clip,"Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z",curve);
-#endif
+				for (int i = 0; i < curve.keys.Length; i++)
+				{
+					AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.Linear);
+					AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.Linear);
+				}
 
+				AnimationUtility.SetEditorCurve(clip,EditorCurveBinding.FloatCurve("Expression/" + skin.Key,typeof(Transform),"m_LocalPosition.z"),curve);
 			}
 		}
 		
@@ -495,11 +509,13 @@ namespace MMD
 		// 無駄なカーブを登録してるけどどうするか
 		void FullEntryBoneAnimation(MMD.VMD.VMDFormat format, AnimationClip clip, Dictionary<string, string> dic, Dictionary<string, GameObject> obj, int interpolationQuality)
 		{
-			foreach (KeyValuePair<string, string> p in dic)	// keyはtransformの名前, valueはパス
+			foreach (KeyValuePair<string, List<MMD.VMD.VMDFormat.Motion>> p in format.motion_list.motion)
 			{
 				// 互いに名前の一致する場合にRigidbodyが存在するか調べたい
 				GameObject current_obj = null;
-				if(obj.ContainsKey(p.Key)){
+				string bonePath = null;
+				// keyはtransformの名前, valueはパス
+				if (dic.TryGetValue(p.Key, out bonePath)){
 					current_obj = obj[p.Key];
 					
 					// Rigidbodyがある場合はキーフレの登録を無視する
@@ -511,8 +527,8 @@ namespace MMD
 				}
 				
 				// キーフレの登録
-				CreateKeysForLocation(format, clip, p.Key, p.Value, interpolationQuality, current_obj);
-				CreateKeysForRotation(format, clip, p.Key, p.Value, interpolationQuality);
+				//CreateKeysForLocation(format, clip, p.Key, bonePath, interpolationQuality, current_obj);
+				CreateKeysForRotation(format, clip, p.Key, bonePath, interpolationQuality);
 			}
 		}
 
@@ -536,26 +552,8 @@ namespace MMD
 				GetGameObjects(obj, transf.gameObject);
 			}
 		}
-
-		/// <summary>
-		/// アニメーションタイプの設定
-		/// </summary>
-		/// <param name="clip">設定するアニメーションクリップ.</param>
-		/// <param name="engine">設定の為に参照するAnimatorを持つゲームオブジェクト</param>
-		static void SetAnimationType(AnimationClip clip, GameObject game_object)
-		{
-			ModelImporterAnimationType animation_type;
-			Animator animator = game_object.GetComponent<Animator>();
-			if (null == animator) {
-				animation_type = ModelImporterAnimationType.Legacy;
-			} else if ((null == animator.avatar) && animator.avatar.isHuman) {
-				animation_type = ModelImporterAnimationType.Human;
-			} else {
-				animation_type = ModelImporterAnimationType.Generic;
-			}
-			AnimationUtility.SetAnimationType(clip, animation_type);
-		}
 		
 		private float scale_ = 1.0f;
+		private const float VMD_FPS = 30.0f;
 	}
 }
